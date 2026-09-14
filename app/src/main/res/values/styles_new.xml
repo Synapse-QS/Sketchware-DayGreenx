@@ -90,8 +90,10 @@
         <item name="alertDialogStyle">@style/MaterialAlertDialog.SketchwarePro</item>
 
         <!-- Expressive button styles have increased horizontal padding, which we don't need at all. -->
-        <item name="buttonBarButtonStyle">@style/Widget.Material3.Button.TextButton.Dialog</item>
-        <item name="buttonBarNegativeButtonStyle">@style/Widget.Material3.Button.TextButton.Dialog
+        <item name="buttonBarButtonStyle">@style/Widget.Material3Expressive.Button.TonalButton.Dialog</item>
+        <item name="buttonBarNegativeButtonStyle">@style/Widget.Material3Expressive.Button.TonalButton.Dialog</item>
+        <item name="buttonBarNeutralButtonStyle">@style/Widget.Material3Expressive.Button.TonalButton.Dialog</item>
+        <item name="buttonBarPositiveButtonStyle">@style/Widget.Material3Expressive.Button.Dialog</item>
         </item>
         <item name="buttonBarNeutralButtonStyle">
             @style/Widget.Material3.Button.TextButton.Dialog.Flush
