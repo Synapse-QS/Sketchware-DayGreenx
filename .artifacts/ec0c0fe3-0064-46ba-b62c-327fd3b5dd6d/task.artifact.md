@@ -1,0 +1,9 @@
+- [x] Add Shizuku dependencies to `app/build.gradle`
+- [x] Add Shizuku meta-data to `AndroidManifest.xml`
+- [x] Implement Shizuku settings in `ConfigActivity.java`
+    - [x] Add constants for Shizuku settings
+    - [x] Add "Shizuku Features" category and preferences to UI
+- [x] Implement Shizuku installation logic in `DesignActivity.java`
+    - [x] Update `installBuiltApk` to support Shizuku
+    - [x] Create `installWithShizuku` method
+- [x] Verify build and functionality
