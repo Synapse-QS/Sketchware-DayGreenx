@@ -18,7 +18,7 @@ android {
         //noinspection ExpiredTargetSdkVersion
         targetSdk = 28
         minSdk = 26
-        versionCode = 174
+        versionCode = 175
         versionName = "v8.0.4-daygreen"
 
         buildConfigField("String", "SKETCHUB_API_KEY", "\"${System.getenv("SKETCHUB_API_KEY")}\"")
@@ -218,5 +218,4 @@ dependencies {
 
     implementation 'dev.rikka.shizuku:api:12.1.0'
     implementation 'dev.rikka.shizuku:provider:12.1.0'
-    //implementation 'dev.rikka.shizuku:provider:12.1.0'
 }
