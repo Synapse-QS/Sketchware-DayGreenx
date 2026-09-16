@@ -254,6 +254,24 @@
 
 
                             </com.google.android.material.card.MaterialCardView>
+                            
+                            <com.google.android.material.card.MaterialCardView
+                                android:id="@+id/grad_color_preview_card3"
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:layout_marginTop="5dp"
+                                app:layout_constraintEnd_toEndOf="parent"
+                                app:layout_constraintTop_toTopOf="@+id/color_value_input_layout"
+                                app:strokeWidth="1dp">
+
+                                <TextView
+                                    android:id="@+id/grad_color_preview3"
+                                    android:layout_width="45dp"
+                                    android:layout_height="45dp"
+                                    android:layout_gravity="center_vertical"
+                                    tools:background="#4177FF" />
+
+                            </com.google.android.material.card.MaterialCardView>
                         </LinearLayout>
 
                         <TextView
