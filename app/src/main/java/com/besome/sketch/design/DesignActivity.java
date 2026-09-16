@@ -364,38 +364,94 @@ public class DesignActivity extends BaseAppCompatActivity implements View.OnClic
      * Opens the debug APK to install.
      */
     private void installBuiltApk() {
-        if (!ConfigActivity.isSettingEnabled(ConfigActivity.SETTING_ROOT_AUTO_INSTALL_PROJECTS)) {
-            requestPackageInstallerInstall();
+        if (ConfigActivity.isSettingEnabled(ConfigActivity.SETTING_ROOT_AUTO_INSTALL_PROJECTS)) {
+            installWithRoot();
+        } else if (ConfigActivity.isSettingEnabled(ConfigActivity.SETTING_SHIZUKU_AUTO_INSTALL_PROJECTS)) {
+            installWithShizuku();
         } else {
-            File apkUri = new File(q.finalToInstallApkPath);
-            long length = apkUri.length();
-            Shell.getShell(shell -> {
-                if (shell.isRoot()) {
-                    List<String> stdout = new LinkedList<>();
-                    List<String> stderr = new LinkedList<>();
+            requestPackageInstallerInstall();
+        }
+    }
 
-                    Shell.cmd("cat " + apkUri + " | pm install -S " + length).to(stdout, stderr).submit(result -> {
-                        if (result.isSuccess()) {
-                            SketchwareUtil.toast("Package installed successfully!");
-                            if (ConfigActivity.isSettingEnabled(ConfigActivity.SETTING_ROOT_AUTO_OPEN_AFTER_INSTALLING)) {
-                                Intent launcher = getPackageManager().getLaunchIntentForPackage(q.packageName);
-                                if (launcher != null) {
-                                    startActivity(launcher);
-                                } else {
-                                    SketchwareUtil.toastError("Couldn't launch project, either not installed or not with launcher activity.");
-                                }
+    private void installWithRoot() {
+        File apkUri = new File(q.finalToInstallApkPath);
+        long length = apkUri.length();
+        Shell.getShell(shell -> {
+            if (shell.isRoot()) {
+                List<String> stdout = new LinkedList<>();
+                List<String> stderr = new LinkedList<>();
+
+                Shell.cmd("cat " + apkUri + " | pm install -S " + length).to(stdout, stderr).submit(result -> {
+                    if (result.isSuccess()) {
+                        SketchwareUtil.toast("Package installed successfully!");
+                        if (ConfigActivity.isSettingEnabled(ConfigActivity.SETTING_ROOT_AUTO_OPEN_AFTER_INSTALLING)) {
+                            Intent launcher = getPackageManager().getLaunchIntentForPackage(q.packageName);
+                            if (launcher != null) {
+                                startActivity(launcher);
+                            } else {
+                                SketchwareUtil.toastError("Couldn't launch project, either not installed or not with launcher activity.");
                             }
-                        } else {
-                            String sharedErrorMessage = "Failed to install package, result code: " + result.getCode() + ". ";
-                            SketchwareUtil.toastError(sharedErrorMessage + "Logs are available in /Internal storage/.sketchware/debug.txt", Toast.LENGTH_LONG);
-                            LogUtil.e("DesignActivity", sharedErrorMessage + "stdout: " + stdout + ", stderr: " + stderr);
                         }
-                    });
-                } else {
-                    SketchwareUtil.toastError("No root access granted. Continuing using default package install prompt.");
-                    requestPackageInstallerInstall();
+                    } else {
+                        String sharedErrorMessage = "Failed to install package, result code: " + result.getCode() + ". ";
+                        SketchwareUtil.toastError(sharedErrorMessage + "Logs are available in /Internal storage/.sketchware/debug.txt", Toast.LENGTH_LONG);
+                        LogUtil.e("DesignActivity", sharedErrorMessage + "stdout: " + stdout + ", stderr: " + stderr);
+                    }
+                });
+            } else {
+                SketchwareUtil.toastError("No root access granted. Continuing using default package install prompt.");
+                requestPackageInstallerInstall();
+            }
+        });
+    }
+
+    private void installWithShizuku() {
+        if (mod.hilal.saif.util.ShizukuUtil.isShizukuRunning()) {
+            File apkFile = new File(q.finalToInstallApkPath);
+            long length = apkFile.length();
+            String command = "pm install -S " + length;
+
+            try {
+                // In Shizuku 12.1.0, newProcess is still public
+                java.lang.Process process = rikka.shizuku.Shizuku.newProcess(new String[]{"sh", "-c", command}, null, null);
+
+                if (process == null) {
+                    throw new Exception("Failed to start Shizuku process");
                 }
-            });
+
+                java.io.OutputStream os = process.getOutputStream();
+                java.io.FileInputStream fis = new java.io.FileInputStream(apkFile);
+                byte[] buffer = new byte[8192];
+                int read;
+                while ((read = fis.read(buffer)) != -1) {
+                    os.write(buffer, 0, read);
+                }
+                os.flush();
+                os.close();
+                fis.close();
+
+                int exitCode = process.waitFor();
+                if (exitCode == 0) {
+                    SketchwareUtil.toast("Package installed successfully via Shizuku!");
+                    if (ConfigActivity.isSettingEnabled(ConfigActivity.SETTING_SHIZUKU_AUTO_OPEN_AFTER_INSTALLING)) {
+                        Intent launcher = getPackageManager().getLaunchIntentForPackage(q.packageName);
+                        if (launcher != null) {
+                            startActivity(launcher);
+                        } else {
+                            SketchwareUtil.toastError("Couldn't launch project, either not installed or not with launcher activity.");
+                        }
+                    }
+                } else {
+                    SketchwareUtil.toastError("Failed to install package via Shizuku, exit code: " + exitCode);
+                }
+            } catch (Exception e) {
+                SketchwareUtil.toastError("Error during Shizuku installation: " + e.getMessage());
+                LogUtil.e("DesignActivity", "Shizuku install failed", e);
+                requestPackageInstallerInstall();
+            }
+        } else {
+            SketchwareUtil.toastError("Shizuku is not running. Continuing using default package install prompt.");
+            requestPackageInstallerInstall();
         }
     }
 

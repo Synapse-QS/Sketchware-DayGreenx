@@ -27,12 +27,7 @@ import java.util.regex.Pattern;
 
 import a.a.a.wq;
 import io.github.rosemoe.sora.lang.analysis.StyleUpdateRange;
-import io.github.rosemoe.sora.lang.styling.Span;
-import io.github.rosemoe.sora.lang.styling.Spans;
 import io.github.rosemoe.sora.lang.styling.Styles;
-import io.github.rosemoe.sora.lang.styling.color.ResolvableColor;
-import io.github.rosemoe.sora.lang.styling.span.SpanColorResolver;
-import io.github.rosemoe.sora.lang.styling.span.SpanExtAttrs;
 import io.github.rosemoe.sora.lang.styling.line.LineSideIcon;
 import io.github.rosemoe.sora.text.Content;
 import io.github.rosemoe.sora.widget.CodeEditor;
@@ -104,17 +99,12 @@ public class SketchwareCodeEditor extends CodeEditor {
         getProps().sideIconSizeFactor = 0.9f;
 
         Content textContent = getText();
-
-        Spans.Modifier modifier = (styles.spans != null && styles.spans.supportsModify())
-                ? styles.spans.modify()
-                : null;
-        Spans.Reader reader = (styles.spans != null) ? styles.spans.read() : null;
-
         int lineCount = textContent.getLineCount();
+
         if (range == null) {
             styles.eraseAllLineStyles();
-            for (int lineIndex = 0; lineIndex < lineCount; lineIndex++) {
-                processLine(lineIndex, textContent, modifier, reader, styles);
+            for (int i = 0; i < lineCount; i++) {
+                processLine(i, textContent, styles);
             }
         } else {
             var iterator = range.lineIndexIterator(lineCount);
@@ -122,7 +112,7 @@ public class SketchwareCodeEditor extends CodeEditor {
                 int lineIndex = iterator.nextInt();
                 if (lineIndex >= 0 && lineIndex < textContent.getLineCount()) {
                     styles.eraseLineStyle(lineIndex, LineSideIcon.class);
-                    processLine(lineIndex, textContent, modifier, reader, styles);
+                    processLine(lineIndex, textContent, styles);
                 }
             }
         }
@@ -130,17 +120,12 @@ public class SketchwareCodeEditor extends CodeEditor {
         styles.finishBuilding();
     }
 
-    private boolean processLine(int line, Content text, Spans.Modifier modifier,
-                                Spans.Reader reader, Styles styles) {
+    private boolean processLine(int line, Content text, Styles styles) {
         if (line < 0 || line >= text.getLineCount()) return false;
 
         String lineText = text.getLineString(line);
         Matcher matcher = RESOURCE_PATTERN.matcher(lineText);
 
-        List<Span> lineSpans = (reader != null)
-                ? new ArrayList<>(reader.getSpansOnLine(line))
-                : null;
-        boolean modified = false;
         boolean iconAdded = false;
 
         while (matcher.find()) {
@@ -148,11 +133,6 @@ public class SketchwareCodeEditor extends CodeEditor {
 
             int color = resolveColor(match);
             if (color != 0) {
-                if (lineSpans != null) {
-                    if (addBoundedColorSpan(lineSpans, matcher.start(), matcher.end(), color)) {
-                        modified = true;
-                    }
-                }
                 if (!iconAdded) {
                     styles.addLineStyle(new LineSideIcon(line, getIconForColor(color)));
                     iconAdded = true;
@@ -166,9 +146,6 @@ public class SketchwareCodeEditor extends CodeEditor {
             }
         }
 
-        if (modified && modifier != null) {
-            modifier.setSpansOnLine(line, lineSpans);
-        }
         return iconAdded;
     }
 
@@ -186,7 +163,9 @@ public class SketchwareCodeEditor extends CodeEditor {
             float radius = 4 * density;
             canvas.drawRoundRect(new RectF(0, 0, size, size), radius, radius, p);
 
-            if (!ColorPreviewRenderer.isDarkColor(color)) {
+            // Calculate darkness manually since ColorPreviewRenderer is deleted
+            double darkness = 1 - (0.299 * Color.red(color) + 0.587 * Color.green(color) + 0.114 * Color.blue(color)) / 255;
+            if (darkness < 0.5) {
                 p.setStyle(Paint.Style.STROKE);
                 p.setColor(0x33000000);
                 p.setStrokeWidth(1 * density);
@@ -394,71 +373,5 @@ public class SketchwareCodeEditor extends CodeEditor {
             case "YELLOW" -> Color.YELLOW;
             default -> 0;
         };
-    }
-
-    private boolean addBoundedColorSpan(List<Span> lineSpans, int start, int end, int color) {
-        getOrCreateSpanAt(lineSpans, start);
-        getOrCreateSpanAt(lineSpans, end);
-
-        int textInt = ColorPreviewRenderer.isDarkColor(color) ? Color.WHITE : Color.BLACK;
-        ResolvableColor resColor = scheme -> textInt;
-
-        SpanColorResolver colorResolver = new SpanColorResolver() {
-            @Override
-            public ResolvableColor getForegroundColor(Span span) {
-                return resColor;
-            }
-
-            @Override
-            public ResolvableColor getBackgroundColor(Span span) {
-                return null;
-            }
-        };
-
-        List<Span> affectedSpans = new ArrayList<>();
-        for (Span span : lineSpans) {
-            int col = span.getColumn();
-            if (col >= start && col < end) {
-                affectedSpans.add(span);
-            }
-        }
-
-        if (affectedSpans.isEmpty()) return false;
-
-        boolean anyApplied = false;
-        for (int i = 0; i < affectedSpans.size(); i++) {
-            Span span = affectedSpans.get(i);
-            boolean isStart = (i == 0);
-            boolean isEnd = (i == affectedSpans.size() - 1);
-
-            try {
-                span.setSpanExt(SpanExtAttrs.EXT_EXTERNAL_RENDERER,
-                        new ColorPreviewRenderer(color, isStart, isEnd));
-                span.setSpanExt(SpanExtAttrs.EXT_COLOR_RESOLVER, colorResolver);
-                anyApplied = true;
-            } catch (UnsupportedOperationException e) {
-            }
-        }
-
-        return anyApplied;
-    }
-
-    private Span getOrCreateSpanAt(List<Span> spans, int column) {
-        for (int i = 0; i < spans.size(); i++) {
-            Span span = spans.get(i);
-            if (span.getColumn() == column) {
-                return span;
-            }
-            if (span.getColumn() > column) {
-                long style = (i > 0) ? spans.get(i - 1).getStyle() : 0;
-                Span newSpan = Span.obtain(column, style);
-                spans.add(i, newSpan);
-                return newSpan;
-            }
-        }
-        long style = spans.isEmpty() ? 0 : spans.get(spans.size() - 1).getStyle();
-        Span newSpan = Span.obtain(column, style);
-        spans.add(newSpan);
-        return newSpan;
     }
 }
