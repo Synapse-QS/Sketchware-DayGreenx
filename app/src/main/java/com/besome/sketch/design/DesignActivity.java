@@ -381,7 +381,7 @@ public class DesignActivity extends BaseAppCompatActivity implements View.OnClic
                 List<String> stdout = new LinkedList<>();
                 List<String> stderr = new LinkedList<>();
 
-                Shell.cmd("cat " + apkUri + " | pm install -S " + length).to(stdout, stderr).submit(result -> {
+                Shell.cmd("cat " + apkUri + " | pm install -r -d -S " + length).to(stdout, stderr).submit(result -> {
                     if (result.isSuccess()) {
                         SketchwareUtil.toast("Package installed successfully!");
                         if (ConfigActivity.isSettingEnabled(ConfigActivity.SETTING_ROOT_AUTO_OPEN_AFTER_INSTALLING)) {
@@ -409,7 +409,7 @@ public class DesignActivity extends BaseAppCompatActivity implements View.OnClic
         if (mod.hilal.saif.util.ShizukuUtil.isShizukuRunning()) {
             File apkFile = new File(q.finalToInstallApkPath);
             long length = apkFile.length();
-            String command = "pm install -S " + length;
+            String command = "pm install -r -d -S " + length;
 
             try {
                 // In Shizuku 12.1.0, newProcess is still public

@@ -98,26 +98,37 @@ public class SketchwareCodeEditor extends CodeEditor {
     private void processStyles(Styles styles, @Nullable StyleUpdateRange range) {
         getProps().sideIconSizeFactor = 0.9f;
 
-        Content textContent = getText();
-        int lineCount = textContent.getLineCount();
+        // The Styles object here can be concurrently touched by sora-editor's own
+        // background analyzer thread while we're adding/removing our custom
+        // color/drawable preview icons on it. When that race happens, the internal
+        // list sora-editor iterates over throws ConcurrentModificationException.
+        // We don't own that internal list, so the safe fix is to skip this pass
+        // gracefully instead of crashing — the next style update (fired on every
+        // keystroke/re-analysis) will simply redraw the icons correctly.
+        try {
+            Content textContent = getText();
+            int lineCount = textContent.getLineCount();
 
-        if (range == null) {
-            styles.eraseAllLineStyles();
-            for (int i = 0; i < lineCount; i++) {
-                processLine(i, textContent, styles);
-            }
-        } else {
-            var iterator = range.lineIndexIterator(lineCount);
-            while (iterator.hasNext()) {
-                int lineIndex = iterator.nextInt();
-                if (lineIndex >= 0 && lineIndex < textContent.getLineCount()) {
-                    styles.eraseLineStyle(lineIndex, LineSideIcon.class);
-                    processLine(lineIndex, textContent, styles);
+            if (range == null) {
+                styles.eraseAllLineStyles();
+                for (int i = 0; i < lineCount; i++) {
+                    processLine(i, textContent, styles);
+                }
+            } else {
+                var iterator = range.lineIndexIterator(lineCount);
+                while (iterator.hasNext()) {
+                    int lineIndex = iterator.nextInt();
+                    if (lineIndex >= 0 && lineIndex < textContent.getLineCount()) {
+                        styles.eraseLineStyle(lineIndex, LineSideIcon.class);
+                        processLine(lineIndex, textContent, styles);
+                    }
                 }
             }
-        }
 
-        styles.finishBuilding();
+            styles.finishBuilding();
+        } catch (java.util.ConcurrentModificationException ignored) {
+            // Styles was mutated concurrently by the analyzer thread — safe to skip.
+        }
     }
 
     private boolean processLine(int line, Content text, Styles styles) {
