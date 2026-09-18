@@ -3,12 +3,17 @@ package extensions.anbui.daydream.activity.project.settings
 import android.os.Build.VERSION.SDK_INT
 import android.os.Bundle
 import android.view.MenuItem
+import android.view.View
 import android.window.OnBackInvokedDispatcher
 import androidx.activity.addCallback
 import androidx.activity.enableEdgeToEdge
 import androidx.appcompat.app.AppCompatActivity
+import com.besome.sketch.editor.manage.library.LibraryCategoryView
+import com.besome.sketch.editor.manage.library.LibraryItemView
 import extensions.anbui.daydream.settings.DRSettings
+import pro.sketchware.R
 import pro.sketchware.databinding.ActivityDaydreamUniversalSettingsBinding
+import java.util.ArrayList
 
 class DayDreamUniversalSettingsActivity : AppCompatActivity() {
     private lateinit var binding: ActivityDaydreamUniversalSettingsBinding
@@ -46,21 +51,36 @@ class DayDreamUniversalSettingsActivity : AppCompatActivity() {
 
 
     fun initialize() {
-        DRSettings.getUseBackupTool(this) { isUse ->
-            binding.swBackuptool.setChecked(isUse)
-        }
-        DRSettings.getAutoCleanUpAfterBuild(this) { isClean ->
-            binding.swAutocleanafterbuild.setChecked(isClean);
-        }
+        val preferences = ArrayList<LibraryCategoryView>()
+        val universalCategory = LibraryCategoryView(this)
+        universalCategory.setTitle(null)
+        preferences.add(universalCategory)
 
-        binding.swBackuptool.setOnCheckedChangeListener { _, isChecked ->
-            DRSettings.setUseBackupTool(this, isChecked)
-        }
-        binding.lnBackuptool.setOnClickListener { _ -> binding.swBackuptool.toggle() }
+        val backupPref = createSwitchPreference(R.drawable.restore_page_24px, "Backup tool", "Use DayGreen's new backup tool instead of the old one.")
+        backupPref.sw_enable.visibility = View.VISIBLE
+        backupPref.sw_enable.isClickable = true
+        DRSettings.getUseBackupTool(this) { backupPref.sw_enable.isChecked = it }
+        backupPref.sw_enable.setOnCheckedChangeListener { _, isChecked -> DRSettings.setUseBackupTool(this, isChecked) }
+        backupPref.setOnClickListener { backupPref.sw_enable.toggle() }
+        universalCategory.addLibraryItem(backupPref, true)
 
-        binding.swAutocleanafterbuild.setOnCheckedChangeListener { _, isChecked ->
-            DRSettings.setAutoCleanUpAfterBuild(this, isChecked)
-        }
-        binding.lnAutocleanafterbuild.setOnClickListener { _ -> binding.swAutocleanafterbuild.toggle() }
+        val cleanPref = createSwitchPreference(R.drawable.cleaning_services_24px, "Auto clean up after building", "Temporary files will be cleaned up after the build is complete.")
+        cleanPref.sw_enable.visibility = View.VISIBLE
+        cleanPref.sw_enable.isClickable = true
+        DRSettings.getAutoCleanUpAfterBuild(this) { cleanPref.sw_enable.isChecked = it }
+        cleanPref.sw_enable.setOnCheckedChangeListener { _, isChecked -> DRSettings.setAutoCleanUpAfterBuild(this, isChecked) }
+        cleanPref.setOnClickListener { cleanPref.sw_enable.toggle() }
+        universalCategory.addLibraryItem(cleanPref, false)
+
+        preferences.forEach { binding.lnAllOptions.addView(it) }
+    }
+
+    private fun createSwitchPreference(icon: Int, title: String, desc: String): LibraryItemView {
+        val preference = LibraryItemView(this)
+        preference.setHideEnabled()
+        preference.icon.setImageResource(icon)
+        preference.title.text = title
+        preference.description.text = desc
+        return preference
     }
 }

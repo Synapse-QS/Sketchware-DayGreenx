@@ -239,9 +239,7 @@ public class ProjectsAdapter extends RecyclerView.Adapter<ProjectsAdapter.Projec
         projectsFragment.openProjectSettings.launch(intent);
     }
 
-    private void showProjectSettingDialog(HashMap<String, Object> project) {
-        new ProjectSettingsDialog(activity, yB.c(project, "sc_id")).show();
-    }
+
 
     private void backupProject(HashMap<String, Object> project) {
         String scId = yB.c(project, "sc_id");
@@ -313,11 +311,6 @@ public class ProjectsAdapter extends RecyclerView.Adapter<ProjectsAdapter.Projec
 
         binding.projectSettings.setOnClickListener(v -> {
             toProjectSettingOrRequestPermission(projectMap, position);
-            projectOptionsBSD.dismiss();
-        });
-
-        binding.projectConfig.setOnClickListener(v -> {
-            showProjectSettingDialog(projectMap);
             projectOptionsBSD.dismiss();
         });
 
