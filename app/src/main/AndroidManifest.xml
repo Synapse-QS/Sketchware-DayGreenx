@@ -324,6 +324,9 @@
             android:name="mod.hey.studios.activity.managers.java.ManageJavaActivity"
             android:configChanges="orientation|screenSize" />
         <activity
+            android:name="mod.hey.studios.activity.managers.native_code.ManageNativeActivity"
+            android:configChanges="orientation|screenSize" />
+        <activity
             android:name="mod.hey.studios.activity.managers.nativelib.ManageNativelibsActivity"
             android:configChanges="orientation|screenSize" />
         <activity

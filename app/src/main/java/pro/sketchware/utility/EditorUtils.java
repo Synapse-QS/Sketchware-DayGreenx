@@ -4,11 +4,20 @@ import static pro.sketchware.utility.ThemeUtils.isDarkThemeEnabled;
 
 import android.content.Context;
 import android.graphics.Typeface;
+import android.util.Log;
 
 import androidx.annotation.NonNull;
 
 import com.google.android.material.color.MaterialColors;
 
+import java.io.File;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
+
+import extensions.fora2323.daygreen.keyword.IDCKeyword;
+import extensions.fora2323.daygreen.keyword.IDCppKeyword;
 import extensions.fora2323.daygreen.keyword.IDCssKeyword;
 import extensions.fora2323.daygreen.keyword.IDHtmlKeyword;
 import extensions.fora2323.daygreen.keyword.IDJavaKeyword;
@@ -27,6 +36,7 @@ import io.github.rosemoe.sora.widget.schemes.SchemeGitHub;
 import mod.jbk.code.CodeEditorColorSchemes;
 import mod.jbk.code.CodeEditorLanguages;
 import pro.sketchware.R;
+import pro.sketchware.editor.SketchwareCodeEditor;
 
 public class EditorUtils {
     EditorUtils() {
@@ -83,27 +93,27 @@ public class EditorUtils {
     public static void loadJavaConfig(CodeEditor editor) {
         Language language = CodeEditorLanguages.loadTextMateLanguage(CodeEditorLanguages.SCOPE_NAME_JAVA);
         if (language instanceof TextMateLanguage tm) {
-            java.util.ArrayList<String> fullKeywords = new java.util.ArrayList<>(java.util.List.of(extensions.fora2323.daygreen.keyword.IDJavaKeyword.KEYWORDS));
-            if (editor instanceof pro.sketchware.editor.SketchwareCodeEditor) {
-                String scId = ((pro.sketchware.editor.SketchwareCodeEditor) editor).getScId();
+            ArrayList<String> fullKeywords = new ArrayList<>(List.of(IDJavaKeyword.KEYWORDS));
+            if (editor instanceof SketchwareCodeEditor) {
+                String scId = ((SketchwareCodeEditor) editor).getScId();
                 if (scId != null && !scId.isEmpty()) {
-                    java.io.File rJavaFile = new java.io.File(pro.sketchware.utility.FileUtil.getExternalStorageDir() + "/.sketchware/mysc/" + scId + "/gen/R.java");
+                    File rJavaFile = new File(FileUtil.getExternalStorageDir() + "/.sketchware/mysc/" + scId + "/gen/R.java");
                     if (rJavaFile.exists()) {
                         try {
-                            String content = pro.sketchware.utility.FileUtil.readFile(rJavaFile.getAbsolutePath());
+                            String content = FileUtil.readFile(rJavaFile.getAbsolutePath());
                             // Ambil nama kelas internal (id, layout, string, color, dll)
-                            java.util.regex.Matcher classMatcher = java.util.regex.Pattern.compile("public\\s+static\\s+final\\s+class\\s+([a-zA-Z0-9_]+)\\s*\\{").matcher(content);
-                            java.util.ArrayList<String> subClasses = new java.util.ArrayList<>();
+                            Matcher classMatcher = Pattern.compile("public\\s+static\\s+final\\s+class\\s+([a-zA-Z0-9_]+)\\s*\\{").matcher(content);
+                            ArrayList<String> subClasses = new ArrayList<>();
                             while (classMatcher.find()) {
                                 subClasses.add(classMatcher.group(1));
                             }
 
                             for (String subClass : subClasses) {
                                 // Cari semua field int di dalam class internal tersebut
-                                java.util.regex.Matcher fieldMatcher = java.util.regex.Pattern.compile("public\\s+static\\s+class\\s+" + subClass + "\\s*\\{([^\\}]+)\\}").matcher(content);
+                                Matcher fieldMatcher = Pattern.compile("public\\s+static\\s+class\\s+" + subClass + "\\s*\\{([^\\}]+)\\}").matcher(content);
                                 if (fieldMatcher.find()) {
                                     String classContent = fieldMatcher.group(1);
-                                    java.util.regex.Matcher m = java.util.regex.Pattern.compile("public\\s+static\\s+final\\s+int\\s+([a-zA-Z0-9_]+)\\s*=").matcher(classContent);
+                                    Matcher m = Pattern.compile("public\\s+static\\s+final\\s+int\\s+([a-zA-Z0-9_]+)\\s*=").matcher(classContent);
                                     while (m.find()) {
                                         String fieldName = m.group(1);
                                         // Suntikkan variasi autocomplete lengkap agar muncul saat diketik setelah titik
@@ -116,7 +126,7 @@ public class EditorUtils {
                                 }
                             }
                         } catch (Exception e) {
-                            android.util.Log.e("EditorUtils", "Failed to parse R.java cache", e);
+                            Log.e("EditorUtils", "Failed to parse R.java cache", e);
                         }
                     }
                 }
@@ -129,27 +139,27 @@ public class EditorUtils {
     public static void loadKotlinConfig(CodeEditor editor) {
         Language language = CodeEditorLanguages.loadTextMateLanguage(CodeEditorLanguages.SCOPE_NAME_KOTLIN);
         if (language instanceof TextMateLanguage tm) {
-            java.util.ArrayList<String> fullKeywords = new java.util.ArrayList<>(java.util.List.of(extensions.fora2323.daygreen.keyword.IDKotlinKeyword.KEYWORDS));
-            if (editor instanceof pro.sketchware.editor.SketchwareCodeEditor) {
-                String scId = ((pro.sketchware.editor.SketchwareCodeEditor) editor).getScId();
+            ArrayList<String> fullKeywords = new ArrayList<>(List.of(IDKotlinKeyword.KEYWORDS));
+            if (editor instanceof SketchwareCodeEditor) {
+                String scId = ((SketchwareCodeEditor) editor).getScId();
                 if (scId != null && !scId.isEmpty()) {
-                    java.io.File rJavaFile = new java.io.File(pro.sketchware.utility.FileUtil.getExternalStorageDir() + "/.sketchware/mysc/" + scId + "/gen/R.java");
+                    File rJavaFile = new File(FileUtil.getExternalStorageDir() + "/.sketchware/mysc/" + scId + "/gen/R.java");
                     if (rJavaFile.exists()) {
                         try {
-                            String content = pro.sketchware.utility.FileUtil.readFile(rJavaFile.getAbsolutePath());
+                            String content = FileUtil.readFile(rJavaFile.getAbsolutePath());
                             // Ambil nama kelas internal (id, layout, string, color, dll)
-                            java.util.regex.Matcher classMatcher = java.util.regex.Pattern.compile("public\\s+static\\s+final\\s+class\\s+([a-zA-Z0-9_]+)\\s*\\{").matcher(content);
-                            java.util.ArrayList<String> subClasses = new java.util.ArrayList<>();
+                            Matcher classMatcher = Pattern.compile("public\\s+static\\s+final\\s+class\\s+([a-zA-Z0-9_]+)\\s*\\{").matcher(content);
+                            ArrayList<String> subClasses = new ArrayList<>();
                             while (classMatcher.find()) {
                                 subClasses.add(classMatcher.group(1));
                             }
 
                             for (String subClass : subClasses) {
                                 // Cari semua field int di dalam class internal tersebut
-                                java.util.regex.Matcher fieldMatcher = java.util.regex.Pattern.compile("public\\s+static\\s+class\\s+" + subClass + "\\s*\\{([^\\}]+)\\}").matcher(content);
+                                Matcher fieldMatcher = Pattern.compile("public\\s+static\\s+class\\s+" + subClass + "\\s*\\{([^\\}]+)\\}").matcher(content);
                                 if (fieldMatcher.find()) {
                                     String classContent = fieldMatcher.group(1);
-                                    java.util.regex.Matcher m = java.util.regex.Pattern.compile("public\\s+static\\s+final\\s+int\\s+([a-zA-Z0-9_]+)\\s*=").matcher(classContent);
+                                    Matcher m = Pattern.compile("public\\s+static\\s+final\\s+int\\s+([a-zA-Z0-9_]+)\\s*=").matcher(classContent);
                                     while (m.find()) {
                                         String fieldName = m.group(1);
                                         // Suntikkan variasi autocomplete lengkap agar muncul saat diketik setelah titik
@@ -162,7 +172,7 @@ public class EditorUtils {
                                 }
                             }
                         } catch (Exception e) {
-                            android.util.Log.e("EditorUtils", "Failed to parse R.java cache", e);
+                            Log.e("EditorUtils", "Failed to parse R.java cache", e);
                         }
                     }
                 }
@@ -211,6 +221,22 @@ public class EditorUtils {
         Language language = CodeEditorLanguages.loadTextMateLanguage(CodeEditorLanguages.SCOPE_NAME_JS);
         if (language instanceof TextMateLanguage tm) {
             tm.setCompleterKeywords(IDJsKeyword.KEYWORDS);
+        }
+        loadConfigByLanguage(editor, language, true);
+    }
+
+    public static void loadCppConfig(CodeEditor editor) {
+        Language language = CodeEditorLanguages.loadTextMateLanguage(CodeEditorLanguages.SCOPE_NAME_CPP);
+        if (language instanceof TextMateLanguage tm) {
+            tm.setCompleterKeywords(IDCppKeyword.KEYWORDS);
+        }
+        loadConfigByLanguage(editor, language, true);
+    }
+
+    public static void loadCConfig(CodeEditor editor) {
+        Language language = CodeEditorLanguages.loadTextMateLanguage(CodeEditorLanguages.SCOPE_NAME_C);
+        if (language instanceof TextMateLanguage tm) {
+            tm.setCompleterKeywords(IDCKeyword.KEYWORDS);
         }
         loadConfigByLanguage(editor, language, true);
     }

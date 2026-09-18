@@ -68,7 +68,11 @@ import com.google.firebase.crashlytics.FirebaseCrashlytics;
 import com.topjohnwu.superuser.Shell;
 
 import java.io.File;
+import java.io.FileInputStream;
+import java.io.OutputStream;
 import java.lang.ref.WeakReference;
+import java.lang.reflect.Field;
+import java.lang.reflect.Method;
 import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
@@ -90,6 +94,7 @@ import a.a.a.kC;
 import a.a.a.lC;
 import a.a.a.mB;
 import a.a.a.rs;
+import a.a.a.wB;
 import a.a.a.wq;
 import a.a.a.yB;
 import a.a.a.yq;
@@ -114,6 +119,7 @@ import mod.hey.studios.util.Helper;
 import mod.hey.studios.util.SystemLogPrinter;
 import mod.hilal.saif.activities.android_manifest.AndroidManifestInjection;
 import mod.hilal.saif.activities.tools.ConfigActivity;
+import mod.hilal.saif.util.ShizukuUtil;
 import mod.jbk.build.BuildProgressReceiver;
 import mod.jbk.build.BuiltInLibraries;
 import mod.jbk.diagnostic.CompileErrorSaver;
@@ -134,6 +140,7 @@ import pro.sketchware.utility.FileUtil;
 import pro.sketchware.utility.SketchwareUtil;
 import pro.sketchware.utility.ThemeUtils;
 import pro.sketchware.utility.apk.ApkSignatures;
+import rikka.shizuku.Shizuku;
 
 //DR
 public class DesignActivity extends BaseAppCompatActivity implements View.OnClickListener {
@@ -406,21 +413,21 @@ public class DesignActivity extends BaseAppCompatActivity implements View.OnClic
     }
 
     private void installWithShizuku() {
-        if (mod.hilal.saif.util.ShizukuUtil.isShizukuRunning()) {
+        if (ShizukuUtil.isShizukuRunning()) {
             File apkFile = new File(q.finalToInstallApkPath);
             long length = apkFile.length();
             String command = "pm install -r -d -S " + length;
 
             try {
                 // In Shizuku 12.1.0, newProcess is still public
-                java.lang.Process process = rikka.shizuku.Shizuku.newProcess(new String[]{"sh", "-c", command}, null, null);
+                Process process = Shizuku.newProcess(new String[]{"sh", "-c", command}, null, null);
 
                 if (process == null) {
                     throw new Exception("Failed to start Shizuku process");
                 }
 
-                java.io.OutputStream os = process.getOutputStream();
-                java.io.FileInputStream fis = new java.io.FileInputStream(apkFile);
+                OutputStream os = process.getOutputStream();
+                FileInputStream fis = new FileInputStream(apkFile);
                 byte[] buffer = new byte[8192];
                 int read;
                 while ((read = fis.read(buffer)) != -1) {
@@ -557,17 +564,27 @@ public class DesignActivity extends BaseAppCompatActivity implements View.OnClic
         View splitButton = findViewById(R.id.run_split_button);
         btnOptions.setOnClickListener(v -> {
             btnOptions.setIconResource(R.drawable.ic_mtrl_arrow_up);
+            try {
+                Field field = bottomPopupMenu.getClass().getDeclaredField("mPopup");
+                field.setAccessible(true);
+                Object menuPopupHelper = field.get(bottomPopupMenu);
+                Class<?> classPopupHelper = Class.forName(menuPopupHelper.getClass().getName());
+                Method setForceIcons = classPopupHelper.getMethod("setForceShowIcon", boolean.class);
+                setForceIcons.invoke(menuPopupHelper, true);
+            } catch (Exception e) {
+                Log.e("DesignActivity", "Failed to force icons in PopupMenu", e);
+            }
             bottomPopupMenu.show();
         });
 
         bottomPopupMenu = new PopupMenu(this, splitButton != null ? splitButton : btnOptions, Gravity.TOP);
         bottomMenu = bottomPopupMenu.getMenu();
-        bottomMenu.add(Menu.NONE, 1, Menu.NONE, "Build Settings").setOnMenuItemClickListener(item -> {
+        bottomMenu.add(0, 1, 0, "Build Settings").setIcon(R.drawable.ic_mtrl_settings).setOnMenuItemClickListener(item -> {
             BuildSettingsBottomSheet sheet = BuildSettingsBottomSheet.newInstance(sc_id);
             sheet.show(getSupportFragmentManager(), BuildSettingsBottomSheet.TAG);
             return true;
         });
-        bottomMenu.add(Menu.NONE, 2, Menu.NONE, "Clean temporary files").setVisible(false).setOnMenuItemClickListener(item -> {
+        bottomMenu.add(0, 2, 1, "Clean temporary files").setIcon(R.drawable.ic_mtrl_delete).setVisible(false).setOnMenuItemClickListener(item -> {
             new Thread(() -> {
                 FileUtil.deleteFile(q.projectMyscPath);
                 new BuildCache(sc_id).invalidateAll();
@@ -576,21 +593,25 @@ public class DesignActivity extends BaseAppCompatActivity implements View.OnClic
             }).start();
             return true;
         });
-        bottomMenu.add(Menu.NONE, 3, Menu.NONE, "Show last compile error").setOnMenuItemClickListener(item -> {
+        bottomMenu.add(0, 3, 2, "Show last compile error").setIcon(R.drawable.ic_mtrl_info).setOnMenuItemClickListener(item -> {
             new CompileErrorSaver(sc_id).showLastErrors(this);
             return true;
         });
-        bottomMenu.add(Menu.NONE, 5, Menu.NONE, "Show source code").setOnMenuItemClickListener(item -> {
+        bottomMenu.add(0, 5, 3, "Show source code").setIcon(R.drawable.ic_mtrl_code).setOnMenuItemClickListener(item -> {
             showCurrentActivitySrcCode();
             return true;
         });
-        bottomMenu.add(Menu.NONE, 4, Menu.NONE, "Install last built APK").setVisible(false).setOnMenuItemClickListener(item -> {
+
+        // Divider
+        bottomMenu.add(1, 99, 4, "────────────────").setEnabled(false);
+
+        bottomMenu.add(1, 4, 5, "Install last built APK").setIcon(R.drawable.ic_mtrl_apk_install).setVisible(false).setOnMenuItemClickListener(item -> {
             if (FileUtil.isExistFile(q.finalToInstallApkPath)) {
                 installBuiltApk();
             } else SketchwareUtil.toast("APK doesn't exist anymore");
             return true;
         });
-        bottomMenu.add(Menu.NONE, 6, Menu.NONE, "Show Apk signatures").setVisible(false).setOnMenuItemClickListener(item -> {
+        bottomMenu.add(1, 6, 6, "Show Apk signatures").setIcon(R.drawable.ic_mtrl_key).setVisible(false).setOnMenuItemClickListener(item -> {
             ApkSignatures apkSignatures = new ApkSignatures(this, q.finalToInstallApkPath);
             apkSignatures.showSignaturesDialog();
             return true;
@@ -687,6 +708,7 @@ public class DesignActivity extends BaseAppCompatActivity implements View.OnClic
             handler.post(() -> {
                 bottomMenu.findItem(2).setVisible(q != null && FileUtil.isExistFile(q.projectMyscPath));
                 var isDebugApkExists = isDebugApkExists();
+                bottomMenu.findItem(99).setVisible(isDebugApkExists);
                 bottomMenu.findItem(4).setVisible(isDebugApkExists);
                 bottomMenu.findItem(6).setVisible(isDebugApkExists);
             });
@@ -967,7 +989,7 @@ public class DesignActivity extends BaseAppCompatActivity implements View.OnClic
         var dialog = new MaterialAlertDialogBuilder(this).create();
         dialog.setTitle(R.string.design_file_selector_title_java);
         dialog.setIcon(R.drawable.ic_mtrl_java);
-        View customView = a.a.a.wB.a(this, R.layout.file_selector_popup_select_java);
+        View customView = wB.a(this, R.layout.file_selector_popup_select_java);
         RecyclerView recyclerView = customView.findViewById(R.id.file_list);
         recyclerView.setLayoutManager(new LinearLayoutManager(getApplicationContext(), RecyclerView.VERTICAL, false));
         var adapter = new JavaFileAdapter(sc_id);
@@ -1061,6 +1083,13 @@ public class DesignActivity extends BaseAppCompatActivity implements View.OnClic
      */
     void toCustomBlocksViewer() {
         new CustomBlocksDialog().show(this, sc_id);
+    }
+
+    /**
+     * Opens {@link ManageNativeActivity}.
+     */
+    void toNativeManager() {
+        launchActivity(mod.hey.studios.activity.managers.native_code.ManageNativeActivity.class, null, new Pair<>("pkgName", q.packageName));
     }
 
     /**
@@ -1312,6 +1341,16 @@ public class DesignActivity extends BaseAppCompatActivity implements View.OnClic
 
                 onProgress("Java is compiling...", 13);
                 builder.compileJavaCode();
+                if (isCanceling) {
+                    return;
+                }
+
+                try {
+                    builder.compileNativeCode();
+                } catch (Exception e) {
+                    LogUtil.e("DesignActivity", "Native compilation failed", e);
+                    throw new RuntimeException(e);
+                }
                 if (isCanceling) {
                     return;
                 }
