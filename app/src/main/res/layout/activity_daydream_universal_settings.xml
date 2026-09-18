@@ -4,8 +4,6 @@
     android:layout_height="match_parent"
     xmlns:tools="http://schemas.android.com/tools"
     android:background="?attr/colorSurface"
-    android:fitsSystemWindows="true"
-    android:orientation="vertical"
     tools:context="extensions.anbui.daydream.activity.project.settings.DayDreamUniversalSettingsActivity">
 
     <com.google.android.material.appbar.AppBarLayout
@@ -13,16 +11,26 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:gravity="center"
+        android:fitsSystemWindows="true"
+        android:background="?attr/colorSurface"
         app:layout_behavior="com.google.android.material.appbar.AppBarLayout$Behavior">
 
         <com.google.android.material.appbar.CollapsingToolbarLayout
+            android:background="?attr/colorSurface"
+            app:contentScrim="?attr/colorSurface"
+            app:statusBarScrim="?attr/colorSurface"
             style="@style/DayDream.CollapsingToolbarLarge"
+            android:fitsSystemWindows="true"
             app:title="@string/daydream"
             app:subtitle="Settings">
 
             <com.google.android.material.appbar.MaterialToolbar
-                style="@style/DayDram.CollapsingMaterialToolbar"
-                android:id="@+id/toolbar" />
+                android:id="@+id/toolbar"
+                android:layout_width="match_parent"
+                android:layout_height="?attr/actionBarSize"
+                android:background="?attr/colorSurface"
+                app:navigationIcon="@drawable/arrow_back_24px"
+                app:layout_collapseMode="pin" />
 
         </com.google.android.material.appbar.CollapsingToolbarLayout>
     </com.google.android.material.appbar.AppBarLayout>

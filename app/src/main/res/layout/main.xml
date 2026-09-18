@@ -58,6 +58,10 @@
                     <!-- DRAWER BUTTON              -->
                     <!-- ========================= -->
 
+                    <!-- ========================= -->
+                    <!-- SEARCH                     -->
+                    <!-- ========================= -->
+
                     <ImageButton
                         android:id="@+id/drawerToggleBtn"
                         android:layout_width="60dp"
@@ -68,12 +72,8 @@
                         android:minHeight="0dp"
                         android:padding="12dp"
                         android:scaleType="center"
-                        android:src="@drawable/ic_menu_white_24dp"
+                        android:src="@drawable/ic_menu_mtr2"
                         android:tint="?attr/colorOnSurfaceVariant" />
-
-                    <!-- ========================= -->
-                    <!-- SEARCH                     -->
-                    <!-- ========================= -->
 
                     <com.google.android.material.card.MaterialCardView
                         android:id="@+id/search_container"
