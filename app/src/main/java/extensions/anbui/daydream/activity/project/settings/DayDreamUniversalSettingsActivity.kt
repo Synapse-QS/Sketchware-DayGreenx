@@ -79,14 +79,14 @@ class DayDreamUniversalSettingsActivity : AppCompatActivity() {
         cleanPref.setOnClickListener { cleanPref.sw_enable.toggle() }
         universalCategory.addLibraryItem(cleanPref, false)
 
-        val ndkPref = createSwitchPreference(R.drawable.ic_mtrl_download.xml, "Download NDK", "Download Android NDK for native compilation")
+        val ndkPref = createSwitchPreference(R.drawable.ic_mtrl_download, "Download NDK", "Download Android NDK for native compilation")
         ndkPref.sw_enable.visibility = View.GONE
         ndkPref.setOnClickListener {
             showNdkDownloadDialog()
         }
         universalCategory.addLibraryItem(ndkPref, false)
 
-        val cmakePref = createSwitchPreference(R.drawable.ic_mtrl_download.xml, "Download CMake", "Download CMake for native compilation")
+        val cmakePref = createSwitchPreference(R.drawable.ic_mtrl_download, "Download CMake", "Download CMake for native compilation")
         cmakePref.sw_enable.visibility = View.GONE
         cmakePref.setOnClickListener {
             showCmakeDownloadDialog()
