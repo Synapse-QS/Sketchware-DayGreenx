@@ -286,7 +286,19 @@ public class ManageNativeActivity extends BaseAppCompatActivity {
             if (isFolder(position)) {
                 binding.icon.setImageResource(R.drawable.ic_mtrl_folder);
             } else {
-                binding.icon.setImageResource(R.drawable.ic_menu_mtr2);
+                if (fileName.endsWith(".cpp")) {
+                    binding.icon.setImageResource(R.drawable.ic_mtrl_cpp);
+                } else {
+                    if (fileName.endsWith(".c")) {
+                        binding.icon.setImageResource(R.drawable.ic_mtrl_c);
+                    } else {
+                        if (fileName.endsWith(".h") || fileName.endsWith(".hpp")) {
+                            binding.icon.setImageResource(R.drawable.ic_mtrl_c);
+                        } else {
+                            binding.icon.setImageResource(R.drawable.ic_mtrl_file);
+                        }
+                    }
+                }
             }
 
             Helper.applyRipple(ManageNativeActivity.this, binding.more);
