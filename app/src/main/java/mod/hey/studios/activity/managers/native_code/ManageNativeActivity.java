@@ -141,7 +141,13 @@ public class ManageNativeActivity extends BaseAppCompatActivity {
                 String extension;
                 String newFileContent;
                 int checkedChipId = dialogBinding.chipGroupTypes.getCheckedChipId();
-                if (checkedChipId == R.id.chip_cpp_file) {
+                if (checkedChipId == R.id.chip_file) {
+                    FileUtil.writeFile(new File(current_path, name).getAbsolutePath(), "");
+                    refresh();
+                    SketchwareUtil.toast("File was created successfully");
+                    dialog.dismiss();
+                    return;
+                } else if (checkedChipId == R.id.chip_cpp_file) {
                     newFileContent = String.format(CPP_TEMPLATE, packageName, className);
                     extension = ".cpp";
                 } else if (checkedChipId == R.id.chip_c_file) {
@@ -172,6 +178,7 @@ public class ManageNativeActivity extends BaseAppCompatActivity {
             dialogBinding.chipCppFile.setVisibility(View.VISIBLE);
             dialogBinding.chipCFile.setVisibility(View.VISIBLE);
             dialogBinding.chipHeaderFile.setVisibility(View.VISIBLE);
+            dialogBinding.chipFile.setVisibility(View.VISIBLE);
         });
 
         dialog.show();
