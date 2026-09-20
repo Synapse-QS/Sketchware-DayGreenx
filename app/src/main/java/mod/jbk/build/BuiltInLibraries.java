@@ -884,7 +884,7 @@ public class BuiltInLibraries {
         String baseAssetsPath = "libs" + File.separator;
         oB fileUtil = new oB(false);
 
-        maybeExtractAndroidJar(progressReceivers);
+        /* maybeExtractAndroidJar(progressReceivers); removed - now handled by SDK Manager */
 
         if (ProjectBuilder.hasFileChanged(baseAssetsPath + dexsArchiveName, dexsArchivePath)) {
             for (BuildProgressReceiver receiver : progressReceivers) {
@@ -922,19 +922,6 @@ public class BuiltInLibraries {
         }
     }
 
-    public static void maybeExtractAndroidJar(@NonNull BuildProgressReceiver... receivers) {
-        String androidJarArchiveName = "android.jar.zip";
-        String androidJarPath = new File(EXTRACTED_COMPILE_ASSETS_PATH, androidJarArchiveName).getAbsolutePath();
-        if (ProjectBuilder.hasFileChanged("libs" + File.separator + androidJarArchiveName, androidJarPath)) {
-            for (BuildProgressReceiver receiver : receivers) {
-                receiver.onProgress("Extracting built-in android.jar...", 7);
-            }
-            /* Delete android.jar */
-            new oB().c(EXTRACTED_COMPILE_ASSETS_PATH.getAbsolutePath() + File.separator + "android.jar");
-            /* Extract android.jar.zip to android.jar */
-            new KB().a(androidJarPath, EXTRACTED_COMPILE_ASSETS_PATH.getAbsolutePath());
-        }
-    }
 
     public static void maybeExtractCoreLambdaStubsJar() {
         String coreLambdaStubsJarName = "core-lambda-stubs.jar";

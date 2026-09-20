@@ -186,8 +186,6 @@ public class LibraryDownloaderDialogFragment extends BottomSheetDialogFragment {
         var handler = new Handler(Looper.getMainLooper());
 
         downloadExecutor.execute(() -> {
-            BuiltInLibraries.maybeExtractAndroidJar((message, progress) ->
-                    handler.post(() -> binding.overallProgress.setIndeterminate(true)));
             BuiltInLibraries.maybeExtractCoreLambdaStubsJar();
 
             resolver.resolveDependency(new DependencyResolver.DependencyResolverCallback() {
