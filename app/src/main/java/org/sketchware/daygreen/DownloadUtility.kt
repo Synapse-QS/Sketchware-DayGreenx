@@ -7,9 +7,10 @@ import android.os.Looper
 import android.view.LayoutInflater
 import android.widget.TextView
 import android.widget.Toast
-import androidx.appcompat.app.AlertDialog
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import com.google.android.material.progressindicator.LinearProgressIndicator
+import org.apache.commons.compress.archivers.tar.TarArchiveInputStream
+import org.tukaani.xz.XZInputStream
 import pro.sketchware.R
 import pro.sketchware.utility.FileUtil
 import java.io.BufferedInputStream
@@ -128,28 +129,46 @@ object DownloadUtility {
                 val tempExtractDir = File(parentPath, "temp_extract_" + System.currentTimeMillis())
                 tempExtractDir.mkdirs()
                 
+                // --- Logika Ekstraksi ---
                 if (name.endsWith(".zip")) {
-                    val zipInputStream = ZipInputStream(archiveFile.inputStream())
-                    FileUtil.extractZipTo(zipInputStream, tempExtractDir.absolutePath)
-                    zipInputStream.close()
+                    ZipInputStream(archiveFile.inputStream()).use { zipInputStream ->
+                        FileUtil.extractZipTo(zipInputStream, tempExtractDir.absolutePath)
+                    }
+                } else if (name.endsWith(".tar.xz")) {
+                    XZInputStream(archiveFile.inputStream().buffered()).use { xzIn ->
+                        TarArchiveInputStream(xzIn).use { tarIn ->
+                            var entry = tarIn.nextTarEntry
+                            while (entry != null) {
+                                val outFile = File(tempExtractDir, entry.name)
+                                if (entry.isDirectory) {
+                                    outFile.mkdirs()
+                                } else {
+                                    outFile.parentFile?.mkdirs()
+                                    outFile.outputStream().use { out -> tarIn.copyTo(out) }
+                                    // Menjaga izin executable (chmod +x) jika ada bit eksekusi di tar header
+                                    if (entry.mode and 0b001001001 != 0) {
+                                        outFile.setExecutable(true)
+                                    }
+                                }
+                                entry = tarIn.nextTarEntry
+                            }
+                        }
+                    }
                 } else {
-                    val tarFlag = if (name.endsWith(".tar.xz")) "-xJf" else "-xzf"
-                    val process = ProcessBuilder("tar", tarFlag, archiveFile.absolutePath, "-C", tempExtractDir.absolutePath)
+                    val process = ProcessBuilder("tar", "-xzf", archiveFile.absolutePath, "-C", tempExtractDir.absolutePath)
                         .redirectErrorStream(true)
                         .start()
-                    
                     val reader = process.inputStream.bufferedReader()
                     while (reader.readLine() != null) {
                         // Wait for output to finish
                     }
-                    
                     val exitCode = process.waitFor()
                     if (exitCode != 0) {
                         throw Exception("Tar process failed with exit code $exitCode")
                     }
                 }
 
-                // Decide target name and move
+                // Penataan Folder Hasil Ekstraksi
                 val targetName = if (name.contains("cmake")) "cmake" else if (name.contains("ndk")) "ndk" else null
                 if (targetName != null) {
                     val targetDir = File(parentPath, targetName)
@@ -159,17 +178,15 @@ object DownloadUtility {
                     val subFiles = tempExtractDir.listFiles { f -> f.isFile }
                     
                     if (subDirs != null && subDirs.size == 1 && (subFiles == null || subFiles.isEmpty())) {
-                        // archive has a single top-level folder
                         subDirs[0].renameTo(targetDir)
                     } else {
-                        // archive has files/folders at root
                         tempExtractDir.renameTo(targetDir)
                     }
                 }
                 
                 // Cleanup
                 if (tempExtractDir.exists()) tempExtractDir.deleteRecursively()
-                archiveFile.delete() // Delete original archive to save space
+                archiveFile.delete() // Hapus file arsip setelah sukses diekstrak
                 
                 handler.post {
                     if (!activity.isFinishing) {
@@ -187,7 +204,6 @@ object DownloadUtility {
             }
         }
     }
-
 
     fun getDeviceAbi(): String {
         return Build.SUPPORTED_ABIS[0]
