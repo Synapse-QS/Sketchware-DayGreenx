@@ -124,22 +124,23 @@ object DownloadUtility {
         executor.execute {
             try {
                 val name = archiveFile.name.lowercase()
-                val parentPath = archiveFile.parent ?: activity.filesDir.absolutePath
+                val parentPath = archiveFile.parentFile ?: activity.filesDir
+                val tempExtractDir = File(parentPath, "temp_extract_" + System.currentTimeMillis())
+                tempExtractDir.mkdirs()
                 
                 if (name.endsWith(".zip")) {
                     val zipInputStream = ZipInputStream(archiveFile.inputStream())
-                    FileUtil.extractZipTo(zipInputStream, parentPath)
+                    FileUtil.extractZipTo(zipInputStream, tempExtractDir.absolutePath)
                     zipInputStream.close()
                 } else {
                     val tarFlag = if (name.endsWith(".tar.xz")) "-xJf" else "-xzf"
-                    val process = ProcessBuilder("tar", tarFlag, archiveFile.absolutePath, "-C", parentPath)
+                    val process = ProcessBuilder("tar", tarFlag, archiveFile.absolutePath, "-C", tempExtractDir.absolutePath)
                         .redirectErrorStream(true)
                         .start()
                     
                     val reader = process.inputStream.bufferedReader()
-                    var line: String?
-                    while (reader.readLine().also { line = it } != null) {
-                        // We could potentially parse lines if we used -v, but indeterminate is safer
+                    while (reader.readLine() != null) {
+                        // Wait for output to finish
                     }
                     
                     val exitCode = process.waitFor()
@@ -148,14 +149,27 @@ object DownloadUtility {
                     }
                 }
 
-                // Post-extraction fix for NDK/CMake
-                archiveFile.parentFile?.let { parent ->
-                    if (name.contains("cmake")) {
-                        fixFolderStructure(parent, "cmake")
-                    } else if (name.contains("ndk")) {
-                        fixFolderStructure(parent, "ndk")
+                // Decide target name and move
+                val targetName = if (name.contains("cmake")) "cmake" else if (name.contains("ndk")) "ndk" else null
+                if (targetName != null) {
+                    val targetDir = File(parentPath, targetName)
+                    if (targetDir.exists()) targetDir.deleteRecursively()
+
+                    val subDirs = tempExtractDir.listFiles { f -> f.isDirectory }
+                    val subFiles = tempExtractDir.listFiles { f -> f.isFile }
+                    
+                    if (subDirs != null && subDirs.size == 1 && (subFiles == null || subFiles.isEmpty())) {
+                        // archive has a single top-level folder
+                        subDirs[0].renameTo(targetDir)
+                    } else {
+                        // archive has files/folders at root
+                        tempExtractDir.renameTo(targetDir)
                     }
                 }
+                
+                // Cleanup
+                if (tempExtractDir.exists()) tempExtractDir.deleteRecursively()
+                archiveFile.delete() // Delete original archive to save space
                 
                 handler.post {
                     if (!activity.isFinishing) {
@@ -174,16 +188,6 @@ object DownloadUtility {
         }
     }
 
-    private fun fixFolderStructure(parentDir: File, targetName: String) {
-        val targetDir = File(parentDir, targetName)
-        val subDirs = parentDir.listFiles { f -> f.isDirectory && f.name != "cmake" && f.name != "ndk" }
-        if (subDirs != null && subDirs.size == 1) {
-            if (targetDir.exists()) {
-                targetDir.deleteRecursively()
-            }
-            subDirs[0].renameTo(targetDir)
-        }
-    }
 
     fun getDeviceAbi(): String {
         return Build.SUPPORTED_ABIS[0]

@@ -25,15 +25,24 @@ object FileCheckUtils {
 
     @JvmStatic
     fun isNdkDownloaded(context: Context): Boolean {
-        // Based on NativeCompiler, it uses filesDir/native/ndk/build/cmake/android.toolchain.cmake
-        val toolchainFile = File(context.filesDir, "native/ndk/build/cmake/android.toolchain.cmake")
-        return toolchainFile.exists()
+        val ndkDir = File(context.filesDir, "native/ndk")
+        if (!ndkDir.exists()) return false
+        
+        // Preferred check (what NativeCompiler needs)
+        val toolchainFile = File(ndkDir, "build/cmake/android.toolchain.cmake")
+        if (toolchainFile.exists()) return true
+        
+        // Fallback check (standard NDK marker)
+        return File(ndkDir, "source.properties").exists()
     }
 
     @JvmStatic
     fun isCmakeDownloaded(context: Context): Boolean {
-        // Based on NativeCompiler, it uses filesDir/native/cmake/bin/cmake
-        val cmakeBinary = File(context.filesDir, "native/cmake/bin/cmake")
+        val cmakeDir = File(context.filesDir, "native/cmake")
+        if (!cmakeDir.exists()) return false
+        
+        // Preferred check
+        val cmakeBinary = File(cmakeDir, "bin/cmake")
         return cmakeBinary.exists()
     }
 
