@@ -369,10 +369,6 @@
         <activity
             android:name="mod.khaled.logcat.LogReaderActivity"
             android:configChanges="orientation|screenSize|screenLayout|smallestScreenSize" />
-        <activity
-            android:name=".activities.main.fragments.projects_store.ProjectPreviewActivity"
-            android:configChanges="orientation|screenSize"
-            android:theme="@style/Theme.SketchwarePro.ProjectPreview" />
         <activity android:name=".activities.settings.SettingsActivity" />
         <activity android:name=".activities.resourceseditor.ResourcesEditorActivity" />
         <activity
