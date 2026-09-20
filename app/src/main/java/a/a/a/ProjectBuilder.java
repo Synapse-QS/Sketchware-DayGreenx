@@ -147,10 +147,19 @@ public class ProjectBuilder {
         fpu = new FilePathUtil();
         mll = new ManageLocalLibrary(yqVar.sc_id);
         builtInLibraryManager = new BuiltInLibraryManager(yqVar.sc_id);
+        settings = new ProjectSettings(yqVar.sc_id);
+
         File defaultAndroidJar = new File(BuiltInLibraries.EXTRACTED_COMPILE_ASSETS_PATH, "android.jar");
+        String compileSdk = settings.getValue(ProjectSettings.SETTING_COMPILE_SDK_VERSION, "");
+        if (!compileSdk.isEmpty()) {
+            File customSdk = new File(BuiltInLibraries.EXTRACTED_COMPILE_ASSETS_PATH, "android-" + compileSdk + ".jar");
+            if (customSdk.exists()) {
+                defaultAndroidJar = customSdk;
+            }
+        }
+
         androidJarPath = build_settings.getValue(BuildSettings.SETTING_ANDROID_JAR_PATH, defaultAndroidJar.getAbsolutePath());
         proguard = new ProguardHandler(yqVar.sc_id);
-        settings = new ProjectSettings(yqVar.sc_id);
         buildCache = new BuildCache(yqVar.sc_id);
     }
 
@@ -193,6 +202,7 @@ public class ProjectBuilder {
                 BuildCache.hashStrings(
                         String.valueOf(settings.getMinSdkVersion()),
                         settings.getValue(ProjectSettings.SETTING_TARGET_SDK_VERSION, ""),
+                        settings.getValue(ProjectSettings.SETTING_COMPILE_SDK_VERSION, ""),
                         yq.versionCode, yq.versionName,
                         getLibraryPackageNames()
                 )

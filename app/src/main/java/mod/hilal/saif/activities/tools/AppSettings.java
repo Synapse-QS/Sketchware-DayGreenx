@@ -26,10 +26,13 @@ import com.besome.sketch.lib.base.BaseAppCompatActivity;
 import com.google.android.material.dialog.MaterialAlertDialogBuilder;
 
 import org.jetbrains.annotations.NotNull;
+import org.sketchware.daygreen.DownloadUtility;
 
 import java.io.File;
 import java.util.ArrayList;
 import java.util.List;
+
+import org.sketchware.daygreen.DownloadUtility;
 
 import dev.aldi.sayuti.editor.manage.ManageLocalLibraryActivity;
 import dev.pranav.filepicker.FilePickerCallback;
@@ -85,6 +88,7 @@ public class AppSettings extends BaseAppCompatActivity {
             });
         }
 
+        binding.topAppBar.setTitle("App Settings");
         binding.topAppBar.setNavigationOnClickListener(Helper.getBackPressedClickListener(this));
         setupPreferences(binding.content);
     }
@@ -101,7 +105,9 @@ public class AppSettings extends BaseAppCompatActivity {
         managersCategory.addLibraryItem(createPreference(R.drawable.ic_mtrl_component, "Component manager", "Manage your own components", new ActivityLauncher(new Intent(getApplicationContext(), ManageCustomComponentActivity.class))), true);
         managersCategory.addLibraryItem(createPreference(R.drawable.ic_mtrl_list, "Event manager", "Manage your own events", openSettingsActivity(SettingsActivity.EVENTS_MANAGER_FRAGMENT)), true);
         managersCategory.addLibraryItem(createPreference(R.drawable.ic_mtrl_box, "Local library manager", "Manage and download local libraries", new ActivityLauncher(new Intent(getApplicationContext(), ManageLocalLibraryActivity.class), new Pair<>("sc_id", "system"))), true);
-        managersCategory.addLibraryItem(createPreference(R.drawable.ic_mtrl_article, Helper.getResString(R.string.design_drawer_menu_title_logcat_reader), Helper.getResString(R.string.design_drawer_menu_subtitle_logcat_reader), new ActivityLauncher(new Intent(getApplicationContext(), LogReaderActivity.class))), false);
+        managersCategory.addLibraryItem(createPreference(R.drawable.ic_mtrl_article, Helper.getResString(R.string.design_drawer_menu_title_logcat_reader), Helper.getResString(R.string.design_drawer_menu_subtitle_logcat_reader), new ActivityLauncher(new Intent(getApplicationContext(), LogReaderActivity.class))), true);
+        managersCategory.addLibraryItem(createPreference(R.drawable.ic_mtrl_settings, "Build Tools", "Manage and download build tools (NDK, CMake, AAPT)", new ActivityLauncher(new Intent(getApplicationContext(), BuildToolsActivity.class))), true);
+        managersCategory.addLibraryItem(createPreference(R.drawable.ic_mtrl_folder, "SDK Manager", "Manage and download SDK platforms", new ActivityLauncher(new Intent(getApplicationContext(), SdkManagerActivity.class))), false);
 
         LibraryCategoryView generalCategory = new LibraryCategoryView(this);
         generalCategory.setTitle("General");
@@ -298,6 +304,7 @@ public class AppSettings extends BaseAppCompatActivity {
 
         building_dialog.show();
     }
+
 
     private class ActivityLauncher implements View.OnClickListener {
         private final Intent launchIntent;

@@ -349,8 +349,22 @@
                         android:layout_marginBottom="12dp"/>
 
                     <com.google.android.material.textfield.TextInputLayout
+                        android:id="@+id/til_compile_sdk_version"
+                        style="@style/Widget.SketchwarePro.TextInputLayout.ExposedDropdownMenu"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_marginTop="8dp"
+                        android:hint="Compile SDK Version">
+                        <com.google.android.material.textfield.MaterialAutoCompleteTextView
+                            android:id="@+id/et_compile_sdk_version"
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:inputType="none" />
+                    </com.google.android.material.textfield.TextInputLayout>
+
+                    <com.google.android.material.textfield.TextInputLayout
                         android:id="@+id/til_minimum_sdk_version"
-                        style="@style/Widget.Material3.TextInputLayout.OutlinedBox.ExposedDropdownMenu"
+                        style="@style/Widget.SketchwarePro.TextInputLayout.ExposedDropdownMenu"
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
                         android:layout_marginTop="8dp"
@@ -364,7 +378,7 @@
 
                     <com.google.android.material.textfield.TextInputLayout
                         android:id="@+id/til_target_sdk_version"
-                        style="@style/Widget.Material3.TextInputLayout.OutlinedBox.ExposedDropdownMenu"
+                        style="@style/Widget.SketchwarePro.TextInputLayout.ExposedDropdownMenu"
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
                         android:layout_marginTop="12dp"
@@ -378,6 +392,7 @@
 
                     <com.google.android.material.textfield.TextInputLayout
                         android:id="@+id/til_application_class_name"
+                        style="@style/Widget.SketchwarePro.TextInputLayout"
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
                         android:layout_marginTop="12dp"

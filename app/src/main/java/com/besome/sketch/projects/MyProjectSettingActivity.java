@@ -26,6 +26,7 @@ import com.besome.sketch.lib.ui.ColorPickerDialog;
 import com.google.android.material.dialog.MaterialAlertDialogBuilder;
 
 import org.sketchware.daygreen.Config;
+import org.sketchware.daygreen.FileCheckUtils;
 
 import java.io.File;
 import java.io.FileOutputStream;
@@ -216,20 +217,53 @@ public class MyProjectSettingActivity extends BaseAppCompatActivity implements V
             "33 (Android 13)", "34 (Android 14)", "35 (Android 15)", "36 (Android 16)",
             "37 (Android 17)"
         };
+        
+        List<Integer> installedSdks = FileCheckUtils.getInstalledSdks(this);
+        String[] compileSdkOptions;
+        if (installedSdks.isEmpty()) {
+            compileSdkOptions = new String[]{"None (Please download in SDK Manager)"};
+        } else {
+            compileSdkOptions = new String[installedSdks.size()];
+            for (int i = 0; i < installedSdks.size(); i++) {
+                int api = installedSdks.get(i);
+                String label = String.valueOf(api);
+                for (String op : sdkFriendlyOptions) {
+                    if (op.startsWith(api + " ")) {
+                        label = op;
+                        break;
+                    }
+                }
+                compileSdkOptions[i] = label;
+            }
+        }
+        
+        ArrayAdapter<String> compileSdkAdapter = new ArrayAdapter<>(this, android.R.layout.simple_dropdown_item_1line, compileSdkOptions);
+        binding.etCompileSdkVersion.setAdapter(compileSdkAdapter);
+
         ArrayAdapter<String> sdkAdapter = new ArrayAdapter<>(this, android.R.layout.simple_dropdown_item_1line, sdkFriendlyOptions);
         binding.etMinimumSdkVersion.setAdapter(sdkAdapter);
         binding.etTargetSdkVersion.setAdapter(sdkAdapter);
 
+        String currentCompile = settings.getValue(ProjectSettings.SETTING_COMPILE_SDK_VERSION, installedSdks.isEmpty() ? "" : String.valueOf(installedSdks.get(installedSdks.size() - 1)));
         String currentMin = settings.getValue(ProjectSettings.SETTING_MINIMUM_SDK_VERSION, String.valueOf(Config.VAR_DEFAULT_MIN_SDK_VERSION));
         String currentTarget = settings.getValue(ProjectSettings.SETTING_TARGET_SDK_VERSION, String.valueOf(Config.VAR_DEFAULT_TARGET_SDK_VERSION));
         
+        String displayCompile = currentCompile;
         String displayMin = currentMin;
         String displayTarget = currentTarget;
+        if (installedSdks.isEmpty()) {
+            displayCompile = compileSdkOptions[0];
+        } else {
+            for (String op : compileSdkOptions) {
+                if (op.startsWith(currentCompile + " ")) displayCompile = op;
+            }
+        }
         for (String op : sdkFriendlyOptions) {
             if (op.startsWith(currentMin + " ")) displayMin = op;
             if (op.startsWith(currentTarget + " ")) displayTarget = op;
         }
         
+        binding.etCompileSdkVersion.setText(displayCompile, false);
         binding.etMinimumSdkVersion.setText(displayMin, false);
         binding.etTargetSdkVersion.setText(displayTarget, false);
         binding.etApplicationClassName.setText(settings.getValue(ProjectSettings.SETTING_APPLICATION_CLASS, ".SketchApplication"));
@@ -463,6 +497,11 @@ public class MyProjectSettingActivity extends BaseAppCompatActivity implements V
     }
 
     private boolean isInputValid() {
+        String compileSdk = binding.etCompileSdkVersion.getText().toString();
+        if (compileSdk.isEmpty() || compileSdk.startsWith("None")) {
+            SketchwareUtil.toastError("Please download at least one SDK in SDK Manager first");
+            return false;
+        }
         return projectPackageNameValidator.b() && projectNameValidator.b() && projectAppNameValidator.b();
     }
 
@@ -599,11 +638,16 @@ public class MyProjectSettingActivity extends BaseAppCompatActivity implements V
             }
 
             ProjectSettings projectSettings = new ProjectSettings(sc_id);
+            String compileSdkRaw = binding.etCompileSdkVersion.getText().toString();
+            String compileSdkVal = compileSdkRaw.contains(" ") ? compileSdkRaw.split(" ")[0] : compileSdkRaw;
+            if (compileSdkVal.equals("None")) compileSdkVal = "";
+            
             String minSdkVal = binding.etMinimumSdkVersion.getText().toString().split(" ")[0];
             String targetSdkVal = binding.etTargetSdkVersion.getText().toString().split(" ")[0];
             String appClassVal = binding.etApplicationClassName.getText().toString().trim();
             if (appClassVal.isEmpty()) appClassVal = ".SketchApplication";
 
+            projectSettings.setValue(ProjectSettings.SETTING_COMPILE_SDK_VERSION, compileSdkVal);
             projectSettings.setValue(ProjectSettings.SETTING_MINIMUM_SDK_VERSION, minSdkVal);
             projectSettings.setValue(ProjectSettings.SETTING_TARGET_SDK_VERSION, targetSdkVal);
             projectSettings.setValue(ProjectSettings.SETTING_APPLICATION_CLASS, appClassVal);

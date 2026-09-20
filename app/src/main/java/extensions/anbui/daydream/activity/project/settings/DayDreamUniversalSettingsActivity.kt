@@ -79,59 +79,7 @@ class DayDreamUniversalSettingsActivity : AppCompatActivity() {
         cleanPref.setOnClickListener { cleanPref.sw_enable.toggle() }
         universalCategory.addLibraryItem(cleanPref, false)
 
-        val ndkPref = createSwitchPreference(R.drawable.ic_mtrl_download, "Download NDK", "Download Android NDK for native compilation")
-        ndkPref.sw_enable.visibility = View.GONE
-        ndkPref.setOnClickListener {
-            showNdkDownloadDialog()
-        }
-        universalCategory.addLibraryItem(ndkPref, false)
-
-        val cmakePref = createSwitchPreference(R.drawable.ic_mtrl_download, "Download CMake", "Download CMake for native compilation")
-        cmakePref.sw_enable.visibility = View.GONE
-        cmakePref.setOnClickListener {
-            showCmakeDownloadDialog()
-        }
-        universalCategory.addLibraryItem(cmakePref, false)
-
         preferences.forEach { binding.lnAllOptions.addView(it) }
-    }
-
-    private fun showNdkDownloadDialog() {
-        MaterialAlertDialogBuilder(this)
-            .setTitle("Download NDK")
-            .setMessage("Do you want to download Android NDK? This is required for C/C++ compilation. The file is large (~500MB).")
-            .setPositiveButton("Download") { _, _ ->
-                startDownload("https://github.com/lzhiyong/termux-ndk/releases/download/android-ndk/android-ndk-r29-aarch64.tar.xz", "android-ndk-r29-aarch64.tar.xz")
-            }
-            .setNegativeButton("Cancel", null)
-            .show()
-    }
-
-    private fun showCmakeDownloadDialog() {
-        MaterialAlertDialogBuilder(this)
-            .setTitle("Download CMake")
-            .setMessage("Do you want to download CMake? This is used to manage the native build process.")
-            .setPositiveButton("Download") { _, _ ->
-                startDownload("https://github.com/lzhiyong/termux-ndk/releases/download/cmake/cmake-3.26.4-aarch64.zip", "cmake-aarch64.zip")
-            }
-            .setNegativeButton("Cancel", null)
-            .show()
-    }
-
-    private fun startDownload(url: String, fileName: String) {
-        try {
-            val request = DownloadManager.Request(Uri.parse(url))
-            request.setTitle(fileName)
-            request.setDescription("Downloading native tools...")
-            request.setNotificationVisibility(DownloadManager.Request.VISIBILITY_VISIBLE_NOTIFY_COMPLETED)
-            request.setDestinationInExternalPublicDir(Environment.DIRECTORY_DOWNLOADS, fileName)
-
-            val manager = getSystemService(DOWNLOAD_SERVICE) as DownloadManager
-            manager.enqueue(request)
-            Toast.makeText(this, "Download started. Check notifications.", Toast.LENGTH_SHORT).show()
-        } catch (e: Exception) {
-            Toast.makeText(this, "Failed to start download: ${e.message}", Toast.LENGTH_LONG).show()
-        }
     }
 
     private fun createSwitchPreference(icon: Int, title: String, desc: String): LibraryItemView {

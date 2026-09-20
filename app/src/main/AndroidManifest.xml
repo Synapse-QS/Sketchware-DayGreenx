@@ -357,7 +357,19 @@
         <activity
             android:name="mod.hilal.saif.activities.tools.AppSettings"
             android:configChanges="orientation|screenSize" />
-            
+
+        <activity
+            android:name="mod.hilal.saif.activities.tools.BuildToolsActivity"
+            android:configChanges="orientation|screenSize"
+            android:label="Build Tools"
+            android:theme="@style/Theme.SketchwarePro" />
+
+        <activity
+            android:name="mod.hilal.saif.activities.tools.SdkManagerActivity"
+            android:configChanges="orientation|screenSize"
+            android:label="SDK Manager"
+            android:theme="@style/Theme.SketchwarePro" />
+
         <activity android:name="mod.jbk.editor.manage.library.ExcludeBuiltInLibrariesActivity" />
         
         <activity

@@ -29,6 +29,11 @@ public class ProjectSettings {
     public static final String SETTING_MINIMUM_SDK_VERSION = "min_sdk";
 
     /**
+     * Setting for the final app's {@code compileSdkVersion}
+     */
+    public static final String SETTING_COMPILE_SDK_VERSION = "compile_sdk";
+
+    /**
      * Setting to make the app's main theme inherit from fully material-styled themes, and not *.Bridge ones
      */
     public static final String SETTING_ENABLE_BRIDGELESS_THEMES = "enable_bridgeless_themes";

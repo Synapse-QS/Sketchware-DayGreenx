@@ -25,6 +25,8 @@ import com.google.android.material.color.MaterialColors;
 import com.google.android.material.dialog.MaterialAlertDialogBuilder;
 import com.google.android.material.transition.MaterialFadeThrough;
 
+import org.sketchware.daygreen.FileCheckUtils;
+
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -36,6 +38,7 @@ import a.a.a.DA;
 import a.a.a.DB;
 import a.a.a.lC;
 import mod.hey.studios.project.ProjectTracker;
+import mod.hilal.saif.activities.tools.AppSettings;
 import pro.sketchware.R;
 import pro.sketchware.activities.main.activities.MainActivity;
 import pro.sketchware.databinding.MyprojectsBinding;
@@ -76,6 +79,15 @@ public class ProjectsFragment extends DA {
     }
 
     public void toDesignActivity(String sc_id) {
+        if (!FileCheckUtils.INSTANCE.isAaptDownloaded(requireContext()) ||
+            !FileCheckUtils.INSTANCE.isSdkDownloaded(requireContext())) {
+            showMissingToolsDialog(() -> toDesignActivityAction(sc_id));
+            return;
+        }
+        toDesignActivityAction(sc_id);
+    }
+
+    private void toDesignActivityAction(String sc_id) {
         Intent intent = new Intent(requireContext(), DesignActivity.class);
         ProjectTracker.setScId(sc_id);
         intent.putExtra("sc_id", sc_id);
@@ -105,9 +117,31 @@ public class ProjectsFragment extends DA {
     }
 
     public void toProjectSettingsActivity() {
+        if (!FileCheckUtils.INSTANCE.isAaptDownloaded(requireContext()) ||
+            !FileCheckUtils.INSTANCE.isSdkDownloaded(requireContext())) {
+            showMissingToolsDialog(this::toProjectSettingsActivityAction);
+            return;
+        }
+        toProjectSettingsActivityAction();
+    }
+
+    private void toProjectSettingsActivityAction() {
         Intent intent = new Intent(getActivity(), MyProjectSettingActivity.class);
         intent.setFlags(Intent.FLAG_ACTIVITY_SINGLE_TOP);
         openProjectSettings.launch(intent);
+    }
+
+    private void showMissingToolsDialog(Runnable onOpenAnyway) {
+        new MaterialAlertDialogBuilder(requireContext())
+                .setTitle("Missing Tools")
+                .setMessage("Required build tools (AAPT/SDK) are not downloaded yet. Please download them in App Settings to avoid build errors.")
+                .setPositiveButton("Open", (dialog, which) -> {
+                    Intent intent = new Intent(getActivity(), AppSettings.class);
+                    intent.setFlags(Intent.FLAG_ACTIVITY_SINGLE_TOP);
+                    startActivity(intent);
+                })
+                .setNegativeButton("Cancel", null)
+                .show();
     }
 
     @Override
