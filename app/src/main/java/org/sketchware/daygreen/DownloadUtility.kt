@@ -104,25 +104,48 @@ object DownloadUtility {
     }
 
     private fun extractArchive(activity: Activity, archiveFile: File, onComplete: () -> Unit) {
+        val dialogView = LayoutInflater.from(activity).inflate(R.layout.dialog_material_progress, null)
+        val progressIndicator = dialogView.findViewById<LinearProgressIndicator>(R.id.progress_indicator)
+        val tvPercentage = dialogView.findViewById<TextView>(R.id.tv_percentage)
+        val tvBytes = dialogView.findViewById<TextView>(R.id.tv_bytes)
+
+        progressIndicator.isIndeterminate = true
+        tvPercentage.text = "Extracting..."
+        tvBytes.text = archiveFile.name
+
         val progressDialog = MaterialAlertDialogBuilder(activity)
             .setTitle("Extracting...")
-            .setMessage("Please wait while extracting files.")
+            .setView(dialogView)
             .setCancelable(false)
-            .show()
+            .create()
+
+        progressDialog.show()
 
         executor.execute {
             try {
                 val name = archiveFile.name.lowercase()
+                val parentPath = archiveFile.parent ?: activity.filesDir.absolutePath
+                
                 if (name.endsWith(".zip")) {
                     val zipInputStream = ZipInputStream(archiveFile.inputStream())
-                    FileUtil.extractZipTo(zipInputStream, archiveFile.parent)
+                    FileUtil.extractZipTo(zipInputStream, parentPath)
                     zipInputStream.close()
-                } else if (name.endsWith(".tar.gz") || name.endsWith(".tgz")) {
-                    val process = Runtime.getRuntime().exec(arrayOf("tar", "-xzf", archiveFile.absolutePath, "-C", archiveFile.parent))
-                    process.waitFor()
-                } else if (name.endsWith(".tar.xz")) {
-                    val process = Runtime.getRuntime().exec(arrayOf("tar", "-xJf", archiveFile.absolutePath, "-C", archiveFile.parent))
-                    process.waitFor()
+                } else {
+                    val tarFlag = if (name.endsWith(".tar.xz")) "-xJf" else "-xzf"
+                    val process = ProcessBuilder("tar", tarFlag, archiveFile.absolutePath, "-C", parentPath)
+                        .redirectErrorStream(true)
+                        .start()
+                    
+                    val reader = process.inputStream.bufferedReader()
+                    var line: String?
+                    while (reader.readLine().also { line = it } != null) {
+                        // We could potentially parse lines if we used -v, but indeterminate is safer
+                    }
+                    
+                    val exitCode = process.waitFor()
+                    if (exitCode != 0) {
+                        throw Exception("Tar process failed with exit code $exitCode")
+                    }
                 }
 
                 // Post-extraction fix for NDK/CMake
