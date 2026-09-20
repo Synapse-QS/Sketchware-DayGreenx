@@ -31,6 +31,11 @@ import pro.sketchware.activities.main.fragments.projects.ProjectsFragment;
 import pro.sketchware.databinding.ProgressMsgBoxBinding;
 import pro.sketchware.utility.FileUtil;
 import pro.sketchware.utility.SketchwareUtil;
+import pro.sketchware.utility.FilePathUtil;
+import mod.hey.studios.project.ProjectSettings;
+import org.sketchware.daygreen.FileCheckUtils;
+import android.content.Intent;
+import mod.hilal.saif.activities.tools.BuildToolsActivity;
 
 public class BackupRestoreManager {
 
@@ -278,11 +283,58 @@ public class BackupRestoreManager {
 
             if (!bm.isRestoreSuccess() || error) {
                 SketchwareUtil.toastError("Couldn't restore: " + bm.error, Toast.LENGTH_LONG);
-            } else if (projectsFragment != null) {
-                projectsFragment.refreshProjectsList();
-                SketchwareUtil.toast("Restored successfully");
             } else {
-                SketchwareUtil.toast("Restored successfully. Refresh to see the project", Toast.LENGTH_LONG);
+                Activity activity = activityWeakReference.get();
+                if (activity != null && !activity.isFinishing()) {
+                    checkRestoredProjectRequirements(activity, bm.sc_id);
+                }
+                
+                if (projectsFragment != null) {
+                    projectsFragment.refreshProjectsList();
+                }
+            }
+        }
+
+        private void checkRestoredProjectRequirements(Activity activity, String sc_id) {
+            ProjectSettings settings = new ProjectSettings(sc_id);
+            String compileSdk = settings.getValue(ProjectSettings.SETTING_COMPILE_SDK_VERSION, "");
+            
+            boolean sdkMissing = !FileCheckUtils.isSdkVersionDownloaded(compileSdk);
+            
+            boolean hasNativeCode = false;
+            File nativeDir = new File(new FilePathUtil().getPathNative(sc_id));
+            if (nativeDir.exists()) {
+                File[] files = nativeDir.listFiles();
+                hasNativeCode = files != null && files.length > 0;
+            }
+            
+            boolean ndkMissing = hasNativeCode && !FileCheckUtils.isNdkDownloaded(activity);
+            boolean cmakeMissing = hasNativeCode && !FileCheckUtils.isCmakeDownloaded(activity);
+            
+            if (sdkMissing || ndkMissing || cmakeMissing) {
+                StringBuilder message = new StringBuilder("The restored project requires some tools that are not currently installed:\n");
+                if (sdkMissing) {
+                    message.append("\n• Android SDK (API ").append(compileSdk).append(")");
+                }
+                if (ndkMissing) {
+                    message.append("\n• Android NDK");
+                }
+                if (cmakeMissing) {
+                    message.append("\n• CMake");
+                }
+                message.append("\n\nDo you want to go to Build Tools to download them?");
+                
+                new MaterialAlertDialogBuilder(activity)
+                    .setTitle("Requirements Missing")
+                    .setMessage(message.toString())
+                    .setPositiveButton("Go to Build Tools", (dialog, which) -> {
+                        Intent intent = new Intent(activity, BuildToolsActivity.class);
+                        activity.startActivity(intent);
+                    })
+                    .setNegativeButton("Later", null)
+                    .show();
+            } else {
+                SketchwareUtil.toast("Restored successfully");
             }
         }
     }

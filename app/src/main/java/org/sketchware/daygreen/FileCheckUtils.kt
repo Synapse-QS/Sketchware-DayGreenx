@@ -5,12 +5,14 @@ import java.io.File
 import mod.jbk.build.BuiltInLibraries
 
 object FileCheckUtils {
+    @JvmStatic
     fun isAaptDownloaded(context: Context): Boolean {
         // Based on ProjectBuilder, it uses filesDir/bin/aapt2
         val aapt2Binary = File(context.filesDir, "bin/aapt2")
         return aapt2Binary.exists()
     }
 
+    @JvmStatic
     fun isSdkDownloaded(context: Context): Boolean {
         // Check for the old android.jar or any new android-XX.jar
         if (File(BuiltInLibraries.EXTRACTED_COMPILE_ASSETS_PATH, "android.jar").exists()) return true
@@ -21,12 +23,14 @@ object FileCheckUtils {
         }?.isNotEmpty() == true
     }
 
+    @JvmStatic
     fun isNdkDownloaded(context: Context): Boolean {
         // Based on NativeCompiler, it uses filesDir/native/ndk/build/cmake/android.toolchain.cmake
         val toolchainFile = File(context.filesDir, "native/ndk/build/cmake/android.toolchain.cmake")
         return toolchainFile.exists()
     }
 
+    @JvmStatic
     fun isCmakeDownloaded(context: Context): Boolean {
         // Based on NativeCompiler, it uses filesDir/native/cmake/bin/cmake
         val cmakeBinary = File(context.filesDir, "native/cmake/bin/cmake")
@@ -41,6 +45,13 @@ object FileCheckUtils {
     fun getCmakeSize(): String = "~48 MB"
     fun getAaptSize(): String = "~5 MB"
     fun getSdkVersionSize(): String = "~30 MB"
+
+    @JvmStatic
+    fun isSdkVersionDownloaded(version: String): Boolean {
+        if (version.isEmpty()) return true
+        val sdkFile = File(BuiltInLibraries.EXTRACTED_COMPILE_ASSETS_PATH, "android-$version.jar")
+        return sdkFile.exists()
+    }
 
     @JvmStatic
     fun getInstalledSdks(context: Context): List<Int> {
