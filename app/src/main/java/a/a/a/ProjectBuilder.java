@@ -140,7 +140,7 @@ public class ProjectBuilder {
             LogUtil.e(TAG, "Somehow failed to get package info about us!", e);
         }
 
-        aapt2Binary = new File(context.getCacheDir(), "aapt2");
+        aapt2Binary = new File(context.getFilesDir(), "bin/aapt2");
         build_settings = new BuildSettings(yqVar.sc_id);
         this.context = context;
         yq = yqVar;
@@ -857,12 +857,21 @@ public class ProjectBuilder {
     public void maybeExtractAapt2() throws By {
         var abi = Build.SUPPORTED_ABIS[0];
         try {
+            if (aapt2Binary.exists()) {
+                Os.chmod(aapt2Binary.getAbsolutePath(), S_IRUSR | S_IWUSR | S_IXUSR);
+                return;
+            }
+
             if (hasFileChanged("aapt/aapt2-" + abi, aapt2Binary.getAbsolutePath())) {
                 Os.chmod(aapt2Binary.getAbsolutePath(), S_IRUSR | S_IWUSR | S_IXUSR);
             }
         } catch (Exception e) {
             LogUtil.e(TAG, "Failed to extract AAPT2 binaries", e);
-            throw new By(e instanceof FileNotFoundException fileNotFoundException ? "Looks like the device's architecture (" + abi + ") isn't supported.\n" + Log.getStackTraceString(fileNotFoundException) : "Couldn't extract AAPT2 binaries! Message: " + e.getMessage());
+            if (e instanceof FileNotFoundException || e.getCause() instanceof FileNotFoundException) {
+                throw new By("AAPT2 binary for " + abi + " not found.\n" +
+                        "Please go to 'Build Tools' and download it first.");
+            }
+            throw new By("Couldn't handle AAPT2 binaries! Message: " + e.getMessage());
         }
     }
 

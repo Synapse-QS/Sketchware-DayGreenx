@@ -51,7 +51,7 @@ object DownloadUtility {
                 connection.connect()
 
                 val fileLength = connection.contentLength
-                val input = BufferedInputStream(urlObj.openStream())
+                val input = BufferedInputStream(connection.inputStream)
                 
                 destinationFile.parentFile?.mkdirs()
                 val output = FileOutputStream(destinationFile)
@@ -63,10 +63,11 @@ object DownloadUtility {
                     total += count
                     
                     handler.post {
-                        val progress = (total * 100 / fileLength).toInt()
+                        if (activity.isFinishing) return@post
+                        val progress = if (fileLength > 0) (total * 100 / fileLength).toInt() else 0
                         progressIndicator.progress = progress
                         tvPercentage.text = "$progress%"
-                        tvBytes.text = "$total/$fileLength"
+                        tvBytes.text = if (fileLength > 0) "$total/$fileLength" else "$total bytes"
                     }
                     output.write(data, 0, count)
                 }
@@ -76,9 +77,11 @@ object DownloadUtility {
                 input.close()
 
                 handler.post {
+                    if (activity.isFinishing) return@post
                     dialog.dismiss()
-                    if (destinationFile.name.endsWith(".zip")) {
-                        extractZip(activity, destinationFile) {
+                    val name = destinationFile.name.lowercase()
+                    if (name.endsWith(".zip") || name.endsWith(".tar.gz") || name.endsWith(".tar.xz") || name.endsWith(".tgz")) {
+                        extractArchive(activity, destinationFile) {
                             Toast.makeText(activity, "Download and extraction completed", Toast.LENGTH_SHORT).show()
                             onComplete()
                         }
@@ -89,8 +92,10 @@ object DownloadUtility {
                 }
             } catch (e: Exception) {
                 handler.post {
-                    dialog.dismiss()
-                    Toast.makeText(activity, "Download failed: ${e.message}", Toast.LENGTH_LONG).show()
+                    if (!activity.isFinishing) {
+                        dialog.dismiss()
+                        Toast.makeText(activity, "Download failed: ${e.message}", Toast.LENGTH_LONG).show()
+                    }
                 }
             } finally {
                 connection?.disconnect()
@@ -98,7 +103,7 @@ object DownloadUtility {
         }
     }
 
-    private fun extractZip(activity: Activity, zipFile: File, onComplete: () -> Unit) {
+    private fun extractArchive(activity: Activity, archiveFile: File, onComplete: () -> Unit) {
         val progressDialog = MaterialAlertDialogBuilder(activity)
             .setTitle("Extracting...")
             .setMessage("Please wait while extracting files.")
@@ -107,22 +112,53 @@ object DownloadUtility {
 
         executor.execute {
             try {
-                val zipInputStream = ZipInputStream(zipFile.inputStream())
-                FileUtil.extractZipTo(zipInputStream, zipFile.parent)
-                zipInputStream.close()
-                // Optionally delete the zip file after extraction
-                // zipFile.delete()
+                val name = archiveFile.name.lowercase()
+                if (name.endsWith(".zip")) {
+                    val zipInputStream = ZipInputStream(archiveFile.inputStream())
+                    FileUtil.extractZipTo(zipInputStream, archiveFile.parent)
+                    zipInputStream.close()
+                } else if (name.endsWith(".tar.gz") || name.endsWith(".tgz")) {
+                    val process = Runtime.getRuntime().exec(arrayOf("tar", "-xzf", archiveFile.absolutePath, "-C", archiveFile.parent))
+                    process.waitFor()
+                } else if (name.endsWith(".tar.xz")) {
+                    val process = Runtime.getRuntime().exec(arrayOf("tar", "-xJf", archiveFile.absolutePath, "-C", archiveFile.parent))
+                    process.waitFor()
+                }
+
+                // Post-extraction fix for NDK/CMake
+                archiveFile.parentFile?.let { parent ->
+                    if (name.contains("cmake")) {
+                        fixFolderStructure(parent, "cmake")
+                    } else if (name.contains("ndk")) {
+                        fixFolderStructure(parent, "ndk")
+                    }
+                }
                 
                 handler.post {
-                    progressDialog.dismiss()
-                    onComplete()
+                    if (!activity.isFinishing) {
+                        progressDialog.dismiss()
+                        onComplete()
+                    }
                 }
             } catch (e: Exception) {
                 handler.post {
-                    progressDialog.dismiss()
-                    Toast.makeText(activity, "Extraction failed: ${e.message}", Toast.LENGTH_LONG).show()
+                    if (!activity.isFinishing) {
+                        progressDialog.dismiss()
+                        Toast.makeText(activity, "Extraction failed: ${e.message}", Toast.LENGTH_LONG).show()
+                    }
                 }
             }
+        }
+    }
+
+    private fun fixFolderStructure(parentDir: File, targetName: String) {
+        val targetDir = File(parentDir, targetName)
+        val subDirs = parentDir.listFiles { f -> f.isDirectory && f.name != "cmake" && f.name != "ndk" }
+        if (subDirs != null && subDirs.size == 1) {
+            if (targetDir.exists()) {
+                targetDir.deleteRecursively()
+            }
+            subDirs[0].renameTo(targetDir)
         }
     }
 

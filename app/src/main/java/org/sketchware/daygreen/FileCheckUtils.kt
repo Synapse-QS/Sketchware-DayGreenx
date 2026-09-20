@@ -6,8 +6,8 @@ import mod.jbk.build.BuiltInLibraries
 
 object FileCheckUtils {
     fun isAaptDownloaded(context: Context): Boolean {
-        // Based on ProjectBuilder, it uses cacheDir/aapt2
-        val aapt2Binary = File(context.cacheDir, "aapt2")
+        // Based on ProjectBuilder, it uses filesDir/bin/aapt2
+        val aapt2Binary = File(context.filesDir, "bin/aapt2")
         return aapt2Binary.exists()
     }
 

@@ -58,18 +58,24 @@ class BuildToolsActivity : BaseAppCompatActivity() {
             description = "Required for compiling native C/C++ code",
             isInstalled = FileCheckUtils.isNdkDownloaded(this),
             size = FileCheckUtils.getNdkSize(),
-            url = "https://github.com/lzhiyong/termux-ndk/releases/download/android-ndk/android-ndk-r29-$abi.tar.xz",
+            url = "https://github.com/lzhiyong/termux-ndk/releases/download/android-ndk/android-ndk-r29-aarch64.tar.xz",
             destination = File(filesDir, "native/ndk.tar.xz")
         )
 
         // CMake
+        val cmakeAbi = when (abi) {
+            "arm64-v8a" -> "arm64"
+            "armeabi-v7a" -> "arm"
+            "x86_64" -> "x64"
+            else -> "arm64" // Default
+        }
         addToolCard(
-            title = "CMake (3.26.4)",
+            title = "CMake (3.25.3)",
             description = "Build tool to configure and compile native code",
             isInstalled = FileCheckUtils.isCmakeDownloaded(this),
             size = FileCheckUtils.getCmakeSize(),
-            url = "https://github.com/lzhiyong/termux-ndk/releases/download/cmake/cmake-3.26.4-$abi.zip",
-            destination = File(filesDir, "native/cmake.zip")
+            url = "https://github.com/gus23-okta/sketchware-daygreen-build-tools/releases/download/3.25.3/cmake-3.25.3-1-linux-$cmakeAbi.tar.gz",
+            destination = File(filesDir, "native/cmake.tar.gz")
         )
 
         // AAPT
@@ -79,7 +85,7 @@ class BuildToolsActivity : BaseAppCompatActivity() {
             isInstalled = FileCheckUtils.isAaptDownloaded(this),
             size = FileCheckUtils.getAaptSize(),
             url = "https://github.com/gus23-okta/sketchware-daygreen-build-tools/releases/download/2.19/aapt2-$abi",
-            destination = File(cacheDir, "aapt2")
+            destination = File(filesDir, "bin/aapt2")
         )
     }
 
