@@ -57,7 +57,7 @@ class BuildToolsActivity : BaseAppCompatActivity() {
             title = "Android NDK (r29)",
             description = "Required for compiling native C/C++ code",
             isInstalled = FileCheckUtils.isNdkDownloaded(this),
-            size = FileCheckUtils.getNdkSize(),
+            size = FileCheckUtils.getNdkSize(this),
             url = "https://github.com/lzhiyong/termux-ndk/releases/download/android-ndk/android-ndk-r29-aarch64.tar.xz",
             destination = File(filesDir, "native/ndk.tar.xz")
         )
@@ -73,7 +73,7 @@ class BuildToolsActivity : BaseAppCompatActivity() {
             title = "CMake (3.25.3)",
             description = "Build tool to configure and compile native code",
             isInstalled = FileCheckUtils.isCmakeDownloaded(this),
-            size = FileCheckUtils.getCmakeSize(),
+            size = FileCheckUtils.getCmakeSize(this),
             url = "https://github.com/gus23-okta/sketchware-daygreen-build-tools/releases/download/3.25.3/cmake-3.25.3-1-linux-$cmakeAbi.tar.gz",
             destination = File(filesDir, "native/cmake.tar.gz")
         )
@@ -83,7 +83,7 @@ class BuildToolsActivity : BaseAppCompatActivity() {
             title = "AAPT (Android Asset Packaging Tool)",
             description = "Tool for compiling and packaging Android resources",
             isInstalled = FileCheckUtils.isAaptDownloaded(this),
-            size = FileCheckUtils.getAaptSize(),
+            size = FileCheckUtils.getAaptSize(this),
             url = "https://github.com/gus23-okta/sketchware-daygreen-build-tools/releases/download/2.19/aapt2-$abi",
             destination = File(filesDir, "bin/aapt2")
         )

@@ -58,7 +58,7 @@ class SdkManagerActivity : BaseAppCompatActivity() {
                 title = "Android SDK $api",
                 description = "Download android.jar for API $api",
                 isInstalled = destination.exists(),
-                size = FileCheckUtils.getSdkVersionSize(),
+                size = FileCheckUtils.getSdkVersionSize(this, api.toString()),
                 url = "https://github.com/gus23-okta/sketchware-daygreen-build-tools/releases/download/37/android-$api.jar",
                 destination = destination
             )

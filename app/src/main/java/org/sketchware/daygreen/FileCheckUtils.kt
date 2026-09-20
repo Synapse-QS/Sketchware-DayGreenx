@@ -1,6 +1,7 @@
 package org.sketchware.daygreen
 
 import android.content.Context
+import android.text.format.Formatter
 import java.io.File
 import mod.jbk.build.BuiltInLibraries
 
@@ -50,10 +51,60 @@ object FileCheckUtils {
         return if (isInstalled) "Installed" else "Not Installed"
     }
 
-    fun getNdkSize(): String = "~360 MB"
-    fun getCmakeSize(): String = "~48 MB"
-    fun getAaptSize(): String = "~5 MB"
-    fun getSdkVersionSize(): String = "~30 MB"
+    private fun getFolderSize(file: File): Long {
+        if (!file.exists()) return 0
+        if (file.isFile) return file.length()
+        var size: Long = 0
+        val files = file.listFiles()
+        if (files != null) {
+            for (f in files) {
+                size += getFolderSize(f)
+            }
+        }
+        return size
+    }
+
+    private fun formatFileSize(context: Context, sizeInBytes: Long): String {
+        return Formatter.formatShortFileSize(context, sizeInBytes)
+    }
+
+    @JvmStatic
+    fun getNdkSize(context: Context): String {
+        val ndkDir = File(context.filesDir, "native/ndk")
+        if (ndkDir.exists()) {
+            return formatFileSize(context, getFolderSize(ndkDir))
+        }
+        return "~360 MB"
+    }
+
+    @JvmStatic
+    fun getCmakeSize(context: Context): String {
+        val cmakeDir = File(context.filesDir, "native/cmake")
+        if (cmakeDir.exists()) {
+            return formatFileSize(context, getFolderSize(cmakeDir))
+        }
+        return "~48 MB"
+    }
+
+    @JvmStatic
+    fun getAaptSize(context: Context): String {
+        val aaptFile = File(context.filesDir, "bin/aapt2")
+        if (aaptFile.exists()) {
+            return formatFileSize(context, aaptFile.length())
+        }
+        return "~5 MB"
+    }
+
+    @JvmStatic
+    fun getSdkVersionSize(context: Context, version: String): String {
+        if (version.isNotEmpty()) {
+            val sdkFile = File(BuiltInLibraries.EXTRACTED_COMPILE_ASSETS_PATH, "android-$version.jar")
+            if (sdkFile.exists()) {
+                return formatFileSize(context, sdkFile.length())
+            }
+        }
+        return "~30 MB"
+    }
 
     @JvmStatic
     fun isSdkVersionDownloaded(version: String): Boolean {
