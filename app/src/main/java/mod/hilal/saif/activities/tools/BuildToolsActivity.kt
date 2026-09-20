@@ -53,12 +53,18 @@ class BuildToolsActivity : BaseAppCompatActivity() {
         binding.listContainer.removeAllViews()
         
         // NDK
+        val ndkAbi = when (abi) {
+            "arm64-v8a" -> "aarch64"
+            "armeabi-v7a" -> "arm"
+            "x86_64" -> "x86_64"
+            else -> "aarch64"
+        }
         addToolCard(
             title = "Android NDK (r29)",
             description = "Required for compiling native C/C++ code",
             isInstalled = FileCheckUtils.isNdkDownloaded(this),
             size = FileCheckUtils.getNdkSize(this),
-            url = "https://github.com/lzhiyong/termux-ndk/releases/download/android-ndk/android-ndk-r29-aarch64.tar.xz",
+            url = "https://github.com/lzhiyong/termux-ndk/releases/download/android-ndk/android-ndk-r29-$ndkAbi.tar.xz",
             destination = File(filesDir, "native/ndk.tar.xz")
         )
 
@@ -112,7 +118,7 @@ class BuildToolsActivity : BaseAppCompatActivity() {
         tvStatusChip.text = if (isInstalled) "Installed" else "Not Installed"
         tvStatusChip.alpha = if (isInstalled) 1.0f else 0.6f
         
-        tvStatusText.text = "Status: ${if (isInstalled) "Installed" else "Not installed"} ($size download)"
+        tvStatusText.text = "Status: ${if (isInstalled) "Installed" else "Not installed"} ($size ${if (isInstalled) "used" else "download"})"
         
         val downloadBtn = btnDownload as MaterialButton
         if (isInstalled) {

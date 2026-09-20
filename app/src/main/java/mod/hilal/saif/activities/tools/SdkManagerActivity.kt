@@ -88,7 +88,7 @@ class SdkManagerActivity : BaseAppCompatActivity() {
         tvStatusChip.text = if (isInstalled) "Installed" else "Not Installed"
         tvStatusChip.alpha = if (isInstalled) 1.0f else 0.6f
         
-        tvStatusText.text = "Status: ${if (isInstalled) "Installed" else "Not installed"} ($size download)"
+        tvStatusText.text = "Status: ${if (isInstalled) "Installed" else "Not installed"} ($size ${if (isInstalled) "used" else "download"})"
         
         val downloadBtn = btnDownload as MaterialButton
         if (isInstalled) {

@@ -2,10 +2,12 @@ package org.sketchware.daygreen
 
 import android.content.Context
 import android.text.format.Formatter
+import android.util.Log
 import java.io.File
 import mod.jbk.build.BuiltInLibraries
 
 object FileCheckUtils {
+    private const val TAG = "FileCheckUtils"
     @JvmStatic
     fun isAaptDownloaded(context: Context): Boolean {
         // Based on ProjectBuilder, it uses filesDir/bin/aapt2
@@ -61,6 +63,7 @@ object FileCheckUtils {
                 size += getFolderSize(f)
             }
         }
+        Log.d(TAG, "Calculated size for ${file.absolutePath}: $size")
         return size
     }
 
