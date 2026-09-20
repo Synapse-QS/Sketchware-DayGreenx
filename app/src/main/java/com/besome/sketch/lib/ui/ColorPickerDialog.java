@@ -44,6 +44,8 @@ import pro.sketchware.utility.FileUtil;
 import pro.sketchware.utility.PropertiesUtil;
 import pro.sketchware.utility.SketchwareUtil;
 
+import org.sketchware.daygreen.CustomColorManager;
+
 public class ColorPickerDialog extends PopupWindow {
 	
 	private static String sc_id;
@@ -94,7 +96,7 @@ public class ColorPickerDialog extends PopupWindow {
 		dialog.setTitle(R.string.picker_color_title_delete_all_custom_color);
 		dialog.setMessage(R.string.picker_color_message_delete_all_custom_color);
 		dialog.setPositiveButton(R.string.common_word_delete, (v, which) -> {
-			colorPref.a();
+			CustomColorManager.clearAll();
 			colorGroups.set(0, getSavedColorBeans());
 			notifyChanges();
 			v.dismiss();
@@ -121,6 +123,7 @@ public class ColorPickerDialog extends PopupWindow {
 			
 		}
 		colorPref = new DB(activity, "P24");
+		CustomColorManager.migrateIfNecessary(colorPref);
 		initializeColorData(isTransparentColor, isNoneColor);
 		initializeResColors();
 		initializeAttrsList();
@@ -388,9 +391,9 @@ public class ColorPickerDialog extends PopupWindow {
 					return;
 				}
 				
-				String savedAttrs = colorPref.f("P24I2");
+				String savedAttrs = CustomColorManager.getCustomAttrs();
 				String attrsToSave = savedAttrs + "," + attributeName;
-				colorPref.a("P24I2", (Object) attrsToSave);
+				CustomColorManager.saveCustomAttrs(attrsToSave);
 				attributes.add(new Attribute(attributeName, savedAttrs.isEmpty() ? "Custom" : null));
 				assert binding.colorList.getAdapter() != null;
 				binding.colorList.getAdapter().notifyItemInserted(attributes.size());
@@ -489,18 +492,18 @@ public class ColorPickerDialog extends PopupWindow {
 	}
 	
 	private void removeSavedColor(String color) {
-		String savedColors = colorPref.f("P24I1");
+		String savedColors = CustomColorManager.getCustomColors();
 		if (savedColors.contains(color)) {
 			String colorToRemove = color + ",";
 			String colorToSave = savedColors.replaceAll(colorToRemove, "");
-			colorPref.a("P24I1", (Object) colorToSave);
+			CustomColorManager.saveCustomColors(colorToSave);
 			colorGroups.set(0, getSavedColorBeans());
 			notifyChanges();
 		}
 	}
 	
 	private ColorBean[] getSavedColorBeans() {
-		String savedColors = colorPref.f("P24I1");
+		String savedColors = CustomColorManager.getCustomColors();
 		ColorBean[] colorBeansResult;
 		if (!savedColors.isEmpty()) {
 			String[] colorStrings = savedColors.split(",");
@@ -545,12 +548,12 @@ public class ColorPickerDialog extends PopupWindow {
 	}
 	
 	private void savePickedColor(String color) {
-		String savedColors = colorPref.f("P24I1");
+		String savedColors = CustomColorManager.getCustomColors();
 		if (savedColors.contains(color)) {
 			bB.b(activity, activity.getString(R.string.picker_color_already_exist), 0).show();
 		} else {
 			String colorsToSave = color + "," + savedColors;
-			colorPref.a("P24I1", (Object) colorsToSave);
+			CustomColorManager.saveCustomColors(colorsToSave);
 			colorGroups.set(0, getSavedColorBeans());
 			notifyChanges();
 			k = 0;
@@ -615,7 +618,7 @@ public class ColorPickerDialog extends PopupWindow {
 		attributes.add(new Attribute("colorSurfaceContainerHigh"));
 		attributes.add(new Attribute("colorSurfaceContainerHighest"));
 		
-		String savedAttrs = colorPref.f("P24I2");
+		String savedAttrs = CustomColorManager.getCustomAttrs();
 		if (savedAttrs != null && !savedAttrs.isEmpty()) {
 			String[] customAttrs = savedAttrs.split(",");
 			for (int i = 0; i < customAttrs.length; i++) {
