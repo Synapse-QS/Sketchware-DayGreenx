@@ -357,10 +357,9 @@
         <activity
             android:name="mod.hilal.saif.activities.tools.AppSettings"
             android:configChanges="orientation|screenSize" />
-        <activity
-            android:name=".activities.about.AboutActivity"
-            android:configChanges="orientation|screenSize" />
+            
         <activity android:name="mod.jbk.editor.manage.library.ExcludeBuiltInLibrariesActivity" />
+        
         <activity
             android:name="com.besome.sketch.editor.manage.view.PresetSettingActivity"
             android:configChanges="orientation|screenSize"
@@ -374,26 +373,33 @@
         <activity
             android:name="com.besome.sketch.editor.manage.library.material3.Material3LibraryActivity"
             android:configChanges="orientation|screenSize" />
+            
         <activity
             android:name=".activities.appcompat.ManageAppCompatActivity"
             android:configChanges="orientation|screenSize" />
+            
         <activity
             android:name=".activities.editor.command.ManageXMLCommandActivity"
             android:configChanges="orientation|screenSize" />
+            
         <activity
             android:name=".activities.editor.component.ManageCustomComponentActivity"
             android:configChanges="orientation|screenSize"
             android:windowSoftInputMode="stateAlwaysHidden" />
+            
         <activity
             android:name=".activities.editor.component.AddCustomComponentActivity"
             android:configChanges="orientation|screenSize"
             android:windowSoftInputMode="adjustResize" />
+            
         <activity
             android:name=".activities.editor.view.ViewCodeEditorActivity"
             android:configChanges="orientation|screenSize" />
+            
         <activity
             android:name=".activities.editor.view.CodeViewerActivity"
             android:configChanges="orientation|screenSize" />
+            
         <activity
             android:name=".activities.preview.LayoutPreviewActivity"
             android:configChanges="orientation|screenSize" />
@@ -414,5 +420,4 @@
             </intent-filter>
         </service>
     </application>
-
 </manifest>
