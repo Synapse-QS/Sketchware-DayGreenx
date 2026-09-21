@@ -312,13 +312,19 @@ public class ResourceCompiler {
             commands.add("--dir");
             commands.add(buildHelper.yq.resDirectoryPath);
             commands.add("-o");
-            commands.add(outputPath + File.separator + "project.zip");
+            String outputZip = outputPath + File.separator + "project.zip";
+            commands.add(outputZip);
             LogUtil.d(TAG + ":cPR", "Now executing: " + commands);
             BinaryExecutor executor = new BinaryExecutor();
             executor.setCommands(commands);
             if (!executor.execute().isEmpty()) {
                 LogUtil.e(TAG, executor.getLog());
                 throw new zy(executor.getLog());
+            }
+
+            File outFile = new File(outputZip);
+            if (!outFile.exists() || outFile.length() == 0) {
+                throw new zy("aapt2 compile produced an empty or missing project.zip (exit code: " + executor.getExitCode() + "). The process may have crashed or been killed.");
             }
         }
 
