@@ -236,8 +236,13 @@ public class ResourceCompiler {
             /* Include compiled built-in library resources */
             for (Jp library : buildHelper.builtInLibraryManager.getLibraries()) {
                 if (library.hasResources()) {
+                    File libZip = new File(compiledBuiltInLibraryResourcesDirectory, library.getName() + ".zip");
+                    if (!libZip.exists() || libZip.length() == 0) {
+                        throw new zy("Built-in library resource archive is missing/empty: " + libZip.getAbsolutePath()
+                                + " (library: " + library.getName() + ")");
+                    }
                     args.add("-R");
-                    args.add(new File(compiledBuiltInLibraryResourcesDirectory, library.getName() + ".zip").getAbsolutePath());
+                    args.add(libZip.getAbsolutePath());
                 }
             }
 
@@ -248,6 +253,9 @@ public class ResourceCompiler {
                 for (File file : filesInCompiledResourcesPath) {
                     if (file.isFile()) {
                         if (!file.getName().equals("project.zip") && !file.getName().equals("project-imported.zip")) {
+                            if (file.length() == 0) {
+                                throw new zy("Local library resource archive is empty: " + file.getAbsolutePath());
+                            }
                             args.add("-R");
                             args.add(file.getAbsolutePath());
                         }
@@ -258,6 +266,9 @@ public class ResourceCompiler {
             /* Include compiled project resources */
             File projectArchive = new File(resourcesPath, "project.zip");
             if (projectArchive.exists()) {
+                if (projectArchive.length() == 0) {
+                    throw new zy("project.zip is empty: " + projectArchive.getAbsolutePath());
+                }
                 args.add("-R");
                 args.add(projectArchive.getAbsolutePath());
             }
@@ -265,6 +276,9 @@ public class ResourceCompiler {
             /* Include compiled imported project resources */
             File projectImportedArchive = new File(resourcesPath, "project-imported.zip");
             if (projectImportedArchive.exists()) {
+                if (projectImportedArchive.length() == 0) {
+                    throw new zy("project-imported.zip is empty: " + projectImportedArchive.getAbsolutePath());
+                }
                 args.add("-R");
                 args.add(projectImportedArchive.getAbsolutePath());
             }
@@ -324,7 +338,8 @@ public class ResourceCompiler {
 
             File outFile = new File(outputZip);
             if (!outFile.exists() || outFile.length() == 0) {
-                throw new zy("aapt2 compile produced an empty or missing project.zip (exit code: " + executor.getExitCode() + "). The process may have crashed or been killed.");
+                throw new zy("aapt2 compile produced an empty or missing project.zip (exit code: "
+                        + executor.getExitCode() + "). The process may have crashed or been killed.");
             }
         }
 
