@@ -8,16 +8,15 @@ import mod.jbk.build.BuiltInLibraries
 
 object FileCheckUtils {
     private const val TAG = "FileCheckUtils"
+
     @JvmStatic
     fun isAaptDownloaded(context: Context): Boolean {
-        // Based on ProjectBuilder, it uses filesDir/bin/aapt2
         val aapt2Binary = File(context.filesDir, "bin/aapt2")
         return aapt2Binary.exists() && aapt2Binary.length() > 0
     }
 
     @JvmStatic
     fun isSdkDownloaded(context: Context): Boolean {
-        // Check for the old android.jar or any new android-XX.jar
         val legacySdk = File(BuiltInLibraries.EXTRACTED_COMPILE_ASSETS_PATH, "android.jar")
         if (legacySdk.exists() && legacySdk.length() > 0) return true
         
@@ -29,25 +28,22 @@ object FileCheckUtils {
 
     @JvmStatic
     fun isNdkDownloaded(context: Context): Boolean {
+        val toolsDir = File(context.filesDir, "native")
+        val toolchainFile = mod.jbk.build.compiler.native_code.NativeCompiler.findToolchainFile(toolsDir)
+        if (toolchainFile != null && toolchainFile.exists() && toolchainFile.length() > 0) return true
+        
         val ndkDir = File(context.filesDir, "native/ndk")
-        if (!ndkDir.exists()) return false
-        
-        // Preferred check (what NativeCompiler needs)
-        val toolchainFile = File(ndkDir, "build/cmake/android.toolchain.cmake")
-        if (toolchainFile.exists()) return true
-        
-        // Fallback check (standard NDK marker)
-        return File(ndkDir, "source.properties").exists()
+        if (ndkDir.exists() && (File(ndkDir, "source.properties").exists() || File(ndkDir, "bin").exists() || File(ndkDir, "toolchains").exists())) return true
+
+        val binNdkDir = File(context.filesDir, "bin/android-ndk")
+        return binNdkDir.exists() && (File(binNdkDir, "source.properties").exists() || File(binNdkDir, "bin").exists() || File(binNdkDir, "toolchains").exists())
     }
 
     @JvmStatic
     fun isCmakeDownloaded(context: Context): Boolean {
-        val cmakeDir = File(context.filesDir, "native/cmake")
-        if (!cmakeDir.exists()) return false
-        
-        // Preferred check
-        val cmakeBinary = File(cmakeDir, "bin/cmake")
-        return cmakeBinary.exists()
+        val toolsDir = File(context.filesDir, "native")
+        val cmakeBinary = mod.jbk.build.compiler.native_code.NativeCompiler.findCmakeBinary(toolsDir)
+        return cmakeBinary != null && cmakeBinary.exists() && cmakeBinary.length() > 0
     }
 
     fun getToolStatus(isInstalled: Boolean): String {
@@ -64,7 +60,6 @@ object FileCheckUtils {
                 size += getFolderSize(f)
             }
         }
-        Log.d(TAG, "Calculated size for ${file.absolutePath}: $size")
         return size
     }
 
@@ -78,6 +73,10 @@ object FileCheckUtils {
         if (ndkDir.exists()) {
             return formatFileSize(context, getFolderSize(ndkDir))
         }
+        val binNdkDir = File(context.filesDir, "bin/android-ndk")
+        if (binNdkDir.exists()) {
+            return formatFileSize(context, getFolderSize(binNdkDir))
+        }
         return "~360 MB"
     }
 
@@ -86,6 +85,10 @@ object FileCheckUtils {
         val cmakeDir = File(context.filesDir, "native/cmake")
         if (cmakeDir.exists()) {
             return formatFileSize(context, getFolderSize(cmakeDir))
+        }
+        val binCmakeDir = File(context.filesDir, "bin/cmake")
+        if (binCmakeDir.exists()) {
+            return formatFileSize(context, getFolderSize(binCmakeDir))
         }
         return "~48 MB"
     }

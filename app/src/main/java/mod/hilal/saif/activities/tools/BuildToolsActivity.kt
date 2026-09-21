@@ -178,15 +178,26 @@ class BuildToolsActivity : BaseAppCompatActivity() {
     private fun importArchive(destination: File) {
         val options = FilePickerOptions().apply {
             selectionMode = SelectionMode.FILE
-            extensions = arrayOf("zip", "tar.xz", "jar")
+            extensions = arrayOf("zip", "tar.xz", "jar", "tar.gz", "tgz")
         }
         
         val callback = object : FilePickerCallback() {
             override fun onFileSelected(file: File) {
                 destination.parentFile?.mkdirs()
                 file.copyTo(destination, overwrite = true)
-                Toast.makeText(this@BuildToolsActivity, "Imported ${file.name}", Toast.LENGTH_SHORT).show()
-                setupItems() // Refresh UI
+                val name = destination.name.lowercase()
+                if (name.endsWith(".zip") || name.endsWith(".tar.gz") || name.endsWith(".tar.xz") || name.endsWith(".tgz")) {
+                    DownloadUtility.extractArchive(this@BuildToolsActivity, destination) {
+                        Toast.makeText(this@BuildToolsActivity, "Imported and extracted ${file.name}", Toast.LENGTH_SHORT).show()
+                        setupItems()
+                    }
+                } else {
+                    if (destination.name.contains("aapt")) {
+                        destination.setExecutable(true, false)
+                    }
+                    Toast.makeText(this@BuildToolsActivity, "Imported ${file.name}", Toast.LENGTH_SHORT).show()
+                    setupItems()
+                }
             }
         }
         
