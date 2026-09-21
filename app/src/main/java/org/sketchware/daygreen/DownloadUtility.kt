@@ -93,6 +93,9 @@ object DownloadUtility {
                     }
                 }
             } catch (e: Exception) {
+                if (destinationFile.exists()) {
+                    destinationFile.delete()
+                }
                 handler.post {
                     if (!activity.isFinishing) {
                         dialog.dismiss()

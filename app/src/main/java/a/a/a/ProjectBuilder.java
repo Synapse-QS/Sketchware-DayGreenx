@@ -153,8 +153,24 @@ public class ProjectBuilder {
         String compileSdk = settings.getValue(ProjectSettings.SETTING_COMPILE_SDK_VERSION, "");
         if (!compileSdk.isEmpty()) {
             File customSdk = new File(BuiltInLibraries.EXTRACTED_COMPILE_ASSETS_PATH, "android-" + compileSdk + ".jar");
-            if (customSdk.exists()) {
+            if (customSdk.exists() && customSdk.length() > 0) {
                 defaultAndroidJar = customSdk;
+            }
+        }
+
+        if (!defaultAndroidJar.exists() || defaultAndroidJar.length() == 0) {
+            File legacyJar = new File(BuiltInLibraries.EXTRACTED_COMPILE_ASSETS_PATH, "android.jar");
+            if (legacyJar.exists() && legacyJar.length() > 0) {
+                defaultAndroidJar = legacyJar;
+            } else {
+                java.util.List<Integer> installedSdks = org.sketchware.daygreen.FileCheckUtils.getInstalledSdks(context);
+                if (!installedSdks.isEmpty()) {
+                    int highestSdk = installedSdks.get(installedSdks.size() - 1);
+                    File fallbackJar = new File(BuiltInLibraries.EXTRACTED_COMPILE_ASSETS_PATH, "android-" + highestSdk + ".jar");
+                    if (fallbackJar.exists() && fallbackJar.length() > 0) {
+                        defaultAndroidJar = fallbackJar;
+                    }
+                }
             }
         }
 

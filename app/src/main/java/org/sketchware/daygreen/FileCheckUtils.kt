@@ -12,17 +12,18 @@ object FileCheckUtils {
     fun isAaptDownloaded(context: Context): Boolean {
         // Based on ProjectBuilder, it uses filesDir/bin/aapt2
         val aapt2Binary = File(context.filesDir, "bin/aapt2")
-        return aapt2Binary.exists()
+        return aapt2Binary.exists() && aapt2Binary.length() > 0
     }
 
     @JvmStatic
     fun isSdkDownloaded(context: Context): Boolean {
         // Check for the old android.jar or any new android-XX.jar
-        if (File(BuiltInLibraries.EXTRACTED_COMPILE_ASSETS_PATH, "android.jar").exists()) return true
+        val legacySdk = File(BuiltInLibraries.EXTRACTED_COMPILE_ASSETS_PATH, "android.jar")
+        if (legacySdk.exists() && legacySdk.length() > 0) return true
         
         val libsDir = BuiltInLibraries.EXTRACTED_COMPILE_ASSETS_PATH
-        return libsDir.exists() && libsDir.listFiles { _, name -> 
-            name.startsWith("android-") && name.endsWith(".jar") 
+        return libsDir.exists() && libsDir.listFiles { file -> 
+            file.isFile && file.name.startsWith("android-") && file.name.endsWith(".jar") && file.length() > 0
         }?.isNotEmpty() == true
     }
 
@@ -113,7 +114,7 @@ object FileCheckUtils {
     fun isSdkVersionDownloaded(version: String): Boolean {
         if (version.isEmpty()) return true
         val sdkFile = File(BuiltInLibraries.EXTRACTED_COMPILE_ASSETS_PATH, "android-$version.jar")
-        return sdkFile.exists()
+        return sdkFile.exists() && sdkFile.length() > 0
     }
 
     @JvmStatic
@@ -121,7 +122,7 @@ object FileCheckUtils {
         val libsDir = File(context.filesDir, "libs")
         if (!libsDir.exists()) return emptyList()
         
-        return libsDir.listFiles { _, name -> name.startsWith("android-") && name.endsWith(".jar") }
+        return libsDir.listFiles { file -> file.isFile && file.name.startsWith("android-") && file.name.endsWith(".jar") && file.length() > 0 }
             ?.mapNotNull { file ->
                 file.name.removePrefix("android-").removeSuffix(".jar").toIntOrNull()
             }?.sorted() ?: emptyList()
