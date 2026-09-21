@@ -57,7 +57,7 @@ class SdkManagerActivity : BaseAppCompatActivity() {
             addToolCard(
                 title = "Android SDK $api",
                 description = "Download android.jar for API $api",
-                isInstalled = destination.exists(),
+                isInstalled = destination.exists() && destination.length() > 0,
                 size = FileCheckUtils.getSdkVersionSize(this, api.toString()),
                 url = "https://github.com/gus23-okta/sketchware-daygreen-build-tools/releases/download/37/android-$api.jar",
                 destination = destination

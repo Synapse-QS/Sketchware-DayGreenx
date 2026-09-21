@@ -196,12 +196,13 @@ public class ResourceCompiler {
 
             args.add("-I");
             String customAndroidSdk = buildHelper.build_settings.getValue(BuildSettings.SETTING_ANDROID_JAR_PATH, "");
-            if (customAndroidSdk.isEmpty()) {
-                args.add(buildHelper.androidJarPath);
-            } else {
-                linkingAssertFileExists(customAndroidSdk);
-                args.add(customAndroidSdk);
+            String effectiveAndroidJar = customAndroidSdk.isEmpty() ? buildHelper.androidJarPath : customAndroidSdk;
+            File androidJarFile = new File(effectiveAndroidJar);
+            if (!androidJarFile.exists() || !androidJarFile.isFile() || androidJarFile.length() == 0) {
+                throw new zy("Android SDK platform JAR is missing or corrupted at:\n" + effectiveAndroidJar
+                        + "\n\nPlease open App Settings > SDK Manager to download the Android SDK (e.g. API 34).");
             }
+            args.add(effectiveAndroidJar);
 
             /* Add assets imported by vanilla method */
             linkingAssertDirectoryExists(buildHelper.yq.assetsPath);
@@ -312,8 +313,12 @@ public class ResourceCompiler {
             BinaryExecutor executor = new BinaryExecutor();
             executor.setCommands(args);
             if (!executor.execute().isEmpty()) {
-                LogUtil.e(TAG + ":l", executor.getLog());
-                throw new zy(executor.getLog());
+                String log = executor.getLog();
+                LogUtil.e(TAG + ":l", log);
+                if (log.contains("failed to open APK")) {
+                    log += "\n\n[Tip] AAPT2 failed to open an archive (SDK jar or resource zip). Ensure your Android SDK is downloaded in App Settings > SDK Manager.";
+                }
+                throw new zy(log);
             }
         }
 
