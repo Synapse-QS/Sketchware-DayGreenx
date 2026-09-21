@@ -8,9 +8,12 @@ import java.io.InputStreamReader;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 import a.a.a.ProjectBuilder;
 import a.a.a.zy;
@@ -60,8 +63,8 @@ public class NativeCompiler {
         List<File> nativeSourceFiles = new ArrayList<>();
         findSourceFiles(sourceDir, nativeSourceFiles);
 
-        File cmakeLists = new File(sourceDir, "CMakeLists.txt");
-        if (cmakeLists.isFile()) {
+        File cmakeLists = findCMakeListsFile(sourceDir);
+        if (cmakeLists != null && cmakeLists.isFile()) {
             try (BufferedReader reader = new BufferedReader(new FileReader(cmakeLists))) {
                 String firstLine = reader.readLine();
                 if (firstLine != null && (firstLine.contains("auto-generated") || firstLine.equals(AUTO_GENERATED_MARKER))) {
@@ -112,11 +115,33 @@ public class NativeCompiler {
             if (ndkDir == null || !ndkDir.isDirectory()) {
                 throw new zy("Android NDK not found. Please install Android NDK (r29) in App Settings > Build Tools.");
             }
-            if (nativeSourceFiles.isEmpty()) {
-                throw new zy("Native build failed: No C/C++ source files (.c, .cpp, .cc) were found to compile.");
-            }
             compileDirectWithClang(ndkDir, sourceDir, nativeSourceFiles, cmakeLists, platformLevel);
         }
+    }
+
+    public static File findCMakeListsFile(File sourceDir) {
+        if (sourceDir == null || !sourceDir.isDirectory()) return null;
+        File[] candidates = {
+                new File(sourceDir, "CMakeLists.txt"),
+                new File(sourceDir, "CMakeList.txt"),
+                new File(sourceDir, "cmakelists.txt"),
+                new File(sourceDir, "cmakelist.txt")
+        };
+        for (File c : candidates) {
+            if (c.isFile()) return c;
+        }
+        File[] files = sourceDir.listFiles();
+        if (files != null) {
+            for (File f : files) {
+                if (f.isFile()) {
+                    String name = f.getName();
+                    if (name.equalsIgnoreCase("cmakelists.txt") || name.equalsIgnoreCase("cmakelist.txt")) {
+                        return f;
+                    }
+                }
+            }
+        }
+        return null;
     }
 
     private static boolean isNdkRoot(File dir) {
@@ -227,7 +252,7 @@ public class NativeCompiler {
             configure.add("-DCMAKE_BUILD_TYPE=Release");
             configure.add("-DCMAKE_TOOLCHAIN_FILE=" + toolchainFile.getAbsolutePath());
             if (ninjaBinary != null && isRunnable(ninjaBinary)) {
-                configure.add("-GNNinja");
+                configure.add("-GNinja");
                 configure.add("-DCMAKE_MAKE_PROGRAM=" + ninjaBinary.getAbsolutePath());
             }
             runCommand(configure, "CMake configure failed for " + abi);
@@ -247,9 +272,143 @@ public class NativeCompiler {
         }
     }
 
+    public static class CMakeInfo {
+        public String libraryName = "native-lib";
+        public List<String> sources = new ArrayList<>();
+        public List<String> linkedLibraries = new ArrayList<>();
+    }
+
+    public static CMakeInfo parseCMakeLists(File cmakeLists) {
+        CMakeInfo info = new CMakeInfo();
+        if (cmakeLists == null || !cmakeLists.isFile()) {
+            return info;
+        }
+
+        try (BufferedReader reader = new BufferedReader(new FileReader(cmakeLists))) {
+            StringBuilder fullText = new StringBuilder();
+            String line;
+            while ((line = reader.readLine()) != null) {
+                int commentIndex = line.indexOf('#');
+                if (commentIndex != -1) {
+                    line = line.substring(0, commentIndex);
+                }
+                fullText.append(line).append(' ');
+            }
+
+            String content = fullText.toString();
+            Map<String, String> variables = new HashMap<>();
+
+            // Parse set(VAR value)
+            Pattern setPattern = Pattern.compile("set\\s*\\(\\s*([A-Za-z0-9_]+)\\s+([^)]+)\\)", Pattern.CASE_INSENSITIVE);
+            Matcher setMatcher = setPattern.matcher(content);
+            while (setMatcher.find()) {
+                String varName = setMatcher.group(1).trim();
+                String varVal = setMatcher.group(2).replaceAll("[\"']", "").trim();
+                variables.put(varName, varVal);
+            }
+
+            // Parse find_library(VAR NAME)
+            Pattern findLibPattern = Pattern.compile("find_library\\s*\\(\\s*([A-Za-z0-9_-]+)\\s+([^)]+)\\)", Pattern.CASE_INSENSITIVE);
+            Matcher findLibMatcher = findLibPattern.matcher(content);
+            while (findLibMatcher.find()) {
+                String varName = findLibMatcher.group(1).trim();
+                String varVal = findLibMatcher.group(2).replaceAll("[\"']", "").trim();
+                String[] parts = varVal.split("\\s+");
+                if (parts.length > 0) {
+                    variables.put(varName, parts[0]);
+                }
+            }
+
+            // Parse project(NAME)
+            Pattern projectPattern = Pattern.compile("project\\s*\\(\\s*[\"']?([A-Za-z0-9_-]+)[\"']?", Pattern.CASE_INSENSITIVE);
+            Matcher projectMatcher = projectPattern.matcher(content);
+            if (projectMatcher.find()) {
+                String proj = projectMatcher.group(1).trim();
+                if (!proj.isEmpty()) {
+                    info.libraryName = proj;
+                }
+            }
+
+            // Parse add_library(NAME [SHARED|STATIC] source1 source2...)
+            Pattern addLibPattern = Pattern.compile("add_library\\s*\\(\\s*([A-Za-z0-9_-]+)\\s*(?:SHARED|STATIC)?\\s*([^)]*)\\)", Pattern.CASE_INSENSITIVE);
+            Matcher addLibMatcher = addLibPattern.matcher(content);
+            if (addLibMatcher.find()) {
+                String libName = addLibMatcher.group(1).replaceAll("[\"']", "").trim();
+                if (!libName.isEmpty()) {
+                    info.libraryName = libName;
+                }
+                String sourcesStr = addLibMatcher.group(2).trim();
+                if (!sourcesStr.isEmpty()) {
+                    String[] srcTokens = sourcesStr.split("[\\s,]+");
+                    for (String token : srcTokens) {
+                        token = token.replaceAll("[\"']", "").trim();
+                        if (token.endsWith(".c") || token.endsWith(".cpp") || token.endsWith(".cc") || token.endsWith(".cxx")) {
+                            info.sources.add(token);
+                        }
+                    }
+                }
+            }
+
+            // Parse target_link_libraries(NAME lib1 lib2...)
+            Pattern linkPattern = Pattern.compile("target_link_libraries\\s*\\(\\s*([A-Za-z0-9_-]+)\\s+([^)]+)\\)", Pattern.CASE_INSENSITIVE);
+            Matcher linkMatcher = linkPattern.matcher(content);
+            while (linkMatcher.find()) {
+                String libsStr = linkMatcher.group(2).trim();
+                String[] tokens = libsStr.split("[\\s,]+");
+                for (String token : tokens) {
+                    token = token.replaceAll("[\"']", "").trim();
+                    if (token.isEmpty() || token.equalsIgnoreCase("PUBLIC") ||
+                        token.equalsIgnoreCase("PRIVATE") || token.equalsIgnoreCase("INTERFACE")) {
+                        continue;
+                    }
+                    if (token.startsWith("${") && token.endsWith("}")) {
+                        String varName = token.substring(2, token.length() - 1).trim();
+                        String resolved = variables.get(varName);
+                        if (resolved != null && !resolved.isEmpty()) {
+                            token = resolved;
+                        } else {
+                            token = varName;
+                        }
+                    }
+                    if (token.startsWith("-l")) {
+                        token = token.substring(2);
+                    }
+                    if (!token.isEmpty() && !info.linkedLibraries.contains(token)) {
+                        info.linkedLibraries.add(token);
+                    }
+                }
+            }
+        } catch (Exception e) {
+            LogUtil.w(TAG, "Failed to parse CMakeLists.txt: " + e.getMessage());
+        }
+
+        return info;
+    }
+
     private void compileDirectWithClang(File ndkDir, File sourceDir, List<File> sourceFiles, File cmakeLists, int platformLevel) throws zy {
+        CMakeInfo cmakeInfo = parseCMakeLists(cmakeLists);
+        String libName = cmakeInfo.libraryName;
+        List<String> extraLibs = cmakeInfo.linkedLibraries;
+
+        List<File> filesToCompile = new ArrayList<>();
+        if (!cmakeInfo.sources.isEmpty()) {
+            for (String srcName : cmakeInfo.sources) {
+                File srcFile = new File(sourceDir, srcName);
+                if (srcFile.isFile()) {
+                    filesToCompile.add(srcFile);
+                }
+            }
+        }
+        if (filesToCompile.isEmpty()) {
+            filesToCompile.addAll(sourceFiles);
+        }
+
+        if (filesToCompile.isEmpty()) {
+            throw new zy("Native build failed: No C/C++ source files (.c, .cpp, .cc) were found to compile.");
+        }
+
         boolean hasCpp = false;
-        for (File src : sourceFiles) {
+        for (File src : filesToCompile) {
             String name = src.getName().toLowerCase(Locale.ROOT);
             if (name.endsWith(".cpp") || name.endsWith(".cc") || name.endsWith(".cxx")) {
                 hasCpp = true;
@@ -263,9 +422,6 @@ public class NativeCompiler {
         }
 
         List<String> abis = getAbis(sourceDir);
-        String libName = extractLibraryName(cmakeLists);
-        List<String> extraLibs = extractLinkedLibraries(cmakeLists);
-
         int successCount = 0;
         String lastError = null;
 
@@ -286,7 +442,7 @@ public class NativeCompiler {
             makeExecutable(clangBinary);
 
             try {
-                compileSingleAbiWithClang(clangBinary, ndkDir, sourceDir, sourceFiles, abi, libName, extraLibs, hasCpp, platformLevel);
+                compileSingleAbiWithClang(clangBinary, ndkDir, sourceDir, filesToCompile, abi, libName, extraLibs, hasCpp, platformLevel);
                 successCount++;
             } catch (zy e) {
                 lastError = e.getMessage();
@@ -763,58 +919,6 @@ public class NativeCompiler {
             abis.addAll(Arrays.asList(AUTO_ABIS));
         }
         return abis;
-    }
-
-    private static String extractLibraryName(File cmakeLists) {
-        if (cmakeLists != null && cmakeLists.isFile()) {
-            try (BufferedReader reader = new BufferedReader(new FileReader(cmakeLists))) {
-                String line;
-                while ((line = reader.readLine()) != null) {
-                    line = line.trim();
-                    if (line.toLowerCase(Locale.ROOT).startsWith("add_library")) {
-                        int start = line.indexOf('(');
-                        if (start != -1) {
-                            String rest = line.substring(start + 1).trim();
-                            String[] parts = rest.split("[\\s,)]+");
-                            if (parts.length > 0 && !parts[0].isEmpty()) {
-                                return parts[0].replaceAll("[\"']", "");
-                            }
-                        }
-                    }
-                }
-            } catch (Exception ignored) {}
-        }
-        return "native-lib";
-    }
-
-    private static List<String> extractLinkedLibraries(File cmakeLists) {
-        List<String> libs = new ArrayList<>();
-        if (cmakeLists != null && cmakeLists.isFile()) {
-            try (BufferedReader reader = new BufferedReader(new FileReader(cmakeLists))) {
-                String line;
-                while ((line = reader.readLine()) != null) {
-                    line = line.trim();
-                    if (line.toLowerCase(Locale.ROOT).startsWith("target_link_libraries")) {
-                        int start = line.indexOf('(');
-                        int end = line.indexOf(')');
-                        if (start != -1) {
-                            String content = end != -1 ? line.substring(start + 1, end) : line.substring(start + 1);
-                            String[] tokens = content.split("\\s+");
-                            for (int i = 1; i < tokens.length; i++) {
-                                String token = tokens[i].replaceAll("[\"']", "").trim();
-                                if (token.isEmpty() || token.startsWith("${") || token.equals("PUBLIC") || token.equals("PRIVATE") || token.equals("INTERFACE")) {
-                                    continue;
-                                }
-                                if (!libs.contains(token)) {
-                                    libs.add(token);
-                                }
-                            }
-                        }
-                    }
-                }
-            } catch (Exception ignored) {}
-        }
-        return libs;
     }
 
     private static void runCommand(List<String> command, String failureMessage) throws zy {
