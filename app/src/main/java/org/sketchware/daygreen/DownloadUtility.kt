@@ -16,6 +16,7 @@ import pro.sketchware.utility.FileUtil
 import java.io.BufferedInputStream
 import java.io.File
 import java.io.FileOutputStream
+import java.io.FilterInputStream
 import java.net.HttpURLConnection
 import java.net.URL
 import java.util.concurrent.Executors
@@ -110,8 +111,9 @@ object DownloadUtility {
         val tvPercentage = dialogView.findViewById<TextView>(R.id.tv_percentage)
         val tvBytes = dialogView.findViewById<TextView>(R.id.tv_bytes)
 
-        progressIndicator.isIndeterminate = true
-        tvPercentage.text = "Extracting..."
+        progressIndicator.isIndeterminate = false
+        progressIndicator.progress = 0
+        tvPercentage.text = "0%"
         tvBytes.text = archiveFile.name
 
         val progressDialog = MaterialAlertDialogBuilder(activity)
@@ -128,14 +130,34 @@ object DownloadUtility {
                 val parentPath = archiveFile.parentFile ?: activity.filesDir
                 val tempExtractDir = File(parentPath, "temp_extract_" + System.currentTimeMillis())
                 tempExtractDir.mkdirs()
-                
-                // --- Logika Ekstraksi ---
+
                 if (name.endsWith(".zip")) {
-                    ZipInputStream(archiveFile.inputStream()).use { zipInputStream ->
-                        FileUtil.extractZipTo(zipInputStream, tempExtractDir.absolutePath)
-                    }
+                    val zipInputStream = ZipInputStream(archiveFile.inputStream())
+                    FileUtil.extractZipTo(zipInputStream, tempExtractDir.absolutePath)
+                    zipInputStream.close()
                 } else if (name.endsWith(".tar.xz")) {
-                    XZInputStream(archiveFile.inputStream().buffered()).use { xzIn ->
+                    val totalSize = archiveFile.length()
+                    var bytesRead = 0L
+
+                    val countingIn = object : FilterInputStream(archiveFile.inputStream().buffered()) {
+                        override fun read(b: ByteArray, off: Int, len: Int): Int {
+                            val n = super.read(b, off, len)
+                            if (n > 0) {
+                                bytesRead += n
+                                handler.post {
+                                    if (!activity.isFinishing) {
+                                        val progress = if (totalSize > 0) (bytesRead * 100 / totalSize).toInt().coerceAtMost(100) else 0
+                                        progressIndicator.progress = progress
+                                        tvPercentage.text = "$progress%"
+                                        tvBytes.text = "$bytesRead/$totalSize"
+                                    }
+                                }
+                            }
+                            return n
+                        }
+                    }
+
+                    XZInputStream(countingIn).use { xzIn ->
                         TarArchiveInputStream(xzIn).use { tarIn ->
                             var entry = tarIn.nextTarEntry
                             while (entry != null) {
@@ -145,30 +167,30 @@ object DownloadUtility {
                                 } else {
                                     outFile.parentFile?.mkdirs()
                                     outFile.outputStream().use { out -> tarIn.copyTo(out) }
-                                    // Menjaga izin executable (chmod +x) jika ada bit eksekusi di tar header
-                                    if (entry.mode and 0b001001001 != 0) {
-                                        outFile.setExecutable(true)
-                                    }
+                                    if (entry.mode and 0b001001001 != 0) outFile.setExecutable(true)
                                 }
                                 entry = tarIn.nextTarEntry
                             }
                         }
                     }
                 } else {
-                    val process = ProcessBuilder("tar", "-xzf", archiveFile.absolutePath, "-C", tempExtractDir.absolutePath)
+                    val tarFlag = "-xzf"
+                    val process = ProcessBuilder("tar", tarFlag, archiveFile.absolutePath, "-C", tempExtractDir.absolutePath)
                         .redirectErrorStream(true)
                         .start()
+
                     val reader = process.inputStream.bufferedReader()
                     while (reader.readLine() != null) {
                         // Wait for output to finish
                     }
+
                     val exitCode = process.waitFor()
                     if (exitCode != 0) {
                         throw Exception("Tar process failed with exit code $exitCode")
                     }
                 }
 
-                // Penataan Folder Hasil Ekstraksi
+                // Decide target name and move
                 val targetName = if (name.contains("cmake")) "cmake" else if (name.contains("ndk")) "ndk" else null
                 if (targetName != null) {
                     val targetDir = File(parentPath, targetName)
@@ -176,18 +198,17 @@ object DownloadUtility {
 
                     val subDirs = tempExtractDir.listFiles { f -> f.isDirectory }
                     val subFiles = tempExtractDir.listFiles { f -> f.isFile }
-                    
+
                     if (subDirs != null && subDirs.size == 1 && (subFiles == null || subFiles.isEmpty())) {
                         subDirs[0].renameTo(targetDir)
                     } else {
                         tempExtractDir.renameTo(targetDir)
                     }
                 }
-                
-                // Cleanup
+
                 if (tempExtractDir.exists()) tempExtractDir.deleteRecursively()
-                archiveFile.delete() // Hapus file arsip setelah sukses diekstrak
-                
+                archiveFile.delete()
+
                 handler.post {
                     if (!activity.isFinishing) {
                         progressDialog.dismiss()
