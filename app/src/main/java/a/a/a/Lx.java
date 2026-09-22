@@ -29,9 +29,6 @@ import pro.sketchware.utility.FileUtil;
 //DR
 public class Lx {
 
-    /**
-     * @return Content of a <code>settings.gradle</code> file, with indentation
-     */
     public static String a() {
         return "include ':app'\r\n";
     }
@@ -40,20 +37,10 @@ public class Lx {
      * @return Content of a <code>build.gradle</code> file for the module ':app', with indentation
      */
     public static String getBuildGradleString(int compileSdkVersion, int minSdkVersion, String targetSdkVersion, jq metadata, boolean isViewBindingEnabled) {
-        StringBuilder content = new StringBuilder("plugins {\r\n" +
-                "id 'com.android.application'\r\n" +
-                "}\r\n" +
-                "\r\n" +
-                "android {\r\n" +
-                "compileSdk " + compileSdkVersion + "\r\n" +
-                "\r\n");
-        if (new BuildSettings(metadata.sc_id)
-                .getValue(BuildSettings.SETTING_NO_HTTP_LEGACY, BuildSettings.SETTING_GENERIC_VALUE_FALSE)
-                .equals(BuildSettings.SETTING_GENERIC_VALUE_FALSE)) {
-            content.append("""
-                    useLibrary 'org.apache.http.legacy'\r
-                    \r
-                    """);
+        StringBuilder content = new StringBuilder("plugins {\r\n" + "id 'com.android.application'\r\n" + "}\r\n" + "\r\n" + "android {\r\n" + "compileSdk " + compileSdkVersion + "\r\n" + "\r\n");
+        
+        if (new BuildSettings(metadata.sc_id).getValue(BuildSettings.SETTING_NO_HTTP_LEGACY, BuildSettings.SETTING_GENERIC_VALUE_FALSE).equals(BuildSettings.SETTING_GENERIC_VALUE_FALSE)) {
+            content.append("""useLibrary 'org.apache.http.legacy'\r\r""");
         }
         content.append("defaultConfig {\r\n" + "applicationId \"")
                 .append(metadata.packageName)
@@ -86,10 +73,7 @@ public class Lx {
             content.append("buildFeatures {\r\n viewBinding true\r\n}\r\n");
         }
 
-        content.append("}\r\n")
-                .append("\r\n")
-                .append("dependencies {\r\n")
-                .append("implementation fileTree(dir: 'libs', include: ['*.jar'])\r\n");
+        content.append("}\r\n").append("\r\n").append("dependencies {\r\n").append("implementation fileTree(dir: 'libs', include: ['*.jar'])\r\n");
 
         List<BuiltInLibraries.BuiltInLibrary> excludedLibraries = ExcludeBuiltInLibrariesActivity.getExcludedLibraries(metadata.sc_id);
         if (isLibraryNotExcluded(BuiltInLibraries.ANDROIDX_APPCOMPAT, excludedLibraries) && metadata.g) {

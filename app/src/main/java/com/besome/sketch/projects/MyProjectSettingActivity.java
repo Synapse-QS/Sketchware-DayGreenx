@@ -271,6 +271,7 @@ public class MyProjectSettingActivity extends BaseAppCompatActivity implements V
         binding.cbEnableViewbinding.setChecked(settings.getValue(ProjectSettings.SETTING_ENABLE_VIEWBINDING, "false").equals("true"));
         binding.cbRemoveOldMethods.setChecked(settings.getValue(ProjectSettings.SETTING_DISABLE_OLD_METHODS, "true").equals("true"));
         binding.cbUseNewMaterialComponentsAppTheme.setChecked(settings.getValue(ProjectSettings.SETTING_ENABLE_BRIDGELESS_THEMES, "false").equals("true"));
+        binding.cbEnableNative.setChecked(settings.getValue(ProjectSettings.SETTING_ENABLE_NATIVE, "false").equals("true"));
     }
 
     @Override
@@ -654,6 +655,7 @@ public class MyProjectSettingActivity extends BaseAppCompatActivity implements V
             projectSettings.setValue(ProjectSettings.SETTING_ENABLE_VIEWBINDING, binding.cbEnableViewbinding.isChecked() ? "true" : "false");
             projectSettings.setValue(ProjectSettings.SETTING_DISABLE_OLD_METHODS, binding.cbRemoveOldMethods.isChecked() ? "true" : "false");
             projectSettings.setValue(ProjectSettings.SETTING_ENABLE_BRIDGELESS_THEMES, binding.cbUseNewMaterialComponentsAppTheme.isChecked() ? "true" : "false");
+            projectSettings.setValue(ProjectSettings.SETTING_ENABLE_NATIVE, binding.cbEnableNative.isChecked() ? "true" : "false");
             projectSettings.setValue(ProjectSettings.SETTING_NEW_XML_COMMAND, "true");
 
             ProjectApplication.createApplicationFile(sc_id, Helper.getText(binding.etPackageName), appClassVal);

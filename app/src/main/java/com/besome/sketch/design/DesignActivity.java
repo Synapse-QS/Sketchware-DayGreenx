@@ -140,6 +140,7 @@ import pro.sketchware.utility.FileUtil;
 import pro.sketchware.utility.SketchwareUtil;
 import pro.sketchware.utility.ThemeUtils;
 import pro.sketchware.utility.apk.ApkSignatures;
+import pro.sketchware.utility.FilePathUtil;
 import rikka.shizuku.Shizuku;
 
 //DR
@@ -588,6 +589,15 @@ public class DesignActivity extends BaseAppCompatActivity implements View.OnClic
             new Thread(() -> {
                 FileUtil.deleteFile(q.projectMyscPath);
                 new BuildCache(sc_id).invalidateAll();
+                
+                String nativeLibsPath = new FilePathUtil().getPathNativelibs(sc_id);
+                FileUtil.deleteFile(nativeLibsPath);
+                
+                File nativeBuildCache = new File(getApplicationContext().getCacheDir(), "native_build");
+                if (nativeBuildCache.exists()) {
+                    FileUtil.deleteFile(nativeBuildCache.getAbsolutePath());
+                }
+                
                 updateBottomMenu();
                 runOnUiThread(() -> SketchwareUtil.toast("Done cleaning temporary files!"));
             }).start();

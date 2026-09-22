@@ -32,6 +32,8 @@ public class ProjectSettings {
      * Setting for the final app's {@code compileSdkVersion}
      */
     public static final String SETTING_COMPILE_SDK_VERSION = "compile_sdk";
+    
+    public static final String SETTING_ENABLE_NATIVE = "enable_native";
 
     /**
      * Setting to make the app's main theme inherit from fully material-styled themes, and not *.Bridge ones
@@ -94,14 +96,9 @@ public class ProjectSettings {
         }
     }
 
-    /**
-     * @return The configured minimum SDK version. Returns 21 if none or an invalid value was set.
-     * @see #SETTING_MINIMUM_SDK_VERSION
-     */
     public int getMinSdkVersion() {
         if (hashmap.containsKey(SETTING_MINIMUM_SDK_VERSION)) {
             try {
-                //noinspection ConstantConditions because we catch that already
                 return Integer.parseInt(hashmap.get(SETTING_MINIMUM_SDK_VERSION));
             } catch (NumberFormatException | NullPointerException e) {
                 LogUtil.e(TAG, "Failed to parse the project's minimum SDK version! Defaulting to 21", e);
