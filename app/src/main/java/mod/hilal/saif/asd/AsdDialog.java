@@ -59,6 +59,7 @@ public class AsdDialog extends Dialog implements DialogInterface.OnDismissListen
         EditorUtils.loadJavaConfig(binding.editor);
         SrcCodeEditor.loadCESettings(act, binding.editor, "dlg");
         pref = SrcCodeEditor.pref;
+        binding.editor.setSearchPanel(binding.searchPanel);
 
         Menu menu = binding.toolbar.getMenu();
         MenuItem itemWordwrap = menu.findItem(R.id.action_word_wrap);
@@ -109,13 +110,20 @@ public class AsdDialog extends Dialog implements DialogInterface.OnDismissListen
             } else if (id == R.id.action_paste) {
                 binding.editor.pasteText();
             } else if (id == R.id.action_find_replace) {
-                binding.editor.getSearcher().stopSearch();
                 binding.editor.beginSearchMode();
             }
             return true;
         });
 
         setOnDismissListener(this);
+    }
+
+    @Override
+    public void onBackPressed() {
+        if (binding.searchPanel != null && binding.searchPanel.handleBackPressed()) {
+            return;
+        }
+        super.onBackPressed();
     }
 
     @Override

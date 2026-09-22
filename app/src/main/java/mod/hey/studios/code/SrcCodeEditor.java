@@ -432,6 +432,7 @@ public class SrcCodeEditor extends BaseAppCompatActivity {
         }
 
         loadCESettings(this, binding.editor, "act", true);
+        binding.editor.setSearchPanel(binding.searchPanel);
         loadToolbar();
 
         UI.addSystemWindowInsetToPadding(binding.appBarLayout, true, true, true, false);
@@ -478,6 +479,9 @@ public class SrcCodeEditor extends BaseAppCompatActivity {
 
     @Override
     public void onBackPressed() {
+        if (binding.searchPanel != null && binding.searchPanel.handleBackPressed()) {
+            return;
+        }
         if (beforeContent.equals(binding.editor.getText().toString())) {
             super.onBackPressed();
         } else {

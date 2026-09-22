@@ -1,0 +1,209 @@
+<?xml version="1.0" encoding="utf-8"?>
+<com.google.android.material.card.MaterialCardView
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/search_panel_card"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    app:cardBackgroundColor="?attr/colorSurfaceContainerHigh"
+    app:cardCornerRadius="12dp"
+    app:cardElevation="4dp"
+    app:strokeWidth="1dp"
+    app:strokeColor="?attr/colorSurfaceContainerHighest"
+    android:layout_marginHorizontal="8dp"
+    android:layout_marginVertical="4dp">
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        android:padding="6dp">
+
+        <!-- Search Row -->
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:gravity="center_vertical"
+            android:orientation="horizontal">
+
+            <com.google.android.material.button.MaterialButton
+                android:id="@+id/btn_toggle_replace"
+                style="@style/Widget.Material3.Button.IconButton"
+                android:layout_width="36dp"
+                android:layout_height="36dp"
+                android:padding="0dp"
+                app:icon="@drawable/ic_mtrl_arrow_down"
+                app:iconSize="18dp"
+                app:iconTint="?attr/colorOnSurfaceVariant"
+                android:contentDescription="Toggle Replace" />
+
+            <LinearLayout
+                android:layout_width="0dp"
+                android:layout_height="38dp"
+                android:layout_weight="1"
+                android:background="@drawable/bg_search_input"
+                android:gravity="center_vertical"
+                android:orientation="horizontal"
+                android:paddingHorizontal="8dp">
+
+                <EditText
+                    android:id="@+id/et_search"
+                    android:layout_width="0dp"
+                    android:layout_height="match_parent"
+                    android:layout_weight="1"
+                    android:background="@null"
+                    android:hint="Find"
+                    android:imeOptions="actionSearch|flagNoExtractUi"
+                    android:inputType="textNoSuggestions"
+                    android:maxLines="1"
+                    android:paddingHorizontal="4dp"
+                    android:textAppearance="?attr/textAppearanceBodyMedium"
+                    android:textColor="?attr/colorOnSurface"
+                    android:textColorHint="?attr/colorOnSurfaceVariant" />
+
+                <!-- Search Options Toggles -->
+                <com.google.android.material.button.MaterialButton
+                    android:id="@+id/btn_match_case"
+                    style="@style/Widget.Material3.Button.IconButton"
+                    android:layout_width="28dp"
+                    android:layout_height="28dp"
+                    android:padding="0dp"
+                    app:icon="@drawable/ic_case_sensitive"
+                    app:iconSize="16dp"
+                    app:iconGravity="textStart"
+                    app:iconTint="?attr/colorOnSurfaceVariant"
+                    android:contentDescription="Match Case" />
+
+                <com.google.android.material.button.MaterialButton
+                    android:id="@+id/btn_match_word"
+                    style="@style/Widget.Material3.Button.IconButton"
+                    android:layout_width="28dp"
+                    android:layout_height="28dp"
+                    android:padding="0dp"
+                    app:icon="@drawable/ic_whole_word"
+                    app:iconSize="16dp"
+                    app:iconGravity="textStart"
+                    app:iconTint="?attr/colorOnSurfaceVariant"
+                    android:contentDescription="Match Whole Word" />
+
+                <com.google.android.material.button.MaterialButton
+                    android:id="@+id/btn_regex"
+                    style="@style/Widget.Material3.Button.IconButton"
+                    android:layout_width="28dp"
+                    android:layout_height="28dp"
+                    android:padding="0dp"
+                    app:iconGravity="textStart"
+                    app:icon="@drawable/ic_regex"
+                    app:iconSize="16dp"
+                    app:iconTint="?attr/colorOnSurfaceVariant"
+                    android:contentDescription="Use Regular Expression" />
+            </LinearLayout>
+
+            <TextView
+                android:id="@+id/tv_match_count"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="4dp"
+                android:textAppearance="?attr/textAppearanceLabelSmall"
+                android:textColor="?attr/colorOnSurfaceVariant"
+                tools:text="1 of 5" />
+
+            <com.google.android.material.button.MaterialButton
+                android:id="@+id/btn_prev_match"
+                style="@style/Widget.Material3.Button.IconButton"
+                android:layout_width="36dp"
+                android:layout_height="36dp"
+                android:padding="0dp"
+                app:icon="@drawable/ic_mtrl_arrow_up"
+                app:iconGravity="textStart"
+                app:iconSize="18dp"
+                app:iconTint="?attr/colorOnSurfaceVariant"
+                android:contentDescription="Previous Match" />
+
+            <com.google.android.material.button.MaterialButton
+                android:id="@+id/btn_next_match"
+                style="@style/Widget.Material3.Button.IconButton"
+                android:layout_width="36dp"
+                android:layout_height="36dp"
+                android:padding="0dp"
+                app:icon="@drawable/ic_mtrl_arrow_down"
+                app:iconSize="18dp"
+                app:iconGravity="textStart"
+                app:iconTint="?attr/colorOnSurfaceVariant"
+                android:contentDescription="Next Match" />
+
+            <com.google.android.material.button.MaterialButton
+                android:id="@+id/btn_close_search"
+                style="@style/Widget.Material3.Button.IconButton"
+                android:layout_width="36dp"
+                android:layout_height="36dp"
+                android:padding="0dp"
+                app:icon="@drawable/ic_mtrl_close"
+                app:iconSize="18dp"
+                app:iconGravity="textStart"
+                app:iconTint="?attr/colorOnSurfaceVariant"
+                android:contentDescription="Close" />
+        </LinearLayout>
+
+        <!-- Replace Row -->
+        <LinearLayout
+            android:id="@+id/layout_replace"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="4dp"
+            android:gravity="center_vertical"
+            android:orientation="horizontal"
+            android:visibility="gone"
+            tools:visibility="visible">
+
+            <View
+                android:layout_width="36dp"
+                android:layout_height="0dp" />
+
+            <LinearLayout
+                android:layout_width="0dp"
+                android:layout_height="38dp"
+                android:layout_weight="1"
+                android:background="@drawable/bg_search_input"
+                android:gravity="center_vertical"
+                android:orientation="horizontal"
+                android:paddingHorizontal="8dp">
+
+                <EditText
+                    android:id="@+id/et_replace"
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent"
+                    android:background="@null"
+                    android:hint="Replace with"
+                    android:imeOptions="actionDone|flagNoExtractUi"
+                    android:inputType="textNoSuggestions"
+                    android:maxLines="1"
+                    android:paddingHorizontal="4dp"
+                    android:textAppearance="?attr/textAppearanceBodyMedium"
+                    android:textColor="?attr/colorOnSurface"
+                    android:textColorHint="?attr/colorOnSurfaceVariant" />
+            </LinearLayout>
+
+            <com.google.android.material.button.MaterialButton
+                android:id="@+id/btn_replace"
+                style="@style/Widget.Material3.Button.OutlinedButton"
+                android:layout_width="wrap_content"
+                android:layout_height="38dp"
+                android:paddingHorizontal="0dp"
+                android:text="Replace"
+                android:layout_marginHorizontal="4dp"
+                android:contentDescription="Replace" />
+
+            <com.google.android.material.button.MaterialButton
+                android:id="@+id/btn_replace_all"
+                style="@style/Widget.Material3.Button.OutlinedButton"
+                android:layout_width="wrap_content"
+                android:layout_height="38dp"
+                android:paddingHorizontal="0dp"
+                android:text="Replace All"
+                android:contentDescription="Replace All" />
+        </LinearLayout>
+
+    </LinearLayout>
+</com.google.android.material.card.MaterialCardView>

@@ -60,8 +60,23 @@ public class Lx {
                 .append("\r\n")
                 .append("versionName \"")
                 .append(metadata.versionName)
-                .append("\"\r\n")
-                .append("}\r\n")
+                .append("\"\r\n");
+
+        boolean nativeEnabled = new ProjectSettings(metadata.sc_id)
+                .getValue(ProjectSettings.SETTING_ENABLE_NATIVE, "false")
+                .equals("true");
+        if (nativeEnabled) {
+            content.append("externalNativeBuild {\r\n")
+                   .append("cmake {\r\n")
+                   .append("cppFlags ''\r\n")
+                   .append("}\r\n")
+                   .append("}\r\n")
+                   .append("ndk {\r\n")
+                   .append("abiFilters 'arm64-v8a', 'armeabi-v7a', 'x86', 'x86_64'\r\n")
+                   .append("}\r\n");
+        }
+
+        content.append("}\r\n")
                 .append("\r\n")
                 .append("buildTypes {\r\n")
                 .append("release {\r\n")
@@ -70,13 +85,10 @@ public class Lx {
                 .append("}\r\n")
                 .append("}\r\n");
 
-        boolean nativeEnabled = new ProjectSettings(metadata.sc_id)
-                .getValue(ProjectSettings.SETTING_ENABLE_NATIVE, "false")
-                .equals("true");
         if (nativeEnabled) {
             content.append("externalNativeBuild {\r\n")
                    .append("cmake {\r\n")
-                   .append("path \"CMakeLists.txt\"\r\n")
+                   .append("path file('src/main/cpp/CMakeLists.txt')\r\n")
                    .append("}\r\n")
                    .append("}\r\n");
         }

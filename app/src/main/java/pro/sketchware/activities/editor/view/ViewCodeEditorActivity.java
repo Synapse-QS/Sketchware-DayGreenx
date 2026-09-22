@@ -57,6 +57,9 @@ public class ViewCodeEditorActivity extends BaseAppCompatActivity {
             new OnBackPressedCallback(true) {
                 @Override
                 public void handleOnBackPressed() {
+                    if (binding.searchPanel != null && binding.searchPanel.handleBackPressed()) {
+                        return;
+                    }
                     if (isContentModified()) {
                         MaterialAlertDialogBuilder dialog = new MaterialAlertDialogBuilder(ViewCodeEditorActivity.this);
                         dialog.setIcon(R.drawable.ic_warning_96dp);
@@ -113,6 +116,7 @@ public class ViewCodeEditorActivity extends BaseAppCompatActivity {
         });
         content = getIntent().getStringExtra("content");
         editor = binding.editor;
+        editor.setSearchPanel(binding.searchPanel);
         editor.setScId(sc_id);
         editor.setTypefaceText(EditorUtils.getTypeface(this));
         editor.setTextSize(14);
@@ -151,6 +155,7 @@ public class ViewCodeEditorActivity extends BaseAppCompatActivity {
             menu.add(Menu.NONE, 3, Menu.NONE, "Edit AppCompat");
         }
         menu.add(Menu.NONE, 5, Menu.NONE, "Layout Preview");
+        menu.add(Menu.NONE, 6, Menu.NONE, "Find & Replace");
         return true;
     }
 
@@ -175,6 +180,10 @@ public class ViewCodeEditorActivity extends BaseAppCompatActivity {
             }
             case 5 -> {
                 toLayoutPreview();
+                return true;
+            }
+            case 6 -> {
+                editor.beginSearchMode();
                 return true;
             }
             default -> {

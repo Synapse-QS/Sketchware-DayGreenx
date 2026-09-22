@@ -73,6 +73,36 @@ public class ExportSource {
             kCVar.b(project_metadata.resDirectoryPath + File.separator + "drawable-xhdpi");
             kCVar.c(project_metadata.resDirectoryPath + File.separator + "raw");
             kCVar.a(project_metadata.assetsPath + File.separator + "fonts");
+
+            pro.sketchware.utility.FilePathUtil util = new pro.sketchware.utility.FilePathUtil();
+            File pathJava = new File(util.getPathJava(sc_id));
+            File pathResources = new File(util.getPathResource(sc_id));
+            File pathAssets = new File(util.getPathAssets(sc_id));
+            File pathNativeLibraries = new File(util.getPathNativelibs(sc_id));
+            File pathNativeSources = new File(util.getPathNative(sc_id));
+
+            if (pathJava.exists()) {
+                FileUtil.copyDirectory(pathJava, new File(project_metadata.javaFilesPath + File.separator + project_metadata.packageNameAsFolders));
+            }
+            if (pathResources.exists()) {
+                FileUtil.copyDirectory(pathResources, new File(project_metadata.resDirectoryPath));
+            }
+            String pathProguard = util.getPathProguard(sc_id);
+            if (FileUtil.isExistFile(pathProguard)) {
+                FileUtil.copyFile(pathProguard, project_metadata.proguardFilePath);
+            }
+            if (pathAssets.exists()) {
+                FileUtil.copyDirectory(pathAssets, new File(project_metadata.assetsPath));
+            }
+            if (pathNativeLibraries.exists()) {
+                FileUtil.copyDirectory(pathNativeLibraries, new File(project_metadata.generatedFilesPath, "jniLibs"));
+            }
+            if (pathNativeSources.exists()) {
+                File cppDest = new File(project_metadata.generatedFilesPath, "cpp");
+                FileUtil.copyDirectory(pathNativeSources, cppDest);
+                ensureCMakeLists(cppDest);
+            }
+
             project_metadata.f();
 
             /* It makes no sense that those methods aren't static */
@@ -95,5 +125,42 @@ public class ExportSource {
     private static void updateStatus(TextView statusTextView, String msg) {
         if (statusTextView == null || statusTextView.getContext() == null) return;
         ((Activity) statusTextView.getContext()).runOnUiThread(() -> statusTextView.setText(msg));
+    }
+
+    public static void ensureCMakeLists(File cppDir) {
+        if (!cppDir.exists()) return;
+        File cmakeFile = new File(cppDir, "CMakeLists.txt");
+        if (!cmakeFile.exists()) {
+            StringBuilder sb = new StringBuilder();
+            sb.append("cmake_minimum_required(VERSION 3.22.1)\r\n\r\n");
+            sb.append("project(\"native-lib\")\r\n\r\n");
+            sb.append("add_library(\r\n");
+            sb.append("    native-lib\r\n");
+            sb.append("    SHARED\r\n");
+            File[] files = cppDir.listFiles();
+            boolean hasSources = false;
+            if (files != null) {
+                for (File f : files) {
+                    String name = f.getName();
+                    if (name.endsWith(".cpp") || name.endsWith(".c") || name.endsWith(".cc")) {
+                        sb.append("    ").append(name).append("\r\n");
+                        hasSources = true;
+                    }
+                }
+            }
+            if (!hasSources) {
+                sb.append("    native-lib.cpp\r\n");
+            }
+            sb.append(")\r\n\r\n");
+            sb.append("find_library(\r\n");
+            sb.append("    log-lib\r\n");
+            sb.append("    log\r\n");
+            sb.append(")\r\n\r\n");
+            sb.append("target_link_libraries(\r\n");
+            sb.append("    native-lib\r\n");
+            sb.append("    ${log-lib}\r\n");
+            sb.append(")\r\n");
+            FileUtil.writeFile(cmakeFile.getAbsolutePath(), sb.toString());
+        }
     }
 }
