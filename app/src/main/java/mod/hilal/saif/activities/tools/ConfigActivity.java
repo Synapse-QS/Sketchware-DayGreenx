@@ -42,6 +42,7 @@ import pro.sketchware.databinding.ActivityAppSettingsBinding;
 import pro.sketchware.databinding.DialogCreateNewFileLayoutBinding;
 import pro.sketchware.utility.FileUtil;
 import pro.sketchware.utility.SketchwareUtil;
+import pro.sketchware.dialogs.LanguagePickerDialog;
 
 public class ConfigActivity extends BaseAppCompatActivity {
 
@@ -364,6 +365,10 @@ public class ConfigActivity extends BaseAppCompatActivity {
             Intent intent = new Intent(this, SettingsActivity.class);
             intent.putExtra(SettingsActivity.FRAGMENT_TAG_EXTRA, SettingsActivity.SETTINGS_APPEARANCE_FRAGMENT);
             startActivity(intent);
+        }), true);
+        
+        appearanceCategory.addLibraryItem(createPreference(R.drawable.ic_mtrl_web, "Change Language", "Change the display language of the app", v -> {
+            LanguagePickerDialog.show(this);
         }), false);
 
         LibraryCategoryView systemCategory = new LibraryCategoryView(this);
