@@ -575,7 +575,7 @@ public class SrcCodeEditor extends BaseAppCompatActivity {
                         break;
 
                     case "Find & Replace":
-                        binding.editor.getSearcher().openOrDismiss();
+                        binding.editor.getSearcher().search();
                         break;
 
                     case "Word wrap":
