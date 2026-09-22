@@ -3,26 +3,16 @@ package pro.sketchware.dialogs;
 import android.app.Activity;
 import android.content.Context;
 import android.content.SharedPreferences;
-import android.os.Build;
-import android.view.LayoutInflater;
-import android.view.View;
-import android.view.ViewGroup;
-import android.widget.TextView;
 
-import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatDelegate;
 import androidx.core.os.LocaleListCompat;
-import androidx.recyclerview.widget.LinearLayoutManager;
-import androidx.recyclerview.widget.RecyclerView;
 
 import com.google.android.material.dialog.MaterialAlertDialogBuilder;
 
 import java.util.Arrays;
 import java.util.List;
-import java.util.Locale;
 
 import pro.sketchware.R;
-import pro.sketchware.utility.ThemeUtils;
 
 public class LanguagePickerDialog {
 
@@ -33,36 +23,46 @@ public class LanguagePickerDialog {
             new String[]{"system", "Follow system"},
             new String[]{"en", "English"},
             new String[]{"id", "Bahasa Indonesia"},
-            new String[]{"zh", "中文 (Chinese)"},
-            new String[]{"ar", "العربية (Arabic)"},
-            new String[]{"tr", "Türkçe (Turkish)"}
+            new String[]{"ko", "한국어 (Korean)"},
+            new String[]{"zh-CN", "简体中文 (Chinese Simplified)"},
+            new String[]{"zh-TW", "繁體中文 (Chinese Traditional)"},
+            new String[]{"ja", "日本語 (Japanese)"},
+            new String[]{"tr", "Türkçe (Turkish)"},
+            new String[]{"es", "Español (Spanish)"},
+            new String[]{"fr", "Français (French)"},
+            new String[]{"de", "Deutsch (German)"},
+            new String[]{"ru", "Русский (Russian)"},
+            new String[]{"pt", "Português (Portuguese)"}
     );
 
     public static void show(Activity activity) {
         String currentLang = getSavedLanguage(activity);
 
-        int[] selectedIndex = {0};
+        // Cari indeks bahasa yang sedang aktif
+        int selectedIndex = 0;
         for (int i = 0; i < LANGUAGES.size(); i++) {
             if (LANGUAGES.get(i)[0].equals(currentLang)) {
-                selectedIndex[0] = i;
+                selectedIndex = i;
                 break;
             }
         }
 
-        RecyclerView recyclerView = new RecyclerView(activity);
-        recyclerView.setLayoutManager(new LinearLayoutManager(activity));
-        LanguageAdapter adapter = new LanguageAdapter(activity, LANGUAGES, selectedIndex[0]);
-        recyclerView.setAdapter(adapter);
+        // Ambil daftar nama label bahasa untuk ditampilkan di Radio Group
+        CharSequence[] labels = new CharSequence[LANGUAGES.size()];
+        for (int i = 0; i < LANGUAGES.size(); i++) {
+            labels[i] = LANGUAGES.get(i)[1];
+        }
 
-        int padding = (int) (16 * activity.getResources().getDisplayMetrics().density);
-        recyclerView.setPadding(0, padding, 0, 0);
+        final int[] checkedItem = {selectedIndex};
 
         new MaterialAlertDialogBuilder(activity)
                 .setTitle("Choose Language")
-                .setView(recyclerView)
+                .setSingleChoiceItems(labels, selectedIndex, (dialog, which) -> {
+                    checkedItem[0] = which;
+                })
                 .setNegativeButton(R.string.common_word_cancel, null)
                 .setPositiveButton("OK", (dialog, which) -> {
-                    String picked = LANGUAGES.get(adapter.getSelected())[0];
+                    String picked = LANGUAGES.get(checkedItem[0])[0];
                     saveLanguage(activity, picked);
                     applyLanguage(picked);
                     activity.recreate();
@@ -91,69 +91,5 @@ public class LanguagePickerDialog {
 
     private static void saveLanguage(Context context, String langCode) {
         context.getSharedPreferences(PREF_NAME, Context.MODE_PRIVATE).edit().putString(PREF_LANGUAGE, langCode).apply();
-    }
-
-    private static class LanguageAdapter extends RecyclerView.Adapter<LanguageAdapter.VH> {
-
-        private final Activity activity;
-        private final List<String[]> items;
-        private int selected;
-
-        LanguageAdapter(Activity activity, List<String[]> items, int selected) {
-            this.activity = activity;
-            this.items = items;
-            this.selected = selected;
-        }
-
-        int getSelected() {
-            return selected;
-        }
-
-        @NonNull
-        @Override
-        public VH onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
-            // Layout sederhana: TextView dengan padding
-            TextView tv = new TextView(activity);
-            int paddingH = (int) (24 * activity.getResources().getDisplayMetrics().density);
-            int paddingV = (int) (16 * activity.getResources().getDisplayMetrics().density);
-            tv.setPadding(paddingH, paddingV, paddingH, paddingV);
-            tv.setTextSize(16);
-            tv.setLayoutParams(new RecyclerView.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT));
-            return new VH(tv);
-        }
-
-        @Override
-        public void onBindViewHolder(@NonNull VH holder, int position) {
-            String label = items.get(position)[1];
-            holder.tv.setText(label);
-
-            if (position == selected) {
-                holder.tv.setTextColor(ThemeUtils.getColor(activity, R.attr.colorPrimary));
-                holder.tv.setTypeface(null, android.graphics.Typeface.BOLD);
-            } else {
-                holder.tv.setTextColor(ThemeUtils.getColor(activity, R.attr.colorOnSurface));
-                holder.tv.setTypeface(null, android.graphics.Typeface.NORMAL);
-            }
-
-            holder.tv.setOnClickListener(v -> {
-                int prev = selected;
-                selected = holder.getAdapterPosition();
-                notifyItemChanged(prev);
-                notifyItemChanged(selected);
-            });
-        }
-
-        @Override
-        public int getItemCount() {
-            return items.size();
-        }
-
-        static class VH extends RecyclerView.ViewHolder {
-            TextView tv;
-            VH(TextView tv) {
-                super(tv);
-                this.tv = tv;
-            }
-        }
     }
 }
