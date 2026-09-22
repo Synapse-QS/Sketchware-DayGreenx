@@ -22,6 +22,7 @@ import java.util.List;
 import java.util.Locale;
 
 import pro.sketchware.R;
+import pro.sketchware.utility.ThemeUtils;
 
 public class LanguagePickerDialog {
 
@@ -127,10 +128,10 @@ public class LanguagePickerDialog {
             holder.tv.setText(label);
 
             if (position == selected) {
-                holder.tv.setTextColor(pro.sketchware.utility.theme.ThemeUtils.getAttrColor(activity, com.google.android.material.R.attr.colorPrimary));
+                holder.tv.setTextColor(ThemeUtils.getColor(activity, R.attr.colorPrimary));
                 holder.tv.setTypeface(null, android.graphics.Typeface.BOLD);
             } else {
-                holder.tv.setTextColor(pro.sketchware.utility.theme.ThemeUtils.getAttrColor(activity, com.google.android.material.R.attr.colorOnSurface));
+                holder.tv.setTextColor(ThemeUtils.getColor(activity, R.attr.colorOnSurface));
                 holder.tv.setTypeface(null, android.graphics.Typeface.NORMAL);
             }
 
