@@ -404,8 +404,6 @@ public class SrcCodeEditor extends BaseAppCompatActivity {
             beforeContent = FileUtil.readFile(getIntent().getStringExtra("content"));
         binding.editor.setText(beforeContent);
 
-        // DIUBAH: fromAndroidManifest sekarang dicek PALING AWAL, terpisah dari title.endsWith(".xml"),
-        // karena title untuk kasus ini ("<Activity> Components") gak diakhiri ".xml" jadi dulu gak kena config apapun.
         if (fromAndroidManifest) {
             EditorUtils.loadXmlConfig(binding.editor, "AndroidManifest.xml");
             languageId = 2;
@@ -417,7 +415,6 @@ public class SrcCodeEditor extends BaseAppCompatActivity {
             selectTheme(binding.editor, 0);
             languageId = 1;
         } else if (title.endsWith(".xml")) {
-            // DIUBAH: kirim path file (content) biar autocomplete-nya sesuai jenis file (layout/values/manifest/dst)
             EditorUtils.loadXmlConfig(binding.editor, getIntent().getStringExtra("content"));
             languageId = 2;
         } else if (title.endsWith(".cpp") || title.endsWith(".hpp")) {
@@ -578,12 +575,15 @@ public class SrcCodeEditor extends BaseAppCompatActivity {
                         break;
 
                     case "Find & Replace":
-                        item.setChecked(!item.isChecked());
-                        binding.editor.setWordwrap(item.isChecked());
-
-                        pref.edit().putBoolean("act_ww", item.isChecked()).apply();
+                        binding.editor.getSearcher().openOrDismiss();
                         break;
 
+                    case "Word wrap":
+                        item.setChecked(!item.isChecked());
+                        binding.editor.setWordwrap(item.isChecked());
+                        pref.edit().putBoolean("act_ww", item.isChecked()).apply();
+                        break;
+  
                     case "Auto complete symbol pair":
                         item.setChecked(!item.isChecked());
                         binding.editor.getProps().symbolPairAutoCompletion = item.isChecked();

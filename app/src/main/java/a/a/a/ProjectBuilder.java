@@ -980,6 +980,8 @@ public class ProjectBuilder {
     }
 
     public void compileNativeCode() throws Exception {
+        String val = settings.getValue(ProjectSettings.SETTING_ENABLE_NATIVE, "false");
+        if (!val.equals("true")) return;
         new NativeCompiler(this, progressReceiver).compile();
     }
 

@@ -129,7 +129,14 @@ public class DesignDrawer extends LinearLayout {
         addDrawerItem(R.id.item_font_manager, R.drawable.ic_mtrl_font, R.string.design_drawer_menu_title_font, R.string.design_drawer_menu_description_font, content);
         addDrawerItem(R.id.item_java_manager, R.drawable.ic_mtrl_java, R.string.text_title_menu_java, R.string.text_subtitle_menu_java, content);
         //native
-        addDrawerItem(R.id.item_native_manager, R.drawable.ic_mtrl_cpp, R.string.text_title_menu_native, R.string.text_subtitle_menu_native, content);
+        Activity activity = (Activity) getContext();
+        String drawerScId = activity instanceof DesignActivity ? DesignActivity.sc_id : null;
+        if (drawerScId != null) {
+            ProjectSettings ps = new ProjectSettings(drawerScId);
+            if (ps.getValue(ProjectSettings.SETTING_ENABLE_NATIVE, "false").equals("true")) {
+                addDrawerItem(R.id.item_native_manager, R.drawable.ic_mtrl_cpp, R.string.text_title_menu_native, R.string.text_subtitle_menu_native, content);
+            }
+        }
         addDrawerItem(R.id.item_resource_manager, R.drawable.ic_mtrl_folder, R.string.text_title_menu_resource, R.string.text_subtitle_menu_resource, content);
         addDrawerItem(R.id.item_resource_editor, R.drawable.ic_mtrl_folder_code, R.string.text_title_menu_resource_editor, R.string.text_subtitle_menu_resource_editor, content);
         addDrawerItem(R.id.item_assets_manager, R.drawable.ic_mtrl_file_present, R.string.text_title_menu_assets, R.string.text_subtitle_menu_assets, content);
@@ -143,8 +150,6 @@ public class DesignDrawer extends LinearLayout {
         addDrawerItem(R.id.item_xml_command_manager, R.drawable.ic_mtrl_code, R.string.design_drawer_menu_title_xml_command, R.string.design_drawer_menu_description_xml_command, content);
         addDrawerItem(R.id.item_logcat_reader, R.drawable.ic_mtrl_article, R.string.design_drawer_menu_title_logcat_reader, R.string.design_drawer_menu_subtitle_logcat_reader, content);
 
-        // if you want to show text "Global", uncomment next line
-        // addDrawerSubheaderItem(R.string.design_drawer_menu_bottom_title, this);
         addDrawerDivider(this);
         addDrawerItem(R.id.item_collection_manager, R.drawable.ic_mtrl_bookmark, R.string.design_drawer_menu_title_collection, R.string.design_drawer_menu_description_collection, this);
     }
@@ -166,7 +171,6 @@ public class DesignDrawer extends LinearLayout {
         int maxWidth = SketchwareUtil.dpToPx(300);
         switch (MeasureSpec.getMode(widthSpec)) {
             case MeasureSpec.EXACTLY:
-                // nothing
                 break;
             case MeasureSpec.AT_MOST:
                 widthSpec = MeasureSpec.makeMeasureSpec(Math.min(MeasureSpec.getSize(widthSpec), maxWidth), MeasureSpec.EXACTLY);
