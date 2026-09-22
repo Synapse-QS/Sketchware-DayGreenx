@@ -986,13 +986,8 @@ public class ProjectBuilder {
     }
 
     private void mergeDexes(File target, List<Dex> dexes) throws IOException {
-        int totalSize = 0;
-        for (Dex dex : dexes) {
-            totalSize += dex.getLength();
-        }
-        
-        int bufferSize = Math.max(totalSize * 2, 4 * 1024 * 1024); // minimal 4MB
-        DexMerger merger = new DexMerger(dexes.toArray(new Dex[0]), CollisionPolicy.KEEP_FIRST, new DxContext(), bufferSize);
+        DexMerger merger = new DexMerger(dexes.toArray(new Dex[0]), CollisionPolicy.KEEP_FIRST, new DxContext());
+        merger.setCompactWasteThreshold(0); // paksa compact selalu, kurangi buffer overflow
         merger.merge().writeTo(target);
     }
 
