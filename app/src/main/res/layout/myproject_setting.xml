@@ -404,32 +404,32 @@
                             android:inputType="text" />
                     </com.google.android.material.textfield.TextInputLayout>
 
-                    <CheckBox
+                    <com.google.android.material.materialswitch.MaterialSwitch
                         android:id="@+id/cb_enable_viewbinding"
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
                         android:layout_marginTop="12dp"
                         android:text="Enable ViewBinding" />
 
-                    <CheckBox
+                    <com.google.android.material.materialswitch.MaterialSwitch
                         android:id="@+id/cb_remove_old_methods"
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
                         android:layout_marginTop="4dp"
                         android:text="Remove old deprecated methods" />
 
-                    <CheckBox
+                    <com.google.android.material.materialswitch.MaterialSwitch
                         android:id="@+id/cb_use_new_material_components_app_theme"
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
                         android:layout_marginTop="4dp"
                         android:text="Use MaterialComponents" />
                     
-                    <CheckBox
+                    <com.google.android.material.materialswitch.MaterialSwitch
                         android:id="@+id/cb_enable_native"
-                        android:layout_width="wrap_content"
+                        android:layout_width="match_parent"
                         android:layout_height="wrap_content"
-                        android:layout_marginStart="8dp"
+                        android:layout_marginTop="4dp"
                         android:text="Enable Native Code (C/C++ build)" />    
                 </LinearLayout>
             </com.google.android.material.card.MaterialCardView>

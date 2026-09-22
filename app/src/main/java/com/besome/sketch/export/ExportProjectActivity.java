@@ -1341,6 +1341,12 @@ public class ExportProjectActivity extends BaseAppCompatActivity {
             if (pathNativeLibraries.exists()) {
                 FileUtil.copyDirectory(pathNativeLibraries, new File(project_metadata.generatedFilesPath, "jniLibs"));
             }
+            File pathNativeSources = new File(util.getPathNative(sc_id));
+            if (pathNativeSources.exists()) {
+                File cppDest = new File(project_metadata.generatedFilesPath, "cpp");
+                FileUtil.copyDirectory(pathNativeSources, cppDest);
+                ExportSource.ensureCMakeLists(cppDest);
+            }
 
             ArrayList<String> toCompress = new ArrayList<>();
             toCompress.add(project_metadata.projectMyscPath);

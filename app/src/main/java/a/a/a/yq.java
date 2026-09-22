@@ -299,20 +299,36 @@ public class yq {
      * Generates top-level build.gradle, build.gradle for module ':app' and settings.gradle files.
      */
     public void generateGradleFiles() {
-        //fileUtil.b(projectMyscPath + File.separator + "app" + File.separator + "build.gradle", Lx.getBuildGradleString(VAR_DEFAULT_TARGET_COMPILE_VERSION, VAR_DEFAULT_MIN_SDK_VERSION, projectSettings.getValue(ProjectSettings.SETTING_TARGET_SDK_VERSION, String.valueOf(VAR_DEFAULT_TARGET_SDK_VERSION)), N, projectSettings.getValue(ProjectSettings.SETTING_ENABLE_VIEWBINDING, ProjectSettings.SETTING_GENERIC_VALUE_FALSE).equals(ProjectSettings.SETTING_GENERIC_VALUE_TRUE)));
+        int targetSdk;
+        try {
+            targetSdk = Integer.parseInt(projectSettings.getValue(ProjectSettings.SETTING_TARGET_SDK_VERSION, String.valueOf(VAR_DEFAULT_TARGET_COMPILE_VERSION)));
+        } catch (Exception e) {
+            targetSdk = VAR_DEFAULT_TARGET_COMPILE_VERSION;
+        }
+
         int compileSdk;
         try {
-            compileSdk = Integer.parseInt(projectSettings.getValue(ProjectSettings.SETTING_COMPILE_SDK_VERSION, String.valueOf(VAR_DEFAULT_TARGET_COMPILE_VERSION)));
+            String compileSdkStr = projectSettings.getValue(ProjectSettings.SETTING_COMPILE_SDK_VERSION, "");
+            if (compileSdkStr.isEmpty() || compileSdkStr.equalsIgnoreCase("None")) {
+                compileSdk = Math.max(targetSdk, VAR_DEFAULT_TARGET_COMPILE_VERSION);
+            } else {
+                compileSdk = Integer.parseInt(compileSdkStr);
+            }
+            if (compileSdk < targetSdk) {
+                compileSdk = targetSdk;
+            }
         } catch (NumberFormatException e) {
-            compileSdk = VAR_DEFAULT_TARGET_COMPILE_VERSION;
+            compileSdk = Math.max(targetSdk, VAR_DEFAULT_TARGET_COMPILE_VERSION);
         }
+
         int minSdk;
         try {
             minSdk = Integer.parseInt(projectSettings.getValue(ProjectSettings.SETTING_MINIMUM_SDK_VERSION, String.valueOf(VAR_DEFAULT_MIN_SDK_VERSION)));
         } catch (NumberFormatException e) {
             minSdk = VAR_DEFAULT_MIN_SDK_VERSION;
         }
-        fileUtil.b(projectMyscPath + File.separator + "app" + File.separator + "build.gradle", Lx.getBuildGradleString(compileSdk, minSdk, projectSettings.getValue(ProjectSettings.SETTING_TARGET_SDK_VERSION, String.valueOf(VAR_DEFAULT_TARGET_SDK_VERSION)), N, projectSettings.getValue(ProjectSettings.SETTING_ENABLE_VIEWBINDING, ProjectSettings.SETTING_GENERIC_VALUE_FALSE).equals(ProjectSettings.SETTING_GENERIC_VALUE_TRUE)));
+
+        fileUtil.b(projectMyscPath + File.separator + "app" + File.separator + "build.gradle", Lx.getBuildGradleString(compileSdk, minSdk, String.valueOf(targetSdk), N, projectSettings.getValue(ProjectSettings.SETTING_ENABLE_VIEWBINDING, ProjectSettings.SETTING_GENERIC_VALUE_FALSE).equals(ProjectSettings.SETTING_GENERIC_VALUE_TRUE)));
         fileUtil.b(projectMyscPath + File.separator + "settings.gradle", Lx.a());
         fileUtil.b(projectMyscPath + File.separator + "build.gradle", Lx.c("8.13.1", "4.4.4"));
 

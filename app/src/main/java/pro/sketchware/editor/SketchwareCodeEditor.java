@@ -75,6 +75,28 @@ public class SketchwareCodeEditor extends CodeEditor {
         }
     }
 
+    private pro.sketchware.editor.search.EditorSearchPanel searchPanel;
+
+    public void setSearchPanel(pro.sketchware.editor.search.EditorSearchPanel searchPanel) {
+        this.searchPanel = searchPanel;
+        if (searchPanel != null) {
+            searchPanel.attachToEditor(this);
+        }
+    }
+
+    public pro.sketchware.editor.search.EditorSearchPanel getSearchPanel() {
+        return searchPanel;
+    }
+
+    @Override
+    public void beginSearchMode() {
+        if (searchPanel != null) {
+            searchPanel.show(true);
+        } else {
+            super.beginSearchMode();
+        }
+    }
+
     public String getScId() {
         return this.currentScId;
     }

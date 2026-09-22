@@ -110,7 +110,7 @@
                         android:text="Hide warnings in error log"
                         android:textAppearance="?attr/textAppearanceBodyMedium" />
 
-                    <CheckBox
+                    <com.google.android.material.materialswitch.MaterialSwitch
                         android:id="@+id/cb_no_warnings"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
@@ -141,7 +141,7 @@
                         android:text="Don't include http-legacy-28.dex"
                         android:textAppearance="?attr/textAppearanceBodyMedium" />
 
-                    <CheckBox
+                    <com.google.android.material.materialswitch.MaterialSwitch
                         android:id="@+id/cb_no_http_legacy"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
@@ -172,7 +172,7 @@
                         android:text="Enable debug logcat logs viewable in Logcat Reader. Not enabled in exported AABs/APKs."
                         android:textAppearance="?attr/textAppearanceBodyMedium" />
 
-                    <CheckBox
+                    <com.google.android.material.materialswitch.MaterialSwitch
                         android:id="@+id/cb_enable_logcat"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
