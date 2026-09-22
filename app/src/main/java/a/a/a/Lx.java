@@ -18,6 +18,7 @@ import mod.agus.jcoderz.editor.event.ManageEvent;
 import mod.agus.jcoderz.handle.component.ConstVarComponent;
 import mod.hey.studios.build.BuildSettings;
 import mod.hey.studios.moreblock.ReturnMoreblockManager;
+import mod.hey.studios.project.ProjectSettings;
 import mod.hey.studios.util.Helper;
 import mod.hilal.saif.components.ComponentsHandler;
 import mod.jbk.build.BuiltInLibraries;
@@ -40,7 +41,7 @@ public class Lx {
         StringBuilder content = new StringBuilder("plugins {\r\n" + "id 'com.android.application'\r\n" + "}\r\n" + "\r\n" + "android {\r\n" + "compileSdk " + compileSdkVersion + "\r\n" + "\r\n");
         
         if (new BuildSettings(metadata.sc_id).getValue(BuildSettings.SETTING_NO_HTTP_LEGACY, BuildSettings.SETTING_GENERIC_VALUE_FALSE).equals(BuildSettings.SETTING_GENERIC_VALUE_FALSE)) {
-            content.append("""useLibrary 'org.apache.http.legacy'\r\r""");
+            content.append("useLibrary 'org.apache.http.legacy'\r\r");
         }
         content.append("defaultConfig {\r\n" + "applicationId \"")
                 .append(metadata.packageName)
@@ -68,6 +69,17 @@ public class Lx {
                 .append("proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'\r\n")
                 .append("}\r\n")
                 .append("}\r\n");
+
+        boolean nativeEnabled = new ProjectSettings(metadata.sc_id)
+                .getValue(ProjectSettings.SETTING_ENABLE_NATIVE, "false")
+                .equals("true");
+        if (nativeEnabled) {
+            content.append("externalNativeBuild {\r\n")
+                   .append("cmake {\r\n")
+                   .append("path \"CMakeLists.txt\"\r\n")
+                   .append("}\r\n")
+                   .append("}\r\n");
+        }
 
         if (isViewBindingEnabled) {
             content.append("buildFeatures {\r\n viewBinding true\r\n}\r\n");
@@ -3020,10 +3032,6 @@ public class Lx {
         return sketchwareUtilSource.toString();
     }
 
-    /**
-     * @return Formatted code
-     */
-
     public static String j(String code, boolean indentMultiLineComments) {
         StringBuilder formattedCode = new StringBuilder(4096);
         char[] codeChars = code.toCharArray();
@@ -3367,22 +3375,9 @@ public class Lx {
                 "}\r\n";
     }
 
-    /**
-     * A field's access modifier. Can either be
-     * <code>private</code>, <code>protected</code> or <code>public</code>.
-     */
     public enum AccessModifier {
-        /**
-         * MODE_PRIVATE
-         */
         PRIVATE("private"),
-        /**
-         * MODE_PROTECTED
-         */
         PROTECTED("protected"),
-        /**
-         * MODE_PUBLIC
-         */
         PUBLIC("public");
 
         private final String name;
