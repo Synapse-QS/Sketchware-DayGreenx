@@ -43,6 +43,13 @@ jobs:
             echo "exists=false" >> "$GITHUB_OUTPUT"
           fi
 
+      - name: Get commit message
+        id: commit
+        run: |
+          echo "message<<EOF" >> $GITHUB_OUTPUT
+          git log -1 --pretty=%B >> $GITHUB_OUTPUT
+          echo "EOF" >> $GITHUB_OUTPUT
+
       - name: Create and push tag
         if: steps.check_tag.outputs.exists == 'false'
         run: |
@@ -71,9 +78,9 @@ jobs:
         uses: softprops/action-gh-release@v2
         with:
           tag_name: v${{ steps.version.outputs.version }}
+          body: ${{ steps.commit.outputs.message }}
           files: |
             app/build/outputs/apk/**/release/*.apk
-          generate_release_notes: true
 
       - name: Set up Python
         if: steps.check_tag.outputs.exists == 'false'

@@ -43,7 +43,7 @@ import java.util.List;
 import extensions.anbui.daydream.configs.Configs;
 import extensions.anbui.daydream.library.DRFeatureManager;
 import mod.hey.studios.build.BuildSettings;
-import pro.sketchware.utility.ProjectSettings;
+import mod.hey.studios.project.ProjectSettings;
 import pro.sketchware.databinding.ProjectConfigLayoutBinding;
 import pro.sketchware.utility.SketchwareUtil;
 
