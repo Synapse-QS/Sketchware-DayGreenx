@@ -311,7 +311,12 @@ public class BlocksManager extends BaseAppCompatActivity {
             pallet_listmap = new ArrayList<>();
         }
 
-        binding.paletteRecycler.setAdapter(new PaletteAdapter(pallet_listmap));
+        //binding.paletteRecycler.setAdapter(new PaletteAdapter(pallet_listmap));
+        if (binding.paletteRecycler.getAdapter() == null) {
+           binding.paletteRecycler.setAdapter(new PaletteAdapter(pallet_listmap));
+        } else {
+           ((PaletteAdapter) binding.paletteRecycler.getAdapter()).updateData(pallet_listmap);
+        }
         binding.recycleSub.setText("Blocks: " + (long) getN(-1));
         refreshCount();
     }
@@ -550,6 +555,12 @@ public class BlocksManager extends BaseAppCompatActivity {
         public PaletteAdapter(ArrayList<HashMap<String, Object>> palettes) {
             this.palettes = palettes;
 
+        }
+        
+        public void updateData(ArrayList<HashMap<String, Object>> newData) {
+            palettes.clear();
+            palettes.addAll(newData);
+            notifyDataSetChanged();
         }
 
         @NonNull

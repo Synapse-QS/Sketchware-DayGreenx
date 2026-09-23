@@ -215,7 +215,8 @@ public class ColorPickerDialog extends PopupWindow {
 					bB.b(activity, activity.getString(R.string.picker_color_xml_is_empty), 1).show();
 					return;
 				}
-				if (sc_id != null && finalJ == 2 && !material3LibraryManager.isMaterial3Enabled()) {
+                if (sc_id != null && finalJ == 2 && (material3LibraryManager == null || !material3LibraryManager.isMaterial3Enabled())) {
+				//if (sc_id != null && finalJ == 2 && !material3LibraryManager.isMaterial3Enabled()) {
 					SketchwareUtil.toastError("Please enable Material3 in the Library Manager first");
 					return;
 				}

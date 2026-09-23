@@ -131,11 +131,22 @@ public class ViewBeanFactory {
         if (bean.getClassInfo().a("ImageView")) {
             applyImage(attributes, injectAttributes);
         }
+        
+        var textAttributes = java.util.List.of(
+                "text", "textSize", "textColor", "textStyle", "textColorHint", "hint",
+                "singleLine", "lines", "inputType", "imeOptions", "fontFamily", 
+                "typeface", "letterSpacing", "lineSpacingExtra", "lineSpacingMultiplier", 
+                "textAllCaps", "ellipsize", "maxLines", "minLines"
+        );
+
         for (Map.Entry<String, String> entry : attributes.entrySet()) {
             var attrName = entry.getKey();
             var attrValue = entry.getValue();
             var reference = parseReferName(attrName, ":");
-            if (!AttributeConstants.BUILT_IN_ATTRIBUTES.contains(reference)) {
+            
+            boolean isTextFallback = textAttributes.contains(reference) && !bean.getClassInfo().a("TextView");
+
+            if (!AttributeConstants.BUILT_IN_ATTRIBUTES.contains(reference) || isTextFallback) {
                 // This attribute wasn't included in built-in attributes intentionally
                 if (attrName.equals("style")
                         && bean.type == ViewBean.VIEW_TYPE_WIDGET_PROGRESSBAR) {
@@ -154,6 +165,7 @@ public class ViewBeanFactory {
                 injectAttributes.put(attrName, attrValue);
             }
         }
+        
         if (bean.getClassInfo().b("ListView")
                 || bean.getClassInfo().b("GridView")
                 || bean.getClassInfo().b("Spinner")
