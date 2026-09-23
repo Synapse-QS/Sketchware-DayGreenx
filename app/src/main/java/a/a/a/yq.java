@@ -489,7 +489,7 @@ public class yq {
             fileUtil.b(javaFilesPath + File.separator + packageNameAsFolders + File.separator + fileName, fileContent);
         } else if (fileName.equals("AndroidManifest.xml")) {
             fileUtil.b(androidManifestPath, fileContent);
-        } else if (fileName.equals("colors.xml") || fileName.equals("styles.xml") || fileName.equals("strings.xml")) {
+        } else if (fileName.equals("colors.xml") || fileName.equals("styles.xml") || fileName.equals("strings.xml") || fileName.equals("dimens.xml") || fileName.equals("arrays.xml")) {
             fileUtil.b(resDirectoryPath + File.separator + "values" + File.separator + fileName, fileContent);
         } else if (fileName.equals("provider_paths.xml")) {
             fileUtil.b(resDirectoryPath + File.separator + "xml" + File.separator + fileName, fileContent);

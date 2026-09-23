@@ -2,6 +2,15 @@ package pro.sketchware.dialogs;
 
 import static mod.hey.studios.build.BuildSettings.SETTING_ANDROID_JAR_PATH;
 import static mod.hey.studios.build.BuildSettings.SETTING_CLASSPATH;
+import static mod.hey.studios.build.BuildSettings.SETTING_CMAKE_ABIS;
+import static mod.hey.studios.build.BuildSettings.SETTING_CMAKE_ABI_ARM64_V8A;
+import static mod.hey.studios.build.BuildSettings.SETTING_CMAKE_ABI_ARMEABI_V7A;
+import static mod.hey.studios.build.BuildSettings.SETTING_CMAKE_ABI_X86;
+import static mod.hey.studios.build.BuildSettings.SETTING_CMAKE_ABI_X86_64;
+import static mod.hey.studios.build.BuildSettings.ABI_ARM64_V8A;
+import static mod.hey.studios.build.BuildSettings.ABI_ARMEABI_V7A;
+import static mod.hey.studios.build.BuildSettings.ABI_X86;
+import static mod.hey.studios.build.BuildSettings.ABI_X86_64;
 import static mod.hey.studios.build.BuildSettings.SETTING_DEXER;
 import static mod.hey.studios.build.BuildSettings.SETTING_ENABLE_LOGCAT;
 import static mod.hey.studios.build.BuildSettings.SETTING_JAVA_VERSION;
@@ -16,6 +25,7 @@ import static mod.hey.studios.build.BuildSettings.SETTING_NO_HTTP_LEGACY;
 import static mod.hey.studios.build.BuildSettings.SETTING_NO_WARNINGS;
 
 import android.os.Bundle;
+import android.text.TextUtils;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -26,6 +36,9 @@ import android.widget.RadioGroup;
 import androidx.annotation.NonNull;
 
 import com.google.android.material.bottomsheet.BottomSheetDialogFragment;
+
+import java.util.ArrayList;
+import java.util.List;
 
 import extensions.anbui.daydream.configs.Configs;
 import extensions.anbui.daydream.library.DRFeatureManager;
@@ -44,6 +57,10 @@ public class BuildSettingsBottomSheet extends BottomSheetDialogFragment {
     private static final int VIEW_NO_WARNINGS = totalViews++;
     private static final int VIEW_NO_HTTP_LEGACY = totalViews++;
     private static final int VIEW_ENABLE_LOGCAT = totalViews++;
+    private static final int VIEW_ABI_ARM64_V8A = totalViews++;
+    private static final int VIEW_ABI_ARMEABI_V7A = totalViews++;
+    private static final int VIEW_ABI_X86 = totalViews++;
+    private static final int VIEW_ABI_X86_64 = totalViews++;
     private View[] views;
 
     private ProjectConfigLayoutBinding binding;
@@ -100,6 +117,19 @@ public class BuildSettingsBottomSheet extends BottomSheetDialogFragment {
         setRadioGroupOptions(binding.rgDexer, new String[]{"Dx", "D8"}, SETTING_DEXER, "Dx");
         setRadioGroupOptions(binding.rgJavaVersion, getAvailableJavaVersions(), SETTING_JAVA_VERSION, "1.7");
 
+        String configuredAbis = projectSettings.getValue(SETTING_CMAKE_ABIS, "");
+        if (!configuredAbis.isEmpty()) {
+            binding.chipAbiArm64V8a.setChecked(configuredAbis.contains(ABI_ARM64_V8A));
+            binding.chipAbiArmeabiV7a.setChecked(configuredAbis.contains(ABI_ARMEABI_V7A));
+            binding.chipAbiX86.setChecked(configuredAbis.contains(ABI_X86));
+            binding.chipAbiX8664.setChecked(configuredAbis.contains(ABI_X86_64));
+        } else {
+            setCheckboxValue(binding.chipAbiArm64V8a, SETTING_CMAKE_ABI_ARM64_V8A, true);
+            setCheckboxValue(binding.chipAbiArmeabiV7a, SETTING_CMAKE_ABI_ARMEABI_V7A, true);
+            setCheckboxValue(binding.chipAbiX86, SETTING_CMAKE_ABI_X86, false);
+            setCheckboxValue(binding.chipAbiX8664, SETTING_CMAKE_ABI_X86_64, false);
+        }
+
         setCheckboxValue(binding.cbNoWarnings, SETTING_NO_WARNINGS, true);
         setCheckboxValue(binding.cbNoHttpLegacy, SETTING_NO_HTTP_LEGACY, false);
         setCheckboxValue(binding.cbEnableLogcat, SETTING_ENABLE_LOGCAT, true);
@@ -107,6 +137,14 @@ public class BuildSettingsBottomSheet extends BottomSheetDialogFragment {
         binding.btnCancel.setOnClickListener(v -> dismiss());
         binding.btnSave.setOnClickListener(v -> {
             projectSettings.setValues(views);
+
+            List<String> selectedAbis = new ArrayList<>();
+            if (binding.chipAbiArm64V8a.isChecked()) selectedAbis.add(ABI_ARM64_V8A);
+            if (binding.chipAbiArmeabiV7a.isChecked()) selectedAbis.add(ABI_ARMEABI_V7A);
+            if (binding.chipAbiX86.isChecked()) selectedAbis.add(ABI_X86);
+            if (binding.chipAbiX8664.isChecked()) selectedAbis.add(ABI_X86_64);
+
+            projectSettings.setValue(SETTING_CMAKE_ABIS, TextUtils.join(",", selectedAbis));
             dismiss();
         });
     }
@@ -125,6 +163,10 @@ public class BuildSettingsBottomSheet extends BottomSheetDialogFragment {
         binding.cbNoWarnings.setTag(SETTING_NO_WARNINGS);
         binding.cbNoHttpLegacy.setTag(SETTING_NO_HTTP_LEGACY);
         binding.cbEnableLogcat.setTag(SETTING_ENABLE_LOGCAT);
+        binding.chipAbiArm64V8a.setTag(SETTING_CMAKE_ABI_ARM64_V8A);
+        binding.chipAbiArmeabiV7a.setTag(SETTING_CMAKE_ABI_ARMEABI_V7A);
+        binding.chipAbiX86.setTag(SETTING_CMAKE_ABI_X86);
+        binding.chipAbiX8664.setTag(SETTING_CMAKE_ABI_X86_64);
 
         views[VIEW_ANDROIR_JAR_PATH] = binding.tilAndroidJar.getEditText();
         views[VIEW_CLASS_PATH] = binding.tilClasspath.getEditText();
@@ -133,6 +175,10 @@ public class BuildSettingsBottomSheet extends BottomSheetDialogFragment {
         views[VIEW_JAVA_VERSION] = binding.rgJavaVersion;
         views[VIEW_NO_HTTP_LEGACY] = binding.cbNoHttpLegacy;
         views[VIEW_NO_WARNINGS] = binding.cbNoWarnings;
+        views[VIEW_ABI_ARM64_V8A] = binding.chipAbiArm64V8a;
+        views[VIEW_ABI_ARMEABI_V7A] = binding.chipAbiArmeabiV7a;
+        views[VIEW_ABI_X86] = binding.chipAbiX86;
+        views[VIEW_ABI_X86_64] = binding.chipAbiX8664;
 
         if (DRFeatureManager.getForMinSDK() < 33)
             binding.lnNote.setVisibility(View.GONE);

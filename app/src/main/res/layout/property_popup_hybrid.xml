@@ -37,14 +37,15 @@
         android:id="@+id/ti_input"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
+        style="@style/Widget.SketchwarePro.TextInputLayout.ExposedDropdownMenu"
         tools:visibility="visible"
         android:visibility="gone">
 
-        <com.google.android.material.textfield.TextInputEditText
+        <com.google.android.material.textfield.MaterialAutoCompleteTextView
             android:id="@+id/ed_input"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:inputType="numberDecimal|numberSigned" />
+            android:inputType="text|textNoSuggestions" />
     </com.google.android.material.textfield.TextInputLayout>
 
 </LinearLayout>

@@ -51,6 +51,8 @@ public class TextBean extends nA implements Parcelable {
     @Expose
     public int line;
     @Expose
+    public String resLine;
+    @Expose
     public int singleLine;
     @Expose
     public String text;
@@ -58,6 +60,8 @@ public class TextBean extends nA implements Parcelable {
     public int textColor;
     @Expose
     public String resTextColor;
+    @Expose
+    public String resTextSize;
     @Expose
     public String textFont;
     @Expose
@@ -93,6 +97,8 @@ public class TextBean extends nA implements Parcelable {
         imeOption = parcel.readInt();
         resTextColor = parcel.readString();
         resHintColor = parcel.readString();
+        resTextSize = parcel.readString();
+        resLine = parcel.readString();
     }
 
     public static Parcelable.Creator<TextBean> getCreator() {
@@ -113,6 +119,8 @@ public class TextBean extends nA implements Parcelable {
         imeOption = textBean.imeOption;
         resHintColor = textBean.resHintColor;
         resTextColor = textBean.resTextColor;
+        resTextSize = textBean.resTextSize;
+        resLine = textBean.resLine;
     }
 
     @Override
@@ -130,7 +138,7 @@ public class TextBean extends nA implements Parcelable {
         } else if (textBean.text != null) {
             return false;
         }
-        if (textSize != textBean.textSize || textColor != textBean.textColor || textType != textBean.textType || resTextColor != textBean.resTextColor || resHintColor != textBean.resTextColor) { //new
+        if (textSize != textBean.textSize || textColor != textBean.textColor || textType != textBean.textType || resTextColor != textBean.resTextColor || resHintColor != textBean.resHintColor || resTextSize != textBean.resTextSize) { //new
             return false;
         }
         String str3 = textFont;
@@ -151,7 +159,10 @@ public class TextBean extends nA implements Parcelable {
         } else if (textBean.hint != null) {
             return false;
         }
-        return hintColor == textBean.hintColor && singleLine == textBean.singleLine && line == textBean.line && inputType == textBean.inputType && imeOption == textBean.imeOption || resTextColor == textBean.resTextColor || resHintColor == textBean.resTextColor; //new
+        if (resLine != null ? !resLine.equals(textBean.resLine) : textBean.resLine != null) {
+            return false;
+        }
+        return (hintColor == textBean.hintColor && singleLine == textBean.singleLine && line == textBean.line && inputType == textBean.inputType && imeOption == textBean.imeOption) || (resTextColor != null && resTextColor.equals(textBean.resTextColor)) || (resHintColor != null && resHintColor.equals(textBean.resTextColor));
     }
 
     public void print() {
@@ -172,5 +183,7 @@ public class TextBean extends nA implements Parcelable {
         parcel.writeInt(imeOption);
         parcel.writeString(resTextColor);
         parcel.writeString(resHintColor);
+        parcel.writeString(resTextSize);
+        parcel.writeString(resLine);
     }
 }

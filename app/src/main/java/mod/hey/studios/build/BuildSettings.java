@@ -14,6 +14,16 @@ public class BuildSettings extends ProjectSettings implements Serializable {
     public static final String SETTING_NO_HTTP_LEGACY = "no_http_legacy";
     public static final String SETTING_NO_WARNINGS = "no_warn";
     public static final String SETTING_ENABLE_LOGCAT = "enable_logcat";
+    public static final String SETTING_CMAKE_ABIS = "cmake_abis";
+    public static final String SETTING_CMAKE_ABI_ARM64_V8A = "cmake_abi_arm64_v8a";
+    public static final String SETTING_CMAKE_ABI_ARMEABI_V7A = "cmake_abi_armeabi_v7a";
+    public static final String SETTING_CMAKE_ABI_X86 = "cmake_abi_x86";
+    public static final String SETTING_CMAKE_ABI_X86_64 = "cmake_abi_x86_64";
+
+    public static final String ABI_ARM64_V8A = "arm64-v8a";
+    public static final String ABI_ARMEABI_V7A = "armeabi-v7a";
+    public static final String ABI_X86 = "x86";
+    public static final String ABI_X86_64 = "x86_64";
 
     public static final String SETTING_DEXER_D8 = "D8";
     public static final String SETTING_DEXER_DX = "Dx";

@@ -82,30 +82,54 @@ public class ViewPropertyItems extends LinearLayout implements Kw, View.OnClickL
                 String id = isGeneratedId ? bean.id.substring(1) : bean.id;
                 a(property, id, isGeneratedId, null);
             }
-            case "property_layout_width" -> a(property, bean.layout.width, isNotAdview);
-            case "property_layout_height" -> a(property, bean.layout.height, isNotAdview);
+            case "property_layout_width" -> a(property, bean.layout.width, bean.layout.resWidth, isNotAdview);
+            case "property_layout_height" -> a(property, bean.layout.height, bean.layout.resHeight, isNotAdview);
             case "property_parent_attr" -> setupAttributes(property, bean.parentAttributes);
             case "property_margin" -> {
                 LayoutBean layoutBean = bean.layout;
-                a(property, layoutBean.marginLeft, layoutBean.marginTop, layoutBean.marginRight, layoutBean.marginBottom);
+                a(property, layoutBean.marginLeft, layoutBean.marginTop, layoutBean.marginRight, layoutBean.marginBottom, layoutBean.resMarginLeft, layoutBean.resMarginTop, layoutBean.resMarginRight, layoutBean.resMarginBottom);
             }
             case "property_padding" -> {
                 LayoutBean layoutBean = bean.layout;
-                a("property_padding", layoutBean.paddingLeft, layoutBean.paddingTop, layoutBean.paddingRight, layoutBean.paddingBottom);
+                a("property_padding", layoutBean.paddingLeft, layoutBean.paddingTop, layoutBean.paddingRight, layoutBean.paddingBottom, layoutBean.resPaddingLeft, layoutBean.resPaddingTop, layoutBean.resPaddingRight, layoutBean.resPaddingBottom);
             }
             case "property_orientation" -> c(property, bean.layout.orientation);
-            case "property_weight_sum" -> b(property, String.valueOf(bean.layout.weightSum));
+            case "property_weight_sum" -> {
+                if (bean.layout.resWeightSum != null && !bean.layout.resWeightSum.isEmpty()) {
+                    b(property, bean.layout.resWeightSum);
+                } else {
+                    b(property, String.valueOf(bean.layout.weightSum));
+                }
+            }
             case "property_gravity" -> b(property, bean.layout.gravity);
             case "property_layout_gravity" -> b(property, bean.layout.layoutGravity);
-            case "property_weight" -> b(property, String.valueOf(bean.layout.weight));
+            case "property_weight" -> {
+                if (bean.layout.resWeight != null && !bean.layout.resWeight.isEmpty()) {
+                    b(property, bean.layout.resWeight);
+                } else {
+                    b(property, String.valueOf(bean.layout.weight));
+                }
+            }
             case "property_text" -> b(property, bean.text.text);
-            case "property_text_size" -> c(property, bean.text.textSize);
+            case "property_text_size" -> {
+                if (bean.text.resTextSize != null && !bean.text.resTextSize.isEmpty()) {
+                    b(property, bean.text.resTextSize);
+                } else {
+                    c(property, bean.text.textSize);
+                }
+            }
             case "property_text_style" -> c(property, bean.text.textType);
             case "property_text_color" -> r(property, bean.text.resTextColor, bean.text.textColor);
             case "property_hint" -> b(property, bean.text.hint);
             case "property_hint_color" -> r(property, bean.text.resHintColor, bean.text.hintColor);
             case "property_single_line" -> e(property, bean.text.singleLine);
-            case "property_lines" -> b(property, String.valueOf(bean.text.line));
+            case "property_lines" -> {
+                if (bean.text.resLine != null && !bean.text.resLine.isEmpty()) {
+                    b(property, bean.text.resLine);
+                } else {
+                    b(property, String.valueOf(bean.text.line));
+                }
+            }
             case "property_input_type" -> c(property, bean.text.inputType);
             case "property_ime_option" -> c(property, bean.text.imeOption);
             case "property_image" -> b(property, bean.image.resName, true);
@@ -115,12 +139,48 @@ public class ViewPropertyItems extends LinearLayout implements Kw, View.OnClickL
             case "property_background_color" ->
                     r(property, bean.layout.backgroundResColor, bean.layout.backgroundColor);
             case "property_enabled" -> e(property, bean.enabled);
-            case "property_rotate" -> b(property, String.valueOf(bean.image.rotate));
-            case "property_alpha" -> b(property, String.valueOf(bean.alpha));
-            case "property_translation_x" -> b(property, String.valueOf(bean.translationX));
-            case "property_translation_y" -> b(property, String.valueOf(bean.translationY));
-            case "property_scale_x" -> b(property, String.valueOf(bean.scaleX));
-            case "property_scale_y" -> b(property, String.valueOf(bean.scaleY));
+            case "property_rotate" -> {
+                if (bean.image.resRotate != null && !bean.image.resRotate.isEmpty()) {
+                    b(property, bean.image.resRotate);
+                } else {
+                    b(property, String.valueOf(bean.image.rotate));
+                }
+            }
+            case "property_alpha" -> {
+                if (bean.resAlpha != null && !bean.resAlpha.isEmpty()) {
+                    b(property, bean.resAlpha);
+                } else {
+                    b(property, String.valueOf(bean.alpha));
+                }
+            }
+            case "property_translation_x" -> {
+                if (bean.resTranslationX != null && !bean.resTranslationX.isEmpty()) {
+                    b(property, bean.resTranslationX);
+                } else {
+                    b(property, String.valueOf(bean.translationX));
+                }
+            }
+            case "property_translation_y" -> {
+                if (bean.resTranslationY != null && !bean.resTranslationY.isEmpty()) {
+                    b(property, bean.resTranslationY);
+                } else {
+                    b(property, String.valueOf(bean.translationY));
+                }
+            }
+            case "property_scale_x" -> {
+                if (bean.resScaleX != null && !bean.resScaleX.isEmpty()) {
+                    b(property, bean.resScaleX);
+                } else {
+                    b(property, String.valueOf(bean.scaleX));
+                }
+            }
+            case "property_scale_y" -> {
+                if (bean.resScaleY != null && !bean.resScaleY.isEmpty()) {
+                    b(property, bean.resScaleY);
+                } else {
+                    b(property, String.valueOf(bean.scaleY));
+                }
+            }
             case "property_spinner_mode" -> c(property, bean.spinnerMode);
             case "property_divider_height" -> d(property, bean.dividerHeight);
             case "property_custom_view_listview" -> a(property, bean.customView);
@@ -159,18 +219,20 @@ public class ViewPropertyItems extends LinearLayout implements Kw, View.OnClickL
         addView(colorItem);
     }
 
-    private void a(String key, int left, int top, int right, int bottom) {
+    private void a(String key, int left, int top, int right, int bottom, String resLeft, String resTop, String resRight, String resBottom) {
         PropertyIndentItem indentItem = (PropertyIndentItem) f.get(key);
         if (indentItem == null) {
             indentItem = new PropertyIndentItem(getContext(), !b);
             indentItem.setOrientationItem(getOrientation());
+            indentItem.setScId(sc_id);
             indentItem.setKey(key);
-            indentItem.a(left, top, right, bottom);
+            indentItem.a(left, top, right, bottom, resLeft, resTop, resRight, resBottom);
             indentItem.setTag(key);
             indentItem.setOnPropertyValueChangeListener(this);
             f.put(key, indentItem);
         } else {
-            indentItem.a(left, top, right, bottom);
+            indentItem.setScId(sc_id);
+            indentItem.a(left, top, right, bottom, resLeft, resTop, resRight, resBottom);
         }
 
         addView(indentItem);
@@ -192,7 +254,7 @@ public class ViewPropertyItems extends LinearLayout implements Kw, View.OnClickL
         addView(colorItem);
     }
 
-    private void a(String key, int value, boolean isEnable) {
+    private void a(String key, int value, String resValue, boolean isEnable) {
         PropertyMeasureItem measureItem = (PropertyMeasureItem) f.get(key);
         int isEnabled;
         if (isEnable) {
@@ -204,15 +266,19 @@ public class ViewPropertyItems extends LinearLayout implements Kw, View.OnClickL
         if (measureItem == null) {
             measureItem = new PropertyMeasureItem(getContext(), !b);
             measureItem.setOrientationItem(getOrientation());
+            measureItem.setScId(sc_id);
             measureItem.setItemEnabled(isEnabled);
             measureItem.setKey(key);
             measureItem.setValue(value);
+            measureItem.setResValue(resValue);
             measureItem.setTag(key);
             measureItem.setOnPropertyValueChangeListener(this);
             f.put(key, measureItem);
         } else {
+            measureItem.setScId(sc_id);
             measureItem.setItemEnabled(isEnabled);
             measureItem.setValue(value);
+            measureItem.setResValue(resValue);
         }
 
         addView(measureItem);
@@ -444,12 +510,14 @@ public class ViewPropertyItems extends LinearLayout implements Kw, View.OnClickL
         if (propertySizeItem == null) {
             propertySizeItem = new PropertySizeItem(getContext(), !b);
             propertySizeItem.setOrientationItem(getOrientation());
+            propertySizeItem.setScId(sc_id);
             propertySizeItem.setKey(key);
             propertySizeItem.setValue(value);
             propertySizeItem.setTag(key);
             propertySizeItem.setOnPropertyValueChangeListener(this);
             f.put(key, propertySizeItem);
         } else {
+            propertySizeItem.setScId(sc_id);
             propertySizeItem.setValue(value);
         }
 
@@ -703,31 +771,146 @@ public class ViewPropertyItems extends LinearLayout implements Kw, View.OnClickL
                     case "property_inject" -> bean.inject = inputItem.getValue();
                     case "property_text" -> bean.text.text = inputItem.getValue();
                     case "property_hint" -> bean.text.hint = inputItem.getValue();
-                    case "property_text_size" -> bean.text.textSize = Integer.parseInt(inputItem.getValue());
-                    case "property_weight" ->
-                            bean.layout.weight = Integer.parseInt(inputItem.getValue());
-                    case "property_weight_sum" ->
-                            bean.layout.weightSum = Integer.parseInt(inputItem.getValue());
-                    case "property_rotate" ->
-                            bean.image.rotate = Integer.parseInt(inputItem.getValue());
-                    case "property_alpha" -> bean.alpha = Float.parseFloat(inputItem.getValue());
-                    case "property_translation_x" ->
-                            bean.translationX = Float.parseFloat(inputItem.getValue());
-                    case "property_translation_y" ->
-                            bean.translationY = Float.parseFloat(inputItem.getValue());
-                    case "property_scale_x" -> bean.scaleX = Float.parseFloat(inputItem.getValue());
-                    case "property_scale_y" -> bean.scaleY = Float.parseFloat(inputItem.getValue());
-                    case "property_lines" ->
-                            bean.text.line = Integer.parseInt(inputItem.getValue());
-                    case "property_max" -> bean.max = Integer.parseInt(inputItem.getValue());
-                    case "property_progress" ->
+                    case "property_text_size" -> {
+                        String val = inputItem.getValue();
+                        if (val != null && val.startsWith("@dimen/")) {
+                            bean.text.resTextSize = val;
+                        } else {
+                            bean.text.resTextSize = null;
+                            try {
+                                bean.text.textSize = Integer.parseInt(val);
+                            } catch (Exception ignored) {
+                            }
+                        }
+                    }
+                    case "property_weight" -> {
+                        String val = inputItem.getValue();
+                        if (val != null && val.startsWith("@dimen/")) {
+                            bean.layout.resWeight = val;
+                        } else {
+                            bean.layout.resWeight = null;
+                            try {
+                                bean.layout.weight = Integer.parseInt(val);
+                            } catch (Exception ignored) {
+                            }
+                        }
+                    }
+                    case "property_weight_sum" -> {
+                        String val = inputItem.getValue();
+                        if (val != null && val.startsWith("@dimen/")) {
+                            bean.layout.resWeightSum = val;
+                        } else {
+                            bean.layout.resWeightSum = null;
+                            try {
+                                bean.layout.weightSum = Integer.parseInt(val);
+                            } catch (Exception ignored) {
+                            }
+                        }
+                    }
+                    case "property_rotate" -> {
+                        String val = inputItem.getValue();
+                        if (val != null && val.startsWith("@dimen/")) {
+                            bean.image.resRotate = val;
+                        } else {
+                            bean.image.resRotate = null;
+                            try {
+                                bean.image.rotate = Integer.parseInt(val);
+                            } catch (Exception ignored) {
+                            }
+                        }
+                    }
+                    case "property_alpha" -> {
+                        String val = inputItem.getValue();
+                        if (val != null && val.startsWith("@dimen/")) {
+                            bean.resAlpha = val;
+                        } else {
+                            bean.resAlpha = null;
+                            try {
+                                bean.alpha = Float.parseFloat(val);
+                            } catch (Exception ignored) {
+                            }
+                        }
+                    }
+                    case "property_translation_x" -> {
+                        String val = inputItem.getValue();
+                        if (val != null && val.startsWith("@dimen/")) {
+                            bean.resTranslationX = val;
+                        } else {
+                            bean.resTranslationX = null;
+                            try {
+                                bean.translationX = Float.parseFloat(val);
+                            } catch (Exception ignored) {
+                            }
+                        }
+                    }
+                    case "property_translation_y" -> {
+                        String val = inputItem.getValue();
+                        if (val != null && val.startsWith("@dimen/")) {
+                            bean.resTranslationY = val;
+                        } else {
+                            bean.resTranslationY = null;
+                            try {
+                                bean.translationY = Float.parseFloat(val);
+                            } catch (Exception ignored) {
+                            }
+                        }
+                    }
+                    case "property_scale_x" -> {
+                        String val = inputItem.getValue();
+                        if (val != null && val.startsWith("@dimen/")) {
+                            bean.resScaleX = val;
+                        } else {
+                            bean.resScaleX = null;
+                            try {
+                                bean.scaleX = Float.parseFloat(val);
+                            } catch (Exception ignored) {
+                            }
+                        }
+                    }
+                    case "property_scale_y" -> {
+                        String val = inputItem.getValue();
+                        if (val != null && val.startsWith("@dimen/")) {
+                            bean.resScaleY = val;
+                        } else {
+                            bean.resScaleY = null;
+                            try {
+                                bean.scaleY = Float.parseFloat(val);
+                            } catch (Exception ignored) {
+                            }
+                        }
+                    }
+                    case "property_lines" -> {
+                        String val = inputItem.getValue();
+                        if (val != null && val.startsWith("@dimen/")) {
+                            bean.text.resLine = val;
+                        } else {
+                            bean.text.resLine = null;
+                            try {
+                                bean.text.line = Integer.parseInt(val);
+                            } catch (Exception ignored) {
+                            }
+                        }
+                    }
+                    case "property_max" -> {
+                        try {
+                            bean.max = Integer.parseInt(inputItem.getValue());
+                        } catch (Exception ignored) {
+                        }
+                    }
+                    case "property_progress" -> {
+                        try {
                             bean.progress = Integer.parseInt(inputItem.getValue());
+                        } catch (Exception ignored) {
+                        }
+                    }
                 }
             } else if (view instanceof PropertyMeasureItem measureItem) {
                 if (measureItem.getKey().equals("property_layout_width")) {
                     bean.layout.width = measureItem.getValue();
+                    bean.layout.resWidth = measureItem.getResValue();
                 } else if (measureItem.getKey().equals("property_layout_height")) {
                     bean.layout.height = measureItem.getValue();
+                    bean.layout.resHeight = measureItem.getResValue();
                 }
             } else if (view instanceof PropertySelectorItem selectorItem) {
                 switch (selectorItem.getKey()) {
@@ -789,12 +972,20 @@ public class ViewPropertyItems extends LinearLayout implements Kw, View.OnClickL
                     layout.marginTop = indentItem.k;
                     layout.marginRight = indentItem.l;
                     layout.marginBottom = indentItem.m;
+                    layout.resMarginLeft = indentItem.resLeft;
+                    layout.resMarginTop = indentItem.resTop;
+                    layout.resMarginRight = indentItem.resRight;
+                    layout.resMarginBottom = indentItem.resBottom;
                 } else if (indentItem.getKey().equals("property_padding")) {
                     LayoutBean layout = bean.layout;
                     layout.paddingLeft = indentItem.j;
                     layout.paddingTop = indentItem.k;
                     layout.paddingRight = indentItem.l;
                     layout.paddingBottom = indentItem.m;
+                    layout.resPaddingLeft = indentItem.resLeft;
+                    layout.resPaddingTop = indentItem.resTop;
+                    layout.resPaddingRight = indentItem.resRight;
+                    layout.resPaddingBottom = indentItem.resBottom;
                 }
             } else if (view instanceof PropertyGravityItem gravityItem) {
                 if (gravityItem.getKey().equals("property_gravity")) {

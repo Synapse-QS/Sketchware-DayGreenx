@@ -127,6 +127,7 @@ import mod.jbk.diagnostic.MissingFileException;
 import mod.jbk.util.LogUtil;
 import mod.khaled.logcat.LogReaderActivity;
 
+import org.sketchware.daygreen.FileCheckUtils;
 import org.sketchware.daygreen.builds.BuildCache;
 
 import pro.sketchware.R;
@@ -136,6 +137,7 @@ import pro.sketchware.activities.editor.view.CodeViewerActivity;
 import pro.sketchware.activities.editor.view.ViewCodeEditorActivity;
 import pro.sketchware.activities.resourceseditor.ResourcesEditorActivity;
 import pro.sketchware.dialogs.BuildSettingsBottomSheet;
+import mod.hilal.saif.activities.tools.AppSettings;
 import pro.sketchware.utility.FileUtil;
 import pro.sketchware.utility.SketchwareUtil;
 import pro.sketchware.utility.ThemeUtils;
@@ -555,6 +557,11 @@ public class DesignActivity extends BaseAppCompatActivity implements View.OnClic
             if (currentBuildTask != null && currentBuildTask.isBuilding) return;
 
             if (!DRProjectTracker.isAllowBuildNow(DesignActivity.this)) return;
+
+            if (!FileCheckUtils.isAaptDownloaded(this) || !FileCheckUtils.isSdkDownloaded(this)) {
+                showMissingToolsDialog();
+                return;
+            }
 
             BuildTask buildTask = new BuildTask(this);
             currentBuildTask = buildTask;
@@ -1212,6 +1219,19 @@ public class DesignActivity extends BaseAppCompatActivity implements View.OnClic
         } else {
             optionalLauncher.launch(intent);
         }
+    }
+
+    private void showMissingToolsDialog() {
+        new MaterialAlertDialogBuilder(this)
+                .setTitle("Missing Tools")
+                .setMessage("Required build tools (AAPT/SDK) are not downloaded yet. Please download them in App Settings to run your project.")
+                .setPositiveButton("Open Settings", (dialog, which) -> {
+                    Intent intent = new Intent(this, AppSettings.class);
+                    intent.setFlags(Intent.FLAG_ACTIVITY_SINGLE_TOP);
+                    startActivity(intent);
+                })
+                .setNegativeButton("Cancel", null)
+                .show();
     }
 
     private abstract static class BaseTask {

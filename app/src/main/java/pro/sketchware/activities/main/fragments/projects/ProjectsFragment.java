@@ -79,11 +79,6 @@ public class ProjectsFragment extends DA {
     }
 
     public void toDesignActivity(String sc_id) {
-        if (!FileCheckUtils.INSTANCE.isAaptDownloaded(requireContext()) ||
-            !FileCheckUtils.INSTANCE.isSdkDownloaded(requireContext())) {
-            showMissingToolsDialog(() -> toDesignActivityAction(sc_id));
-            return;
-        }
         toDesignActivityAction(sc_id);
     }
 
@@ -117,11 +112,6 @@ public class ProjectsFragment extends DA {
     }
 
     public void toProjectSettingsActivity() {
-        if (!FileCheckUtils.INSTANCE.isAaptDownloaded(requireContext()) ||
-            !FileCheckUtils.INSTANCE.isSdkDownloaded(requireContext())) {
-            showMissingToolsDialog(this::toProjectSettingsActivityAction);
-            return;
-        }
         toProjectSettingsActivityAction();
     }
 
@@ -129,19 +119,6 @@ public class ProjectsFragment extends DA {
         Intent intent = new Intent(getActivity(), MyProjectSettingActivity.class);
         intent.setFlags(Intent.FLAG_ACTIVITY_SINGLE_TOP);
         openProjectSettings.launch(intent);
-    }
-
-    private void showMissingToolsDialog(Runnable onOpenAnyway) {
-        new MaterialAlertDialogBuilder(requireContext())
-                .setTitle("Missing Tools")
-                .setMessage("Required build tools (AAPT/SDK) are not downloaded yet. Please download them in App Settings to avoid build errors.")
-                .setPositiveButton("Open", (dialog, which) -> {
-                    Intent intent = new Intent(getActivity(), AppSettings.class);
-                    intent.setFlags(Intent.FLAG_ACTIVITY_SINGLE_TOP);
-                    startActivity(intent);
-                })
-                .setNegativeButton("Cancel", null)
-                .show();
     }
 
     @Override

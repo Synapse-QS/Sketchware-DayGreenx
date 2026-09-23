@@ -107,6 +107,7 @@ import mod.bobur.VectorDrawableLoader;
 import mod.hey.studios.util.ProjectFile;
 import pro.sketchware.R;
 import pro.sketchware.activities.resourceseditor.components.utils.ColorsEditorManager;
+import pro.sketchware.activities.resourceseditor.components.utils.DimensEditorManager;
 import pro.sketchware.activities.resourceseditor.components.utils.StringsEditorManager;
 import pro.sketchware.managers.inject.InjectRootLayoutManager;
 import pro.sketchware.utility.FilePathUtil;
@@ -121,6 +122,7 @@ import pro.sketchware.utility.ThemeUtils;
 //DR
 public class ViewPane extends RelativeLayout {
     private final String stringsStart = "@string/";
+    private final String dimensStart = "@dimen/";
 //    private final FirebaseCrashlytics crashlytics = FirebaseCrashlytics.getInstance();
     private Context context;
     private ViewGroup rootLayout;
@@ -366,10 +368,10 @@ public class ViewPane extends RelativeLayout {
             LayoutParams layoutParams = new LayoutParams(
                     ViewGroup.LayoutParams.WRAP_CONTENT,
                     ViewGroup.LayoutParams.WRAP_CONTENT);
-            layoutParams.leftMargin = (int) wB.a(getContext(), (float) viewBean.layout.marginLeft);
-            layoutParams.topMargin = (int) wB.a(getContext(), (float) viewBean.layout.marginTop);
-            layoutParams.rightMargin = (int) wB.a(getContext(), (float) viewBean.layout.marginRight);
-            layoutParams.bottomMargin = (int) wB.a(getContext(), (float) viewBean.layout.marginBottom);
+            layoutParams.leftMargin = resolveDimenToPx(viewBean.layout.resMarginLeft, viewBean.layout.marginLeft);
+            layoutParams.topMargin = resolveDimenToPx(viewBean.layout.resMarginTop, viewBean.layout.marginTop);
+            layoutParams.rightMargin = resolveDimenToPx(viewBean.layout.resMarginRight, viewBean.layout.marginRight);
+            layoutParams.bottomMargin = resolveDimenToPx(viewBean.layout.resMarginBottom, viewBean.layout.marginBottom);
             int layoutGravity = viewBean.layout.layoutGravity;
             if ((layoutGravity & Gravity.LEFT) == Gravity.LEFT) {
                 layoutParams.addRule(RelativeLayout.ALIGN_PARENT_LEFT);
@@ -448,30 +450,34 @@ public class ViewPane extends RelativeLayout {
 //                    crashlytics.recordException(exception);
                 }
             }
-            view.setRotation(viewBean.image.rotate);
-            if (viewBean.alpha == 1) {
-                view.setAlpha(viewBean.enabled != 0 ? 1 : 0.7f);
+            float rotation = resolveDimenToFloat(viewBean.image.resRotate, (float) viewBean.image.rotate);
+            view.setRotation(rotation);
+            float alpha = resolveDimenToFloat(viewBean.resAlpha, viewBean.alpha);
+            if (alpha == 1.0f) {
+                view.setAlpha(viewBean.enabled != 0 ? 1.0f : 0.7f);
             } else {
-                view.setAlpha(viewBean.alpha);
+                view.setAlpha(alpha);
             }
-            view.setTranslationX(wB.a(getContext(), viewBean.translationX));
-            view.setTranslationY(wB.a(getContext(), viewBean.translationY));
-            view.setScaleX(viewBean.scaleX);
-            view.setScaleY(viewBean.scaleY);
+            view.setTranslationX(resolveDimenToPx(viewBean.resTranslationX, viewBean.translationX));
+            view.setTranslationY(resolveDimenToPx(viewBean.resTranslationY, viewBean.translationY));
+            view.setScaleX(resolveDimenToFloat(viewBean.resScaleX, viewBean.scaleX));
+            view.setScaleY(resolveDimenToFloat(viewBean.resScaleY, viewBean.scaleY));
             view.setVisibility(View.VISIBLE);
             return;
         }
         updateLayout(view, viewBean);
-        view.setRotation(viewBean.image.rotate);
-        if (viewBean.alpha == 1) {
-            view.setAlpha(viewBean.enabled != 0 ? 1 : 0.7f);
+        float rotation = resolveDimenToFloat(viewBean.image.resRotate, (float) viewBean.image.rotate);
+        view.setRotation(rotation);
+        float alpha = resolveDimenToFloat(viewBean.resAlpha, viewBean.alpha);
+        if (alpha == 1.0f) {
+            view.setAlpha(viewBean.enabled != 0 ? 1.0f : 0.7f);
         } else {
-            view.setAlpha(viewBean.alpha);
+            view.setAlpha(alpha);
         }
-        view.setTranslationX(wB.a(getContext(), viewBean.translationX));
-        view.setTranslationY(wB.a(getContext(), viewBean.translationY));
-        view.setScaleX(viewBean.scaleX);
-        view.setScaleY(viewBean.scaleY);
+        view.setTranslationX(resolveDimenToPx(viewBean.resTranslationX, viewBean.translationX));
+        view.setTranslationY(resolveDimenToPx(viewBean.resTranslationY, viewBean.translationY));
+        view.setScaleX(resolveDimenToFloat(viewBean.resScaleX, viewBean.scaleX));
+        view.setScaleY(resolveDimenToFloat(viewBean.resScaleY, viewBean.scaleY));
         String backgroundResource = viewBean.layout.backgroundResource;
         if (backgroundResource != null) {
             try {
@@ -501,7 +507,7 @@ public class ViewPane extends RelativeLayout {
         if (classInfo.a("LinearLayout")) {
             LinearLayout linearLayout = (LinearLayout) view;
             linearLayout.setOrientation(viewBean.layout.orientation);
-            linearLayout.setWeightSum(viewBean.layout.weightSum);
+            linearLayout.setWeightSum(resolveDimenToFloat(viewBean.layout.resWeightSum, (float) viewBean.layout.weightSum));
             if (view instanceof ItemLinearLayout) {
                 ((ItemLinearLayout) view).setLayoutGravity(viewBean.layout.gravity);
             }
@@ -1040,22 +1046,98 @@ public class ViewPane extends RelativeLayout {
         return defaultValue;
     }
 
+    public float resolveDimenToFloat(String resDimen, float defaultVal) {
+        if (resDimen != null && !resDimen.isEmpty()) {
+            String dimenVal = getXmlDimen(resDimen);
+            if (dimenVal != null) {
+                try {
+                    String numStr = dimenVal.trim().replaceAll("[^0-9.-]", "");
+                    if (!numStr.isEmpty()) {
+                        return Float.parseFloat(numStr);
+                    }
+                } catch (Exception ignored) {
+                }
+            }
+        }
+        return defaultVal;
+    }
+
+    public int resolveDimenToDp(String resDimen, int defaultDpValue) {
+        if (resDimen != null && !resDimen.isEmpty()) {
+            String dimenVal = getXmlDimen(resDimen);
+            if (dimenVal != null) {
+                String trimmed = dimenVal.trim().toLowerCase();
+                try {
+                    String numStr = trimmed.replaceAll("[^0-9.-]", "");
+                    if (!numStr.isEmpty()) {
+                        return (int) Float.parseFloat(numStr);
+                    }
+                } catch (Exception ignored) {
+                }
+            }
+        }
+        return defaultDpValue;
+    }
+
+    public float resolveDimenToPx(String resDimen, float defaultDpValue) {
+        if (resDimen != null && !resDimen.isEmpty()) {
+            String dimenVal = getXmlDimen(resDimen);
+            if (dimenVal != null) {
+                try {
+                    String numStr = dimenVal.trim().replaceAll("[^0-9.-]", "");
+                    if (!numStr.isEmpty()) {
+                        float dp = Float.parseFloat(numStr);
+                        return wB.a(getContext(), dp);
+                    }
+                } catch (Exception ignored) {
+                }
+            }
+        }
+        return wB.a(getContext(), defaultDpValue);
+    }
+
+    public int resolveDimenToPx(String resDimen, int defaultDpValue) {
+        if (resDimen != null && !resDimen.isEmpty()) {
+            String dimenVal = getXmlDimen(resDimen);
+            if (dimenVal != null) {
+                String trimmed = dimenVal.trim().toLowerCase();
+                if (trimmed.equals("match_parent") || trimmed.equals("-1")) {
+                    return ViewGroup.LayoutParams.MATCH_PARENT;
+                }
+                if (trimmed.equals("wrap_content") || trimmed.equals("-2")) {
+                    return ViewGroup.LayoutParams.WRAP_CONTENT;
+                }
+                try {
+                    String numStr = trimmed.replaceAll("[^0-9.-]", "");
+                    if (!numStr.isEmpty()) {
+                        float dp = Float.parseFloat(numStr);
+                        return (int) wB.a(getContext(), dp);
+                    }
+                } catch (Exception ignored) {
+                }
+            }
+        }
+        if (defaultDpValue > 0) {
+            return (int) wB.a(getContext(), (float) defaultDpValue);
+        }
+        return defaultDpValue;
+    }
+
     private void updateLayout(View view, ViewBean viewBean) {
 //        crashlytics.log("ViewPane: Updating layout");
         LayoutBean layoutBean = viewBean.layout;
-        int width = layoutBean.width;
-        int height = layoutBean.height;
-        if (width > 0) {
-            width = (int) wB.a(getContext(), (float) viewBean.layout.width);
-        }
-        if (height > 0) {
-            height = (int) wB.a(getContext(), (float) viewBean.layout.height);
-        }
+        int width = resolveDimenToPx(layoutBean.resWidth, layoutBean.width);
+        int height = resolveDimenToPx(layoutBean.resHeight, layoutBean.height);
 
-        int leftMargin = (int) wB.a(getContext(), (float) viewBean.layout.marginLeft);
-        int topMargin = (int) wB.a(getContext(), (float) viewBean.layout.marginTop);
-        int rightMargin = (int) wB.a(getContext(), (float) viewBean.layout.marginRight);
-        int bottomMargin = (int) wB.a(getContext(), (float) viewBean.layout.marginBottom);
+        int leftMargin = resolveDimenToPx(layoutBean.resMarginLeft, layoutBean.marginLeft);
+        int topMargin = resolveDimenToPx(layoutBean.resMarginTop, layoutBean.marginTop);
+        int rightMargin = resolveDimenToPx(layoutBean.resMarginRight, layoutBean.marginRight);
+        int bottomMargin = resolveDimenToPx(layoutBean.resMarginBottom, layoutBean.marginBottom);
+
+        int paddingLeft = resolveDimenToDp(layoutBean.resPaddingLeft, layoutBean.paddingLeft);
+        int paddingTop = resolveDimenToDp(layoutBean.resPaddingTop, layoutBean.paddingTop);
+        int paddingRight = resolveDimenToDp(layoutBean.resPaddingRight, layoutBean.paddingRight);
+        int paddingBottom = resolveDimenToDp(layoutBean.resPaddingBottom, layoutBean.paddingBottom);
 
         if (viewBean.layout.backgroundResColor == null) {
             view.setBackgroundColor(viewBean.layout.backgroundColor);
@@ -1065,25 +1147,22 @@ public class ViewPane extends RelativeLayout {
         if (viewBean.parentType == ViewBean.VIEW_TYPE_LAYOUT_LINEAR) {
             LinearLayout.LayoutParams layoutParams2 = new LinearLayout.LayoutParams(width, height);
             layoutParams2.setMargins(leftMargin, topMargin, rightMargin, bottomMargin);
-            LayoutBean layoutBean3 = viewBean.layout;
-            view.setPadding(layoutBean3.paddingLeft, layoutBean3.paddingTop, layoutBean3.paddingRight, layoutBean3.paddingBottom);
+            view.setPadding(paddingLeft, paddingTop, paddingRight, paddingBottom);
             int layoutGravity = viewBean.layout.layoutGravity;
             if (layoutGravity != LayoutBean.GRAVITY_NONE) {
                 layoutParams2.gravity = layoutGravity;
             }
-            layoutParams2.weight = viewBean.layout.weight;
+            layoutParams2.weight = resolveDimenToDp(layoutBean.resWeight, layoutBean.weight);
             view.setLayoutParams(layoutParams2);
         } else if (viewBean.parentType == ViewBean.VIEW_TYPE_LAYOUT_RELATIVE) {
             RelativeLayout.LayoutParams layoutParams2 = new RelativeLayout.LayoutParams(width, height);
             layoutParams2.setMargins(leftMargin, topMargin, rightMargin, bottomMargin);
-            LayoutBean layoutBean3 = viewBean.layout;
-            view.setPadding(layoutBean3.paddingLeft, layoutBean3.paddingTop, layoutBean3.paddingRight, layoutBean3.paddingBottom);
+            view.setPadding(paddingLeft, paddingTop, paddingRight, paddingBottom);
             view.setLayoutParams(layoutParams2);
         } else {
             FrameLayout.LayoutParams layoutParams3 = new FrameLayout.LayoutParams(width, height);
             layoutParams3.setMargins(leftMargin, topMargin, rightMargin, bottomMargin);
-            LayoutBean layoutBean4 = viewBean.layout;
-            view.setPadding(layoutBean4.paddingLeft, layoutBean4.paddingTop, layoutBean4.paddingRight, layoutBean4.paddingBottom);
+            view.setPadding(paddingLeft, paddingTop, paddingRight, paddingBottom);
             int layoutGravity = viewBean.layout.layoutGravity;
             if (layoutGravity != LayoutBean.GRAVITY_NONE) {
                 layoutParams3.gravity = layoutGravity;
@@ -1311,7 +1390,17 @@ public class ViewPane extends RelativeLayout {
         } else {
             textView.setTextColor(PropertiesUtil.parseColor(colorsEditorManager.getColorValue(context, viewBean.text.resTextColor, 3, material3LibraryManager.canUseNightVariantColors())));
         }
-        textView.setTextSize(viewBean.text.textSize);
+        if (viewBean.text.resTextSize != null && !viewBean.text.resTextSize.isEmpty()) {
+            try {
+                String dimenStr = getXmlDimen(viewBean.text.resTextSize);
+                String numericStr = dimenStr.replaceAll("[^0-9.]", "");
+                textView.setTextSize(Float.parseFloat(numericStr));
+            } catch (Exception ignored) {
+                textView.setTextSize(viewBean.text.textSize);
+            }
+        } else {
+            textView.setTextSize(viewBean.text.textSize);
+        }
         textView.setLines(viewBean.text.line);
         textView.setSingleLine(viewBean.text.singleLine != 0);
     }
@@ -1335,6 +1424,27 @@ public class ViewPane extends RelativeLayout {
             String keyValue = stringsStart + map.get("key").toString().trim();
             if (key.equals(keyValue)) {
                 return map.get("text").toString();
+            }
+        }
+
+        return key;
+    }
+
+    public String getXmlDimen(String key) {
+        if (sc_id == null || key == null) {
+            return key;
+        }
+        String filePath = wq.b(sc_id) + "/files/resource/values/dimens.xml";
+
+        ArrayList<HashMap<String, Object>> dimensListMap = new ArrayList<>();
+
+        DimensEditorManager dimensEditorManager = new DimensEditorManager();
+        dimensEditorManager.convertXmlDimensToListMap(FileUtil.readFileIfExist(filePath), dimensListMap);
+
+        for (HashMap<String, Object> map : dimensListMap) {
+            String keyValue = dimensStart + map.get("key").toString().trim();
+            if (key.equals(keyValue)) {
+                return map.get("value").toString();
             }
         }
 

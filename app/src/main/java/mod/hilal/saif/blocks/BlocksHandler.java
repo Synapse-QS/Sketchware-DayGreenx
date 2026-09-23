@@ -2584,6 +2584,33 @@ public class BlocksHandler {
         hashMap.put("spec", "get String from %m.ResString");
         arrayList.add(hashMap);
 
+        hashMap = new HashMap<>();
+        hashMap.put("name", "getResStr");
+        hashMap.put("type", "s");
+        hashMap.put("code", "getString(R.string.%s)");
+        hashMap.put("color", "#7c83db");
+        hashMap.put("palette", "-1");
+        hashMap.put("spec", "");
+        arrayList.add(hashMap);
+
+        hashMap = new HashMap<>();
+        hashMap.put("name", "getResDimen");
+        hashMap.put("type", "d");
+        hashMap.put("code", "(int) getResources().getDimension(%s)");
+        hashMap.put("color", "#7c83db");
+        hashMap.put("palette", "-2");
+        hashMap.put("spec", "get Dimension from %m.ResDimen");
+        arrayList.add(hashMap);
+
+        hashMap = new HashMap<>();
+        hashMap.put("name", "getResDim");
+        hashMap.put("type", "d");
+        hashMap.put("code", "(int) getResources().getDimension(R.dimen.%s)");
+        hashMap.put("color", "#7c83db");
+        hashMap.put("palette", "-2");
+        hashMap.put("spec", "");
+        arrayList.add(hashMap);
+
         DRBlockHandler.addBlocks(arrayList);
     }
 

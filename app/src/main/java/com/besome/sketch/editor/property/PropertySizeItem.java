@@ -9,18 +9,21 @@ import android.widget.RelativeLayout;
 import android.widget.TextView;
 
 import com.google.android.material.dialog.MaterialAlertDialogBuilder;
+import com.google.android.material.textfield.MaterialAutoCompleteTextView;
 
 import a.a.a.Kw;
 import a.a.a.mB;
 import a.a.a.wB;
 import mod.hey.studios.util.Helper;
 import pro.sketchware.R;
+import pro.sketchware.activities.resourceseditor.components.utils.DimensEditorManager;
 import pro.sketchware.lib.validator.MinMaxInputValidator;
 
 @SuppressLint("ViewConstructor")
 public class PropertySizeItem extends RelativeLayout implements View.OnClickListener {
 
     private Context context;
+    private String sc_id;
     private String key = "";
     private int value = 1;
     private TextView tvName;
@@ -34,6 +37,10 @@ public class PropertySizeItem extends RelativeLayout implements View.OnClickList
     public PropertySizeItem(Context context, boolean z) {
         super(context);
         initialize(context, z);
+    }
+
+    public void setScId(String scId) {
+        this.sc_id = scId;
     }
 
     public String getKey() {
@@ -63,6 +70,18 @@ public class PropertySizeItem extends RelativeLayout implements View.OnClickList
         this.value = value;
         TextView textView = tvValue;
         textView.setText(this.value + " dp");
+    }
+
+    public void setValue(String value) {
+        if (value != null && value.startsWith("@dimen/")) {
+            tvValue.setText(value);
+        } else {
+            try {
+                setValue(Integer.parseInt(value));
+            } catch (Exception e) {
+                tvValue.setText(value);
+            }
+        }
     }
 
     @Override
@@ -111,18 +130,33 @@ public class PropertySizeItem extends RelativeLayout implements View.OnClickList
         dialog.setTitle(Helper.getText(tvName));
         dialog.setIcon(icon);
         View view = wB.a(getContext(), R.layout.property_popup_input_size);
-        EditText input = view.findViewById(R.id.et_input);
+        MaterialAutoCompleteTextView input = view.findViewById(R.id.et_input);
+        DimensEditorManager.setupDimenAutoComplete(getContext(), sc_id, input);
         MinMaxInputValidator validator = new MinMaxInputValidator(context, view.findViewById(R.id.ti_input), 0, 999);
         validator.a(String.valueOf(value));
         dialog.setView(view);
         dialog.setPositiveButton(Helper.getResString(R.string.common_word_save), (v, which) -> {
             if (validator.b()) {
-                setValue(Integer.parseInt(Helper.getText(input)));
-                if (valueChangeListener != null) {
-                    valueChangeListener.a(key, value);
+                String inputStr = Helper.getText(input).trim();
+                if (inputStr.startsWith("@dimen/")) {
+                    tvValue.setText(inputStr);
+                    if (valueChangeListener != null) {
+                        valueChangeListener.a(key, inputStr);
+                    }
+                } else {
+                    setValue(Integer.parseInt(inputStr));
+                    if (valueChangeListener != null) {
+                        valueChangeListener.a(key, value);
+                    }
                 }
                 v.dismiss();
             }
+        });
+        dialog.setNeutralButton("@dimen/", (v, which) -> {
+            input.setText("@dimen/");
+            input.setSelection(input.getText().length());
+            input.showDropDown();
+            input.requestFocus();
         });
         dialog.setNegativeButton(Helper.getResString(R.string.common_word_cancel), null);
         dialog.show();

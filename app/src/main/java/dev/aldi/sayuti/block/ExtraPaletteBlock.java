@@ -34,6 +34,7 @@ import mod.hilal.saif.activities.tools.ConfigActivity;
 import mod.hilal.saif.blocks.BlocksHandler;
 import mod.pranav.viewbinding.ViewBindingBuilder;
 import pro.sketchware.R;
+import pro.sketchware.activities.resourceseditor.components.utils.DimensEditorManager;
 import pro.sketchware.activities.resourceseditor.components.utils.StringsEditorManager;
 import pro.sketchware.blocks.ExtraBlocks;
 import pro.sketchware.control.logic.LogicClickListener;
@@ -417,6 +418,22 @@ public class ExtraPaletteBlock {
                 for (int i = 0; i < StringsListMap.size(); i++) {
                     String key = StringsListMap.get(i).get("key").toString();
                     logicEditor.a(key, "s", "getResStr").setTag("S98ZCS" + key);
+                }
+                return;
+            case -2:
+                String dimensFilePath = FileUtil.getExternalStorageDir().concat("/.sketchware/data/").concat(sc_id.concat("/files/resource/values/dimens.xml"));
+                ArrayList<HashMap<String, Object>> DimensListMap = new ArrayList<>();
+                DimensEditorManager dimensEditorManager = new DimensEditorManager();
+                dimensEditorManager.convertXmlDimensToListMap(FileUtil.readFileIfExist(dimensFilePath), DimensListMap);
+
+                logicEditor.b("Open Resources editor", "openResourcesEditor");
+
+                logicEditor.a("d", "getResDimen");
+                logicEditor.a("Saved Res Dimens :", getTitleBgColor());
+
+                for (int i = 0; i < DimensListMap.size(); i++) {
+                    String key = DimensListMap.get(i).get("key").toString();
+                    logicEditor.a(key, "d", "getResDim").setTag("S98ZCD" + key);
                 }
                 return;
             case 0:
