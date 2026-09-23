@@ -89,6 +89,12 @@
                     android:layout_height="wrap_content"
                     android:layout_marginHorizontal="24dp"
                     android:orientation="horizontal" />
+                    
+                <LinearLayout
+                    android:id="@+id/cmake_section"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="vertical">
 
                 <TextView
                     android:id="@+id/title_cmake_abi"
@@ -114,7 +120,8 @@
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:layout_marginHorizontal="24dp"
-                    android:layout_marginBottom="8dp">
+                    android:layout_marginBottom="8dp"
+                    app:chipSpacingVertical="4dp">
 
                     <com.google.android.material.chip.Chip
                         android:id="@+id/chip_abi_arm64_v8a"
@@ -125,7 +132,8 @@
                         android:text="arm64-v8a (64)"
                         app:checkedIconTint="?attr/colorOnSurfaceVariant"
                         app:chipBackgroundColor="@color/bg_chip_surface_container_low"
-                        app:chipCornerRadius="14dp" />
+                        app:chipCornerRadius="50dp"
+                        app:chipMinHeight="30dp" />
 
                     <com.google.android.material.chip.Chip
                         android:id="@+id/chip_abi_armeabi_v7a"
@@ -136,7 +144,8 @@
                         android:text="armeabi-v7a (32)"
                         app:checkedIconTint="?attr/colorOnSurfaceVariant"
                         app:chipBackgroundColor="@color/bg_chip_surface_container_low"
-                        app:chipCornerRadius="14dp" />
+                        app:chipCornerRadius="50dp"
+                        app:chipMinHeight="30dp" />
 
                     <com.google.android.material.chip.Chip
                         android:id="@+id/chip_abi_x86"
@@ -147,7 +156,8 @@
                         android:text="x86"
                         app:checkedIconTint="?attr/colorOnSurfaceVariant"
                         app:chipBackgroundColor="@color/bg_chip_surface_container_low"
-                        app:chipCornerRadius="14dp" />
+                        app:chipCornerRadius="50dp"
+                        app:chipMinHeight="30dp" />
 
                     <com.google.android.material.chip.Chip
                         android:id="@+id/chip_abi_x86_64"
@@ -158,8 +168,11 @@
                         android:text="x86_64"
                         app:checkedIconTint="?attr/colorOnSurfaceVariant"
                         app:chipBackgroundColor="@color/bg_chip_surface_container_low"
-                        app:chipCornerRadius="14dp" />
+                        app:chipCornerRadius="50dp"
+                        app:chipMinHeight="30dp" />
                 </com.google.android.material.chip.ChipGroup>
+                
+                </LinearLayout>
 
                 <LinearLayout
                     android:id="@+id/no_warnings"
