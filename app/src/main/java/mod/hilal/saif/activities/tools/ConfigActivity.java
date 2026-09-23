@@ -367,7 +367,7 @@ public class ConfigActivity extends BaseAppCompatActivity {
             startActivity(intent);
         }), true);
         
-        appearanceCategory.addLibraryItem(createPreference(R.drawable.ic_mtrl_web, "Change Language", "Change the display language of the app", v -> {
+        appearanceCategory.addLibraryItem(createPreference(R.drawable.ic_language, "Change Language", "Change the display language of the app", v -> {
             LanguagePickerDialog.show(this);
         }), false);
 
