@@ -2,6 +2,7 @@ package com.besome.sketch.editor.property;
 
 import android.annotation.SuppressLint;
 import android.content.Context;
+import android.content.DialogInterface;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.widget.ImageView;
@@ -16,6 +17,7 @@ import a.a.a.sq;
 import a.a.a.wB;
 import mod.hey.studios.util.Helper;
 import pro.sketchware.R;
+import pro.sketchware.activities.resourceseditor.components.utils.DimensEditorManager;
 import pro.sketchware.databinding.PropertyPopupMeasurementBinding;
 import pro.sketchware.lib.validator.MinMaxInputValidator;
 
@@ -23,6 +25,7 @@ import pro.sketchware.lib.validator.MinMaxInputValidator;
 public class PropertyMeasureItem extends RelativeLayout implements View.OnClickListener {
 
     private String key = "";
+    private String sc_id;
     private int measureValue = -1;
     private TextView tvName;
     private TextView tvValue;
@@ -48,6 +51,10 @@ public class PropertyMeasureItem extends RelativeLayout implements View.OnClickL
         imageView.setImageResource(imgLeftIconDrawableResId);
     }
 
+    public void setScId(String scId) {
+        this.sc_id = scId;
+    }
+
     public String getKey() {
         return key;
     }
@@ -66,11 +73,25 @@ public class PropertyMeasureItem extends RelativeLayout implements View.OnClickL
         }
     }
 
+    private String resValue = null;
+
+    public String getResValue() {
+        return resValue;
+    }
+
+    public void setResValue(String resValue) {
+        this.resValue = resValue;
+        if (resValue != null && !resValue.isEmpty()) {
+            tvValue.setText(resValue);
+        }
+    }
+
     public int getValue() {
         return measureValue;
     }
 
     public void setValue(int value) {
+        this.resValue = null;
         measureValue = value;
         if (!isWrapContent && value == LayoutParams.WRAP_CONTENT) {
             tvValue.setText(sq.a(key, LayoutParams.MATCH_PARENT));
@@ -78,6 +99,20 @@ public class PropertyMeasureItem extends RelativeLayout implements View.OnClickL
             tvValue.setText(sq.a(key, value));
         } else {
             tvValue.setText(sq.a(key, LayoutParams.WRAP_CONTENT));
+        }
+    }
+
+    public void setValue(String value) {
+        if (value != null && value.startsWith("@dimen/")) {
+            this.resValue = value;
+            tvValue.setText(value);
+        } else {
+            this.resValue = null;
+            try {
+                setValue(Integer.parseInt(value));
+            } catch (Exception e) {
+                tvValue.setText(value);
+            }
         }
     }
 
@@ -133,6 +168,8 @@ public class PropertyMeasureItem extends RelativeLayout implements View.OnClickL
         PropertyPopupMeasurementBinding binding = PropertyPopupMeasurementBinding.inflate(LayoutInflater.from(getContext()));
         binding.tiInput.setHint(String.format(Helper.getResString(R.string.property_enter_value), Helper.getText(tvName)));
 
+        DimensEditorManager.setupDimenAutoComplete(getContext(), sc_id, binding.edInput);
+
         MinMaxInputValidator minMaxInputValidator = new MinMaxInputValidator(getContext(), binding.tiInput, 0, 999);
 
         binding.rgWidthHeight.setOnCheckedChangeListener((group, checkedId) -> {
@@ -144,7 +181,11 @@ public class PropertyMeasureItem extends RelativeLayout implements View.OnClickL
             }
         });
         binding.rgWidthHeight.clearCheck();
-        if (measureValue >= 0) {
+        if (resValue != null && !resValue.isEmpty()) {
+            binding.rgWidthHeight.check(R.id.rb_directinput);
+            binding.edInput.setText(resValue);
+            binding.directInput.setVisibility(VISIBLE);
+        } else if (measureValue >= 0) {
             if (isCustomValue) {
                 binding.rgWidthHeight.check(R.id.rb_directinput);
                 minMaxInputValidator.a(String.valueOf(measureValue));
@@ -168,19 +209,45 @@ public class PropertyMeasureItem extends RelativeLayout implements View.OnClickL
             int checkedRadioButtonId = binding.rgWidthHeight.getCheckedRadioButtonId();
             if (checkedRadioButtonId == R.id.rb_matchparent) {
                 setValue(LayoutParams.MATCH_PARENT);
+                if (valueChangeListener != null) {
+                    valueChangeListener.a(key, measureValue);
+                }
             } else if (checkedRadioButtonId == R.id.rb_wrapcontent) {
                 setValue(LayoutParams.WRAP_CONTENT);
+                if (valueChangeListener != null) {
+                    valueChangeListener.a(key, measureValue);
+                }
             } else if (minMaxInputValidator.b()) {
-                setValue(Integer.parseInt(Helper.getText(binding.edInput)));
+                String inputStr = Helper.getText(binding.edInput).trim();
+                if (inputStr.startsWith("@dimen/")) {
+                    resValue = inputStr;
+                    tvValue.setText(inputStr);
+                    if (valueChangeListener != null) {
+                        valueChangeListener.a(key, inputStr);
+                    }
+                } else {
+                    setValue(Integer.parseInt(inputStr));
+                    if (valueChangeListener != null) {
+                        valueChangeListener.a(key, measureValue);
+                    }
+                }
             } else {
                 return;
             }
-            if (valueChangeListener != null) {
-                valueChangeListener.a(key, measureValue);
-            }
             v.dismiss();
         });
+        dialog.setNeutralButton("Dimen", null);
         dialog.setNegativeButton(Helper.getResString(R.string.common_word_cancel), null);
-        dialog.show();
+        var alertDialog = dialog.create();
+        alertDialog.setOnShowListener(dialogInterface -> {
+            alertDialog.getButton(DialogInterface.BUTTON_NEUTRAL).setOnClickListener(v -> {
+                binding.rgWidthHeight.check(R.id.rb_directinput);
+                binding.edInput.setText("@dimen/");
+                binding.edInput.setSelection(binding.edInput.getText().length());
+                binding.edInput.showDropDown();
+                binding.edInput.requestFocus();
+            });
+        });
+        alertDialog.show();
     }
 }

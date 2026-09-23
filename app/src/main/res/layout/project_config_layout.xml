@@ -2,6 +2,7 @@
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
     android:orientation="vertical">
 
     <com.google.android.material.bottomsheet.BottomSheetDragHandleView
@@ -88,6 +89,77 @@
                     android:layout_height="wrap_content"
                     android:layout_marginHorizontal="24dp"
                     android:orientation="horizontal" />
+
+                <TextView
+                    android:id="@+id/title_cmake_abi"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginHorizontal="24dp"
+                    android:layout_marginTop="16dp"
+                    android:layout_marginBottom="4dp"
+                    android:text="CMake / Native Target ABIs"
+                    android:textAppearance="?attr/textAppearanceBodyLargeEmphasized" />
+
+                <TextView
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginHorizontal="24dp"
+                    android:layout_marginBottom="12dp"
+                    android:text="Select target architectures to compile (32-bit, 64-bit, x86, x86_64)"
+                    android:textAppearance="?attr/textAppearanceBodySmall"
+                    android:textColor="?android:attr/textColorSecondary" />
+
+                <com.google.android.material.chip.ChipGroup
+                    android:id="@+id/cg_cmake_abis"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginHorizontal="24dp"
+                    android:layout_marginBottom="8dp">
+
+                    <com.google.android.material.chip.Chip
+                        android:id="@+id/chip_abi_arm64_v8a"
+                        style="@style/Widget.Material3.Chip.Filter"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:checkable="true"
+                        android:text="arm64-v8a (64)"
+                        app:checkedIconTint="?attr/colorOnSurfaceVariant"
+                        app:chipBackgroundColor="@color/bg_chip_surface_container_low"
+                        app:chipCornerRadius="14dp" />
+
+                    <com.google.android.material.chip.Chip
+                        android:id="@+id/chip_abi_armeabi_v7a"
+                        style="@style/Widget.Material3.Chip.Filter"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:checkable="true"
+                        android:text="armeabi-v7a (32)"
+                        app:checkedIconTint="?attr/colorOnSurfaceVariant"
+                        app:chipBackgroundColor="@color/bg_chip_surface_container_low"
+                        app:chipCornerRadius="14dp" />
+
+                    <com.google.android.material.chip.Chip
+                        android:id="@+id/chip_abi_x86"
+                        style="@style/Widget.Material3.Chip.Filter"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:checkable="true"
+                        android:text="x86"
+                        app:checkedIconTint="?attr/colorOnSurfaceVariant"
+                        app:chipBackgroundColor="@color/bg_chip_surface_container_low"
+                        app:chipCornerRadius="14dp" />
+
+                    <com.google.android.material.chip.Chip
+                        android:id="@+id/chip_abi_x86_64"
+                        style="@style/Widget.Material3.Chip.Filter"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:checkable="true"
+                        android:text="x86_64"
+                        app:checkedIconTint="?attr/colorOnSurfaceVariant"
+                        app:chipBackgroundColor="@color/bg_chip_surface_container_low"
+                        app:chipCornerRadius="14dp" />
+                </com.google.android.material.chip.ChipGroup>
 
                 <LinearLayout
                     android:id="@+id/no_warnings"

@@ -49,18 +49,18 @@
             android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:layout_weight="1"
+            style="@style/Widget.SketchwarePro.TextInputLayout.ExposedDropdownMenu"
             android:hint="Enter value"
             android:importantForAutofill="noExcludeDescendants"
             app:errorEnabled="true">
 
-            <com.google.android.material.textfield.TextInputEditText
+            <com.google.android.material.textfield.MaterialAutoCompleteTextView
                 android:id="@+id/ed_input"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:imeOptions="actionDone"
-                android:inputType="numberSigned"
-                android:lines="1"
-                android:maxLength="3" />
+                android:inputType="text|textNoSuggestions"
+                android:lines="1" />
         </com.google.android.material.textfield.TextInputLayout>
 
         <TextView

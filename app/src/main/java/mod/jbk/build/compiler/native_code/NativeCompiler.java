@@ -17,6 +17,7 @@ import java.util.regex.Pattern;
 
 import a.a.a.ProjectBuilder;
 import a.a.a.zy;
+import mod.hey.studios.build.BuildSettings;
 import mod.jbk.build.BuildProgressReceiver;
 import mod.jbk.util.LogUtil;
 import pro.sketchware.SketchApplication;
@@ -913,6 +914,27 @@ public class NativeCompiler {
                 }
             } catch (IOException e) {
                 LogUtil.e(TAG, "Failed to read abis.txt", e);
+            }
+        }
+        if (abis.isEmpty() && builder != null && builder.build_settings != null) {
+            String configAbis = builder.build_settings.getValue(BuildSettings.SETTING_CMAKE_ABIS, "");
+            if (!configAbis.isEmpty()) {
+                for (String abi : configAbis.split(",")) {
+                    String trimmed = abi.trim();
+                    if (!trimmed.isEmpty() && !abis.contains(trimmed)) {
+                        abis.add(trimmed);
+                    }
+                }
+            } else {
+                boolean arm64 = "true".equals(builder.build_settings.getValue(BuildSettings.SETTING_CMAKE_ABI_ARM64_V8A, "true"));
+                boolean armv7 = "true".equals(builder.build_settings.getValue(BuildSettings.SETTING_CMAKE_ABI_ARMEABI_V7A, "true"));
+                boolean x86 = "true".equals(builder.build_settings.getValue(BuildSettings.SETTING_CMAKE_ABI_X86, "false"));
+                boolean x86_64 = "true".equals(builder.build_settings.getValue(BuildSettings.SETTING_CMAKE_ABI_X86_64, "false"));
+
+                if (arm64) abis.add(BuildSettings.ABI_ARM64_V8A);
+                if (armv7) abis.add(BuildSettings.ABI_ARMEABI_V7A);
+                if (x86) abis.add(BuildSettings.ABI_X86);
+                if (x86_64) abis.add(BuildSettings.ABI_X86_64);
             }
         }
         if (abis.isEmpty()) {

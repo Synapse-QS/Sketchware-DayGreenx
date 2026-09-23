@@ -111,7 +111,8 @@ object IDXmlKeyword {
     private val VALUES_STYLES = arrayOf("resources", "style", "item", "name", "parent")
     private val VALUES_ATTRS = arrayOf("resources", "declare-styleable", "attr", "name", "format", "enum", "flag", "reference", "dimension", "boolean", "integer", "fraction")
     private val VALUES_ARRAYS = arrayOf("resources", "array", "string-array", "integer-array", "item", "name")
-    private val VALUES_ALL = VALUES_STYLES + VALUES_COLORS + VALUES_STRINGS + VALUES_ATTRS + VALUES_ARRAYS
+    private val VALUES_DIMENS = arrayOf("resources", "dimen", "item", "name")
+    private val VALUES_ALL = VALUES_STYLES + VALUES_COLORS + VALUES_STRINGS + VALUES_ATTRS + VALUES_ARRAYS + VALUES_DIMENS
 
     @JvmField
     val KEYWORDS = BASE + LAYOUT + MANIFEST + DRAWABLE + ANIM + MENU + COLOR_STATE_LIST + VALUES_ALL
@@ -150,6 +151,7 @@ object IDXmlKeyword {
                     "styles.xml", "themes.xml" -> BASE + VALUES_STYLES
                     "attrs.xml" -> BASE + VALUES_ATTRS
                     "arrays.xml" -> BASE + VALUES_ARRAYS
+                    "dimens.xml" -> BASE + VALUES_DIMENS
                     else -> BASE + LAYOUT
                 }
             }

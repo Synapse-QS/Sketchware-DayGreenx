@@ -33,6 +33,8 @@ public class ImageBean extends nA implements Parcelable {
     @Expose
     public int rotate;
     @Expose
+    public String resRotate;
+    @Expose
     public String scaleType;
 
     public ImageBean() {
@@ -44,6 +46,7 @@ public class ImageBean extends nA implements Parcelable {
         resName = parcel.readString();
         scaleType = parcel.readString();
         rotate = parcel.readInt();
+        resRotate = parcel.readString();
     }
 
     public static Parcelable.Creator<ImageBean> getCreator() {
@@ -54,6 +57,7 @@ public class ImageBean extends nA implements Parcelable {
         resName = imageBean.resName;
         scaleType = imageBean.scaleType;
         rotate = imageBean.rotate;
+        resRotate = imageBean.resRotate;
     }
 
     @Override
@@ -80,6 +84,13 @@ public class ImageBean extends nA implements Parcelable {
         } else if (imageBean.scaleType != null) {
             return false;
         }
+        if (resRotate != null) {
+            if (!resRotate.equals(imageBean.resRotate)) {
+                return false;
+            }
+        } else if (imageBean.resRotate != null) {
+            return false;
+        }
         return rotate == imageBean.rotate;
     }
 
@@ -91,5 +102,6 @@ public class ImageBean extends nA implements Parcelable {
         parcel.writeString(resName);
         parcel.writeString(scaleType);
         parcel.writeInt(rotate);
+        parcel.writeString(resRotate);
     }
 }

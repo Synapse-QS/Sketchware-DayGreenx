@@ -49,31 +49,55 @@ public class LayoutBean extends nA implements Parcelable {
     @Expose
     public int height;
     @Expose
+    public String resHeight;
+    @Expose
     public int layoutGravity;
     @Expose
     public int marginBottom;
     @Expose
+    public String resMarginBottom;
+    @Expose
     public int marginLeft;
+    @Expose
+    public String resMarginLeft;
     @Expose
     public int marginRight;
     @Expose
+    public String resMarginRight;
+    @Expose
     public int marginTop;
+    @Expose
+    public String resMarginTop;
     @Expose
     public int orientation;
     @Expose
     public int paddingBottom;
     @Expose
+    public String resPaddingBottom;
+    @Expose
     public int paddingLeft;
+    @Expose
+    public String resPaddingLeft;
     @Expose
     public int paddingRight;
     @Expose
+    public String resPaddingRight;
+    @Expose
     public int paddingTop;
+    @Expose
+    public String resPaddingTop;
     @Expose
     public int weight;
     @Expose
+    public String resWeight;
+    @Expose
     public int weightSum;
     @Expose
+    public String resWeightSum;
+    @Expose
     public int width;
+    @Expose
+    public String resWidth;
 
     public LayoutBean() {
         width = LAYOUT_WRAP_CONTENT;
@@ -105,6 +129,18 @@ public class LayoutBean extends nA implements Parcelable {
         borderColor = parcel.readInt();
         backgroundResource = parcel.readString();
         backgroundResColor = parcel.readString();
+        resWidth = parcel.readString();
+        resHeight = parcel.readString();
+        resMarginLeft = parcel.readString();
+        resMarginTop = parcel.readString();
+        resMarginRight = parcel.readString();
+        resMarginBottom = parcel.readString();
+        resPaddingLeft = parcel.readString();
+        resPaddingTop = parcel.readString();
+        resPaddingRight = parcel.readString();
+        resPaddingBottom = parcel.readString();
+        resWeight = parcel.readString();
+        resWeightSum = parcel.readString();
     }
 
     public static Parcelable.Creator<LayoutBean> getCreator() {
@@ -131,6 +167,18 @@ public class LayoutBean extends nA implements Parcelable {
         borderColor = layoutBean.borderColor;
         backgroundResource = layoutBean.backgroundResource;
         backgroundResColor = layoutBean.backgroundResColor;
+        resWidth = layoutBean.resWidth;
+        resHeight = layoutBean.resHeight;
+        resMarginLeft = layoutBean.resMarginLeft;
+        resMarginTop = layoutBean.resMarginTop;
+        resMarginRight = layoutBean.resMarginRight;
+        resMarginBottom = layoutBean.resMarginBottom;
+        resPaddingLeft = layoutBean.resPaddingLeft;
+        resPaddingTop = layoutBean.resPaddingTop;
+        resPaddingRight = layoutBean.resPaddingRight;
+        resPaddingBottom = layoutBean.resPaddingBottom;
+        resWeight = layoutBean.resWeight;
+        resWeightSum = layoutBean.resWeightSum;
     }
 
     @Override
@@ -143,10 +191,12 @@ public class LayoutBean extends nA implements Parcelable {
             return false;
         }
         if (backgroundResource != null) {
-            return backgroundResource.equals(layoutBean.backgroundResource);
-        } else {
-            return layoutBean.backgroundResource == null;
+            if (!backgroundResource.equals(layoutBean.backgroundResource)) return false;
+        } else if (layoutBean.backgroundResource != null) {
+            return false;
         }
+        if (resWeight != null ? !resWeight.equals(layoutBean.resWeight) : layoutBean.resWeight != null) return false;
+        return resWeightSum != null ? resWeightSum.equals(layoutBean.resWeightSum) : layoutBean.resWeightSum == null;
     }
 
     public void print() {
@@ -173,5 +223,17 @@ public class LayoutBean extends nA implements Parcelable {
         parcel.writeInt(borderColor);
         parcel.writeString(backgroundResource);
         parcel.writeString(backgroundResColor);
+        parcel.writeString(resWidth);
+        parcel.writeString(resHeight);
+        parcel.writeString(resMarginLeft);
+        parcel.writeString(resMarginTop);
+        parcel.writeString(resMarginRight);
+        parcel.writeString(resMarginBottom);
+        parcel.writeString(resPaddingLeft);
+        parcel.writeString(resPaddingTop);
+        parcel.writeString(resPaddingRight);
+        parcel.writeString(resPaddingBottom);
+        parcel.writeString(resWeight);
+        parcel.writeString(resWeightSum);
     }
 }

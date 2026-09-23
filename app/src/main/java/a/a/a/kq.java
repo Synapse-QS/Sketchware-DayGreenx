@@ -23,7 +23,6 @@ public class kq {
         }
 
         return switch (opcode) {
-            case "getResStr" -> harmonizeWithPrimary(context, 0xff7c83db);
             case "getVar" -> switch (blockType) {
                 case "v" -> viewType;
                 case "p" -> harmonizeWithPrimary(context, 0xff2ca5e2);

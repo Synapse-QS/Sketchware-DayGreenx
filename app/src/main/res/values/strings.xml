@@ -2281,6 +2281,8 @@ Please try again later"</string>
     <string name="search_header">"  Search…"</string>
     <string name="strings_xml">strings.xml</string>
     <string name="xml_strings">XML Strings</string>
+    <string name="dimens_xml">dimens.xml</string>
+    <string name="xml_dimens">XML Dimens</string>
 
     <string name="create_new_widget">Create a widget</string>
     <string name="import_widgets">Import Widgets</string>

@@ -62,6 +62,7 @@ import a.a.a.wB;
 import a.a.a.yB;
 import mod.hey.studios.util.Helper;
 import pro.sketchware.R;
+import pro.sketchware.activities.resourceseditor.components.utils.DimensEditorManager;
 import pro.sketchware.activities.resourceseditor.components.utils.StringsEditorManager;
 import pro.sketchware.databinding.PropertyInputItemBinding;
 import pro.sketchware.databinding.PropertyPopupHybridBinding;
@@ -77,7 +78,9 @@ import pro.sketchware.utility.FileUtil;
 public class PropertyInputItem extends RelativeLayout implements View.OnClickListener {
 
     private final String stringsStart = "@string/";
+    private final String dimensStart = "@dimen/";
     private final ArrayList<HashMap<String, Object>> stringsListMap = new ArrayList<>();
+    private final ArrayList<HashMap<String, Object>> dimensListMap = new ArrayList<>();
     private Context context;
     private String typeView = "";
     private String key = "";
@@ -156,6 +159,17 @@ public class PropertyInputItem extends RelativeLayout implements View.OnClickLis
         this.bean = bean;
     }
 
+    private float parseFloatSafe(String val, float defaultVal) {
+        if (val == null || val.isEmpty() || val.startsWith("@dimen/")) {
+            return defaultVal;
+        }
+        try {
+            return Float.parseFloat(val);
+        } catch (NumberFormatException e) {
+            return defaultVal;
+        }
+    }
+
     @Override
     public void onClick(View v) {
         if (!mB.a()) {
@@ -164,18 +178,18 @@ public class PropertyInputItem extends RelativeLayout implements View.OnClickLis
                 case "property_text", "property_hint" -> showTextInputDialog(9999, false);
                 case "property_rotate" -> showHybridSliderDialog(
                         Helper.getText(tvName),
-                        Float.parseFloat(value.isEmpty() ? "0" : value),
+                        parseFloatSafe(value, 0f),
                         -360f, 360f, 1f, true);
                 case "property_alpha" -> showHybridSliderDialog(
                         Helper.getText(tvName),
-                        Float.parseFloat(value.isEmpty() ? "1" : value),
+                        parseFloatSafe(value, 1f),
                         0f, 1f, 0.1f, false);
                 case "property_translation_x", "property_translation_y" -> showHybridSliderDialog(
                         Helper.getText(tvName),
-                        Float.parseFloat(value.isEmpty() ? "0" : value),
+                        parseFloatSafe(value, 0f),
                         -200f, 200f, 1f, true);
                 case "property_scale_x", "property_scale_y" -> {
-                    float currentVal = Float.parseFloat(value.isEmpty() ? "1" : value);
+                    float currentVal = parseFloatSafe(value, 1f);
                     float maxRange = Math.max(10f, currentVal * 1.2f);
                     showHybridSliderDialog(
                             Helper.getText(tvName),
@@ -184,7 +198,7 @@ public class PropertyInputItem extends RelativeLayout implements View.OnClickLis
                 }
 
                 case "property_text_size" -> {
-                    float currentVal = Float.parseFloat(value.isEmpty() ? "14" : value);
+                    float currentVal = parseFloatSafe(value, 14f);
                     float maxRange = Math.max(100f, currentVal);
                     float minRange = Math.min(10f, currentVal);
                     showHybridSliderDialog(
@@ -194,10 +208,10 @@ public class PropertyInputItem extends RelativeLayout implements View.OnClickLis
                 }
                 case "property_weight", "property_weight_sum" -> showHybridSliderDialog(
                         Helper.getText(tvName),
-                        Float.parseFloat(value.isEmpty() ? "0" : value),
+                        parseFloatSafe(value, 0f),
                         0f, 10f, 1f, true);
                 case "property_lines" -> {
-                    float currentVal = Float.parseFloat(value.isEmpty() ? "0" : value);
+                    float currentVal = parseFloatSafe(value, 0f);
                     float maxRange = Math.max(20f, currentVal);
                     float minRange = Math.min(0f, currentVal);
                     showHybridSliderDialog(
@@ -207,18 +221,18 @@ public class PropertyInputItem extends RelativeLayout implements View.OnClickLis
                 }
                 case "property_max" -> showHybridSliderDialog(
                         Helper.getText(tvName),
-                        Float.parseFloat(value.isEmpty() ? "100" : value),
+                        parseFloatSafe(value, 100f),
                         1f, 1000f, 1f, true);
                 case "property_progress" -> {
                     float maxValue = bean != null ? bean.max : 100f;
                     showHybridSliderDialog(
                             Helper.getText(tvName),
-                            Float.parseFloat(value.isEmpty() ? "0" : value),
+                            parseFloatSafe(value, 0f),
                             0f, maxValue, 1f, true);
                 }
                 case "property_divider_height" -> showHybridSliderDialog(
                         Helper.getText(tvName),
-                        Float.parseFloat(value.isEmpty() ? "1" : value),
+                        parseFloatSafe(value, 1f),
                         0f, 50f, 1f, true);
                 case "property_convert" -> showAutoCompleteDialog();
                 case "property_inject" -> showInjectDialog();
@@ -249,8 +263,18 @@ public class PropertyInputItem extends RelativeLayout implements View.OnClickLis
 
         binding.slider.setValue(minValue);
 
-        binding.edInput.setText(isInteger ? String.valueOf((int) validCurrentValue) : String.valueOf(validCurrentValue));
+        boolean isDimen = value != null && value.startsWith("@dimen/");
+        if (isDimen) {
+            binding.edInput.setText(value);
+            binding.sliderSection.setVisibility(View.GONE);
+            binding.tiInput.setVisibility(View.VISIBLE);
+            binding.tvCurrentValue.setText(value);
+        } else {
+            binding.edInput.setText(isInteger ? String.valueOf((int) validCurrentValue) : String.valueOf(validCurrentValue));
+            updateValueDisplay(binding.tvCurrentValue, validCurrentValue, isInteger);
+        }
         binding.tiInput.setHint(String.format(Helper.getResString(R.string.property_enter_value), propertyName));
+        DimensEditorManager.setupDimenAutoComplete(context, sc_id, binding.edInput);
 
         updateValueDisplay(binding.tvCurrentValue, validCurrentValue, isInteger);
 
@@ -274,8 +298,13 @@ public class PropertyInputItem extends RelativeLayout implements View.OnClickLis
 
             @Override
             public void afterTextChanged(Editable s) {
+                String inputStr = s.toString().trim();
+                if (inputStr.startsWith("@dimen/")) {
+                    binding.tiInput.setError(inputStr.length() > "@dimen/".length() ? null : "Enter dimension name");
+                    return;
+                }
                 try {
-                    float inputValue = Float.parseFloat(s.toString());
+                    float inputValue = Float.parseFloat(inputStr);
                     boolean isUnlimited = key.equals("property_translation_x") || key.equals("property_translation_y") ||
                             key.equals("property_text_size") || key.equals("property_lines") ||
                             key.equals("property_scale_x") || key.equals("property_scale_y");
@@ -324,9 +353,19 @@ public class PropertyInputItem extends RelativeLayout implements View.OnClickLis
 
         dialog.setView(binding.getRoot());
         dialog.setPositiveButton(Helper.getResString(R.string.common_word_save), (v, which) -> {
+            String rawInput = binding.edInput.getText().toString().trim();
+            if (rawInput.startsWith("@dimen/")) {
+                setValue(rawInput);
+                if (valueChangeListener != null) {
+                    valueChangeListener.a(key, rawInput);
+                }
+                v.dismiss();
+                return;
+            }
+
             float finalValue;
             try {
-                finalValue = Float.parseFloat(binding.edInput.getText().toString());
+                finalValue = Float.parseFloat(rawInput);
             } catch (NumberFormatException e) {
                 finalValue = validCurrentValue;
             }
@@ -352,29 +391,35 @@ public class PropertyInputItem extends RelativeLayout implements View.OnClickLis
         AlertDialog alertDialog = dialog.create();
 
         alertDialog.setOnShowListener(dialogInterface -> {
-            float animationStartValue;
-            if (key.equals("property_translation_x") || key.equals("property_translation_y") || key.equals("property_rotate")) {
-                animationStartValue = 0f;
-            } else {
-                animationStartValue = minValue;
-            }
-
-            ValueAnimator sliderAnimator = ValueAnimator.ofFloat(animationStartValue, validCurrentValue);
-            sliderAnimator.setDuration(800);
-            sliderAnimator.setInterpolator(new DecelerateInterpolator());
-
-            sliderAnimator.addUpdateListener(animation -> {
-                float animatedValue = (float) animation.getAnimatedValue();
-                float validAnimatedValue = Math.round(animatedValue / stepSize) * stepSize;
-                validAnimatedValue = Math.max(minValue, Math.min(maxValue, validAnimatedValue));
-                binding.slider.setValue(validAnimatedValue);
-                updateValueDisplay(binding.tvCurrentValue, validAnimatedValue, isInteger);
-            });
-
-            sliderAnimator.start();
-
             Button customButton = alertDialog.getButton(AlertDialog.BUTTON_NEUTRAL);
             Button resetButton = alertDialog.getButton(AlertDialog.BUTTON_NEGATIVE);
+
+            if (isDimen) {
+                if (customButton != null) {
+                    customButton.setText("Slider");
+                }
+            } else {
+                float animationStartValue;
+                if (key.equals("property_translation_x") || key.equals("property_translation_y") || key.equals("property_rotate")) {
+                    animationStartValue = 0f;
+                } else {
+                    animationStartValue = minValue;
+                }
+
+                ValueAnimator sliderAnimator = ValueAnimator.ofFloat(animationStartValue, validCurrentValue);
+                sliderAnimator.setDuration(800);
+                sliderAnimator.setInterpolator(new DecelerateInterpolator());
+
+                sliderAnimator.addUpdateListener(animation -> {
+                    float animatedValue = (float) animation.getAnimatedValue();
+                    float validAnimatedValue = Math.round(animatedValue / stepSize) * stepSize;
+                    validAnimatedValue = Math.max(minValue, Math.min(maxValue, validAnimatedValue));
+                    binding.slider.setValue(validAnimatedValue);
+                    updateValueDisplay(binding.tvCurrentValue, validAnimatedValue, isInteger);
+                });
+
+                sliderAnimator.start();
+            }
 
             customButton.setOnClickListener(v -> {
                 if (binding.sliderSection.getVisibility() == View.VISIBLE) {
@@ -514,7 +559,7 @@ public class PropertyInputItem extends RelativeLayout implements View.OnClickLis
             binding.tiAutoCompleteInput.setVisibility(View.GONE);
             SyntaxScheme.setXMLHighlighter(binding.edInput);
         } else {
-            loadStringsListMap();
+            loadResourcesListMaps();
             setupTextWatcher(binding.tiAutoCompleteInput, binding.edTiAutoCompleteInput);
 
             lengthValidator = new SB(context, binding.tiAutoCompleteInput, 0, maxValue);
@@ -540,9 +585,15 @@ public class PropertyInputItem extends RelativeLayout implements View.OnClickLis
                 neutralButton.setVisibility(View.VISIBLE);
                 neutralButton.setText(Helper.getResString(R.string.strings_xml));
                 neutralButton.setOnClickListener(view -> {
-                    if (binding.edTiAutoCompleteInput.getText().toString().isEmpty()) {
+                    String current = binding.edTiAutoCompleteInput.getText().toString();
+                    if (current.isEmpty()) {
                         binding.edTiAutoCompleteInput.setText(stringsStart);
                         binding.edTiAutoCompleteInput.setSelection(stringsStart.length());
+                    } else if (current.equals(stringsStart)) {
+                        binding.edTiAutoCompleteInput.setText(dimensStart);
+                        binding.edTiAutoCompleteInput.setSelection(dimensStart.length());
+                    } else if (current.equals(dimensStart)) {
+                        binding.edTiAutoCompleteInput.setText("");
                     }
                     binding.edTiAutoCompleteInput.requestFocus();
                 });
@@ -559,6 +610,12 @@ public class PropertyInputItem extends RelativeLayout implements View.OnClickLis
             String keyValue = map.get("key").toString();
             keysList.add(stringsStart + keyValue);
             mergedList.add(stringsStart + keyValue + " ( " + map.get("text") + " )");
+        }
+
+        for (HashMap<String, Object> map : dimensListMap) {
+            String keyValue = map.get("key").toString();
+            keysList.add(dimensStart + keyValue);
+            mergedList.add(dimensStart + keyValue + " ( " + map.get("value") + " )");
         }
 
         ArrayAdapter<String> adapter = new ArrayAdapter<>(context, android.R.layout.simple_dropdown_item_1line, mergedList);
@@ -584,11 +641,17 @@ public class PropertyInputItem extends RelativeLayout implements View.OnClickLis
                 String inputText = Helper.getText(autoCompleteTextView);
 
                 if (inputText.equals(stringsStart)) {
-
                     String errorMessage = MessageFormat.format(
                             "Please select a String\n" +
                                     "or remove \"{0}\" and add the value directly",
                             stringsStart
+                    );
+                    textAutoCompleteInput.setError(errorMessage);
+                } else if (inputText.equals(dimensStart)) {
+                    String errorMessage = MessageFormat.format(
+                            "Please select a Dimension\n" +
+                                    "or remove \"{0}\" and add the value directly",
+                            dimensStart
                     );
                     textAutoCompleteInput.setError(errorMessage);
                 } else {
@@ -599,18 +662,25 @@ public class PropertyInputItem extends RelativeLayout implements View.OnClickLis
         }
     }
 
-    private void loadStringsListMap() {
-        String filePath = FileUtil.getExternalStorageDir().concat("/.sketchware/data/").concat(sc_id.concat("/files/resource/values/strings.xml"));
+    private void loadResourcesListMaps() {
+        stringsListMap.clear();
+        dimensListMap.clear();
+
+        String stringsFilePath = FileUtil.getExternalStorageDir().concat("/.sketchware/data/").concat(sc_id.concat("/files/resource/values/strings.xml"));
         StringsEditorManager stringsEditorManager = new StringsEditorManager();
-        stringsEditorManager.convertXmlStringsToListMap(FileUtil.readFileIfExist(filePath), stringsListMap);
+        stringsEditorManager.convertXmlStringsToListMap(FileUtil.readFileIfExist(stringsFilePath), stringsListMap);
 
         if (!stringsEditorManager.isXmlStringsExist(stringsListMap, "app_name") &&
-                filePath != null) {
+                stringsFilePath != null) {
             HashMap<String, Object> map = new HashMap<>();
             map.put("key", "app_name");
             map.put("text", yB.c(lC.b(sc_id), "my_app_name"));
             stringsListMap.add(0, map);
         }
+
+        String dimensFilePath = FileUtil.getExternalStorageDir().concat("/.sketchware/data/").concat(sc_id.concat("/files/resource/values/dimens.xml"));
+        DimensEditorManager dimensEditorManager = new DimensEditorManager();
+        dimensEditorManager.convertXmlDimensToListMap(FileUtil.readFileIfExist(dimensFilePath), dimensListMap);
     }
 
     public void setupTextWatcher(TextInputLayout textAutoCompleteInput, MaterialAutoCompleteTextView editText) {
@@ -626,13 +696,23 @@ public class PropertyInputItem extends RelativeLayout implements View.OnClickLis
             @Override
             public void afterTextChanged(Editable s) {
                 String text = s.toString().trim();
-                if (!text.startsWith(stringsStart) || text.equals(stringsStart)) {
+                if (text.startsWith(stringsStart)) {
+                    if (text.equals(stringsStart)) {
+                        textAutoCompleteInput.setError(null);
+                    } else {
+                        boolean isExactMatch = keysList.contains(text);
+                        textAutoCompleteInput.setError(isExactMatch ? null : "Not found in strings.xml");
+                    }
+                } else if (text.startsWith(dimensStart)) {
+                    if (text.equals(dimensStart)) {
+                        textAutoCompleteInput.setError(null);
+                    } else {
+                        boolean isExactMatch = keysList.contains(text);
+                        textAutoCompleteInput.setError(isExactMatch ? null : "Not found in dimens.xml");
+                    }
+                } else {
                     textAutoCompleteInput.setError(null);
-                    return;
                 }
-
-                boolean isExactMatch = keysList.contains(text);
-                textAutoCompleteInput.setError(isExactMatch ? null : "Not found in strings.xml");
             }
         });
     }
@@ -991,13 +1071,18 @@ public class PropertyInputItem extends RelativeLayout implements View.OnClickLis
         PropertyPopupInputTextBinding binding =
                 PropertyPopupInputTextBinding.inflate(LayoutInflater.from(getContext()));
 
-        var input = binding.edInput;
+        binding.tiInput.setVisibility(View.GONE);
+        binding.tiAutoCompleteInput.setVisibility(View.VISIBLE);
+        binding.tiAutoCompleteInput.setHint(
+                String.format(Helper.getResString(R.string.property_enter_value), attr));
+
+        var input = binding.edTiAutoCompleteInput;
         if (attributes.containsKey(attr)) {
             input.setText(attributes.get(attr));
         }
 
-        binding.tiInput.setHint(
-                String.format(Helper.getResString(R.string.property_enter_value), attr));
+        loadResourcesListMaps();
+        setupAutoCompleteTextView(input);
 
         builder.setView(binding.getRoot());
         builder.setPositiveButton(
@@ -1030,6 +1115,23 @@ public class PropertyInputItem extends RelativeLayout implements View.OnClickLis
                                             !Helper.getText(input).trim().isEmpty());
                                 }
                             });
+
+                    Button neutralButton = dialog.getButton(AlertDialog.BUTTON_NEUTRAL);
+                    neutralButton.setVisibility(View.VISIBLE);
+                    neutralButton.setText("@dimen / @string");
+                    neutralButton.setOnClickListener(v -> {
+                        String current = input.getText().toString();
+                        if (current.isEmpty()) {
+                            input.setText(dimensStart);
+                            input.setSelection(dimensStart.length());
+                        } else if (current.equals(dimensStart)) {
+                            input.setText(stringsStart);
+                            input.setSelection(stringsStart.length());
+                        } else if (current.equals(stringsStart)) {
+                            input.setText("");
+                        }
+                        input.requestFocus();
+                    });
                 });
         dialog.show();
         dialog.setOnDismissListener(d -> showInjectDialog());

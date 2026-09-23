@@ -69,6 +69,8 @@ public class ViewBean extends nA implements Parcelable {
     @Expose
     public float alpha;
     @Expose
+    public String resAlpha;
+    @Expose
     public int checked;
     @Expose
     public int choiceMode;
@@ -120,7 +122,11 @@ public class ViewBean extends nA implements Parcelable {
     @Expose
     public float scaleX;
     @Expose
+    public String resScaleX;
+    @Expose
     public float scaleY;
+    @Expose
+    public String resScaleY;
     @Expose
     public int spinnerMode;
     @Expose
@@ -128,7 +134,11 @@ public class ViewBean extends nA implements Parcelable {
     @Expose
     public float translationX;
     @Expose
+    public String resTranslationX;
+    @Expose
     public float translationY;
+    @Expose
+    public String resTranslationY;
     @Expose
     public int type;
     @Expose
@@ -181,10 +191,15 @@ public class ViewBean extends nA implements Parcelable {
         customView = parcel.readString();
         checked = parcel.readInt();
         alpha = parcel.readFloat();
+        resAlpha = parcel.readString();
         translationX = parcel.readFloat();
+        resTranslationX = parcel.readString();
         translationY = parcel.readFloat();
+        resTranslationY = parcel.readString();
         scaleX = parcel.readFloat();
+        resScaleX = parcel.readString();
         scaleY = parcel.readFloat();
+        resScaleY = parcel.readString();
         max = parcel.readInt();
         progress = parcel.readInt();
         firstDayOfWeek = parcel.readInt();
@@ -350,10 +365,15 @@ public class ViewBean extends nA implements Parcelable {
         customView = other.customView;
         checked = other.checked;
         alpha = other.alpha;
+        resAlpha = other.resAlpha;
         translationX = other.translationX;
+        resTranslationX = other.resTranslationX;
         translationY = other.translationY;
+        resTranslationY = other.resTranslationY;
         scaleX = other.scaleX;
+        resScaleX = other.resScaleX;
         scaleY = other.scaleY;
+        resScaleY = other.resScaleY;
         max = other.max;
         progress = other.progress;
         firstDayOfWeek = other.firstDayOfWeek;
@@ -411,6 +431,12 @@ public class ViewBean extends nA implements Parcelable {
             return false;
         }
 
+        if (resAlpha != null ? !resAlpha.equals(viewBean.resAlpha) : viewBean.resAlpha != null) return false;
+        if (resTranslationX != null ? !resTranslationX.equals(viewBean.resTranslationX) : viewBean.resTranslationX != null) return false;
+        if (resTranslationY != null ? !resTranslationY.equals(viewBean.resTranslationY) : viewBean.resTranslationY != null) return false;
+        if (resScaleX != null ? !resScaleX.equals(viewBean.resScaleX) : viewBean.resScaleX != null) return false;
+        if (resScaleY != null ? !resScaleY.equals(viewBean.resScaleY) : viewBean.resScaleY != null) return false;
+
         String id = this.id;
         if (id != null) {
             if (!id.equals(viewBean.id)) {
@@ -457,10 +483,15 @@ public class ViewBean extends nA implements Parcelable {
         dest.writeString(customView);
         dest.writeInt(checked);
         dest.writeFloat(alpha);
+        dest.writeString(resAlpha);
         dest.writeFloat(translationX);
+        dest.writeString(resTranslationX);
         dest.writeFloat(translationY);
+        dest.writeString(resTranslationY);
         dest.writeFloat(scaleX);
+        dest.writeString(resScaleX);
         dest.writeFloat(scaleY);
+        dest.writeString(resScaleY);
         dest.writeInt(max);
         dest.writeInt(progress);
         dest.writeInt(firstDayOfWeek);

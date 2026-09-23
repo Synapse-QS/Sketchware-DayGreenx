@@ -41,6 +41,7 @@ import mod.hey.studios.util.Helper;
 import mod.hilal.saif.activities.tools.ConfigActivity;
 import mod.hilal.saif.asd.AsdDialog;
 import pro.sketchware.R;
+import pro.sketchware.activities.resourceseditor.components.utils.DimensEditorManager;
 import pro.sketchware.activities.resourceseditor.components.utils.StringsEditorManager;
 import pro.sketchware.lib.base.BaseTextWatcher;
 import pro.sketchware.lib.highlighter.SimpleHighlighter;
@@ -595,10 +596,23 @@ public class ExtraMenuBean {
                 }
 
                 break;
+
+            case "ResDimen":
+                title = "Select a ResDimen";
+
+                String dimensFilePath = FileUtil.getExternalStorageDir().concat("/.sketchware/data/").concat(sc_id.concat("/files/resource/values/dimens.xml"));
+                ArrayList<HashMap<String, Object>> DimensListMap = new ArrayList<>();
+                DimensEditorManager dimensEditorManager = new DimensEditorManager();
+                dimensEditorManager.convertXmlDimensToListMap(FileUtil.readFileIfExist(dimensFilePath), DimensListMap);
+
+                for (HashMap<String, Object> map : DimensListMap) {
+                    menus.add("R.dimen." + map.get("key"));
+                }
+                break;
+
             case "ResStyle":
             case "ResColor":
             case "ResArray":
-            case "ResDimen":
             case "ResBool":
             case "ResInteger":
             case "ResAttr":

@@ -335,24 +335,32 @@ public class Ox {
             }
 
             if (!toNotAdd.contains("android:layout_width") && !injectHandler.contains("layout_width")) {
-                int width = viewBean.layout.width;
-                if (width == ViewGroup.LayoutParams.MATCH_PARENT) {
-                    widgetTag.addAttribute("android", "layout_width", "match_parent");
-                } else if (width == ViewGroup.LayoutParams.WRAP_CONTENT) {
-                    widgetTag.addAttribute("android", "layout_width", "wrap_content");
+                if (viewBean.layout.resWidth != null && !viewBean.layout.resWidth.isEmpty()) {
+                    widgetTag.addAttribute("android", "layout_width", viewBean.layout.resWidth);
                 } else {
-                    widgetTag.addAttribute("android", "layout_width", width + "dp");
+                    int width = viewBean.layout.width;
+                    if (width == ViewGroup.LayoutParams.MATCH_PARENT) {
+                        widgetTag.addAttribute("android", "layout_width", "match_parent");
+                    } else if (width == ViewGroup.LayoutParams.WRAP_CONTENT) {
+                        widgetTag.addAttribute("android", "layout_width", "wrap_content");
+                    } else {
+                        widgetTag.addAttribute("android", "layout_width", width + "dp");
+                    }
                 }
             }
 
             if (!toNotAdd.contains("android:layout_height") && !injectHandler.contains("layout_height")) {
-                int height = viewBean.layout.height;
-                if (height == ViewGroup.LayoutParams.MATCH_PARENT) {
-                    widgetTag.addAttribute("android", "layout_height", "match_parent");
-                } else if (height == ViewGroup.LayoutParams.WRAP_CONTENT) {
-                    widgetTag.addAttribute("android", "layout_height", "wrap_content");
+                if (viewBean.layout.resHeight != null && !viewBean.layout.resHeight.isEmpty()) {
+                    widgetTag.addAttribute("android", "layout_height", viewBean.layout.resHeight);
                 } else {
-                    widgetTag.addAttribute("android", "layout_height", height + "dp");
+                    int height = viewBean.layout.height;
+                    if (height == ViewGroup.LayoutParams.MATCH_PARENT) {
+                        widgetTag.addAttribute("android", "layout_height", "match_parent");
+                    } else if (height == ViewGroup.LayoutParams.WRAP_CONTENT) {
+                        widgetTag.addAttribute("android", "layout_height", "wrap_content");
+                    } else {
+                        widgetTag.addAttribute("android", "layout_height", height + "dp");
+                    }
                 }
             }
 
@@ -383,9 +391,13 @@ public class Ox {
             }
 
             if (!toNotAdd.contains("android:weightSum") && !injectHandler.contains("weightSum")) {
-                int weightSum = viewBean.layout.weightSum;
-                if (weightSum > 0) {
-                    widgetTag.addAttribute("android", "weightSum", String.valueOf(weightSum));
+                if (viewBean.layout.resWeightSum != null && !viewBean.layout.resWeightSum.isEmpty()) {
+                    widgetTag.addAttribute("android", "weightSum", viewBean.layout.resWeightSum);
+                } else {
+                    int weightSum = viewBean.layout.weightSum;
+                    if (weightSum > 0) {
+                        widgetTag.addAttribute("android", "weightSum", String.valueOf(weightSum));
+                    }
                 }
             }
         }
@@ -428,9 +440,13 @@ public class Ox {
         if (!viewBean.convert.equals("include")) {
             if (parentViewType == ViewBean.VIEW_TYPE_LAYOUT_LINEAR) {
                 writeLayoutGravity(widgetTag, viewBean);
-                int weight = viewBean.layout.weight;
-                if (weight > 0 && !toNotAdd.contains("android:layout_weight") && !injectHandler.contains("layout_weight")) {
-                    widgetTag.addAttribute("android", "layout_weight", String.valueOf(weight));
+                if (viewBean.layout.resWeight != null && !viewBean.layout.resWeight.isEmpty() && !toNotAdd.contains("android:layout_weight") && !injectHandler.contains("layout_weight")) {
+                    widgetTag.addAttribute("android", "layout_weight", viewBean.layout.resWeight);
+                } else {
+                    int weight = viewBean.layout.weight;
+                    if (weight > 0 && !toNotAdd.contains("android:layout_weight") && !injectHandler.contains("layout_weight")) {
+                        widgetTag.addAttribute("android", "layout_weight", String.valueOf(weight));
+                    }
                 }
             } else if (parentViewType == ViewBean.VIEW_TYPE_LAYOUT_HSCROLLVIEW || parentViewType == ViewBean.VIEW_TYPE_LAYOUT_VSCROLLVIEW) {
                 writeLayoutGravity(widgetTag, viewBean);
@@ -658,6 +674,31 @@ public class Ox {
         int marginRight = layoutBean.marginRight;
         int marginBottom = layoutBean.marginBottom;
 
+        if (layoutBean.resMarginLeft != null || layoutBean.resMarginTop != null
+                || layoutBean.resMarginRight != null || layoutBean.resMarginBottom != null) {
+            if (layoutBean.resMarginLeft != null && !layoutBean.resMarginLeft.isEmpty() && !toNotAdd.contains("android:layout_marginLeft") && !injectHandler.contains("layout_marginLeft")) {
+                nx.addAttribute("android", "layout_marginLeft", layoutBean.resMarginLeft);
+            } else if (marginLeft > 0 && !toNotAdd.contains("android:layout_marginLeft") && !injectHandler.contains("layout_marginLeft")) {
+                nx.addAttribute("android", "layout_marginLeft", marginLeft + "dp");
+            }
+            if (layoutBean.resMarginTop != null && !layoutBean.resMarginTop.isEmpty() && !toNotAdd.contains("android:layout_marginTop") && !injectHandler.contains("layout_marginTop")) {
+                nx.addAttribute("android", "layout_marginTop", layoutBean.resMarginTop);
+            } else if (marginTop > 0 && !toNotAdd.contains("android:layout_marginTop") && !injectHandler.contains("layout_marginTop")) {
+                nx.addAttribute("android", "layout_marginTop", marginTop + "dp");
+            }
+            if (layoutBean.resMarginRight != null && !layoutBean.resMarginRight.isEmpty() && !toNotAdd.contains("android:layout_marginRight") && !injectHandler.contains("layout_marginRight")) {
+                nx.addAttribute("android", "layout_marginRight", layoutBean.resMarginRight);
+            } else if (marginRight > 0 && !toNotAdd.contains("android:layout_marginRight") && !injectHandler.contains("layout_marginRight")) {
+                nx.addAttribute("android", "layout_marginRight", marginRight + "dp");
+            }
+            if (layoutBean.resMarginBottom != null && !layoutBean.resMarginBottom.isEmpty() && !toNotAdd.contains("android:layout_marginBottom") && !injectHandler.contains("layout_marginBottom")) {
+                nx.addAttribute("android", "layout_marginBottom", layoutBean.resMarginBottom);
+            } else if (marginBottom > 0 && !toNotAdd.contains("android:layout_marginBottom") && !injectHandler.contains("layout_marginBottom")) {
+                nx.addAttribute("android", "layout_marginBottom", marginBottom + "dp");
+            }
+            return;
+        }
+
         if (marginLeft == marginRight && marginTop == marginBottom
                 && marginLeft == marginTop && marginLeft > 0) {
             if (!toNotAdd.contains("android:layout_margin") && !injectHandler.contains("layout_margin")) {
@@ -732,6 +773,31 @@ public class Ox {
         int paddingRight = layoutBean.paddingRight;
         int paddingBottom = layoutBean.paddingBottom;
 
+        if (layoutBean.resPaddingLeft != null || layoutBean.resPaddingTop != null
+                || layoutBean.resPaddingRight != null || layoutBean.resPaddingBottom != null) {
+            if (layoutBean.resPaddingLeft != null && !layoutBean.resPaddingLeft.isEmpty() && !toNotAdd.contains("android:paddingLeft") && !injectHandler.contains("paddingLeft")) {
+                nx.addAttribute("android", "paddingLeft", layoutBean.resPaddingLeft);
+            } else if (paddingLeft > 0 && !toNotAdd.contains("android:paddingLeft") && !injectHandler.contains("paddingLeft")) {
+                nx.addAttribute("android", "paddingLeft", paddingLeft + "dp");
+            }
+            if (layoutBean.resPaddingTop != null && !layoutBean.resPaddingTop.isEmpty() && !toNotAdd.contains("android:paddingTop") && !injectHandler.contains("paddingTop")) {
+                nx.addAttribute("android", "paddingTop", layoutBean.resPaddingTop);
+            } else if (paddingTop > 0 && !toNotAdd.contains("android:paddingTop") && !injectHandler.contains("paddingTop")) {
+                nx.addAttribute("android", "paddingTop", paddingTop + "dp");
+            }
+            if (layoutBean.resPaddingRight != null && !layoutBean.resPaddingRight.isEmpty() && !toNotAdd.contains("android:paddingRight") && !injectHandler.contains("paddingRight")) {
+                nx.addAttribute("android", "paddingRight", layoutBean.resPaddingRight);
+            } else if (paddingRight > 0 && !toNotAdd.contains("android:paddingRight") && !injectHandler.contains("paddingRight")) {
+                nx.addAttribute("android", "paddingRight", paddingRight + "dp");
+            }
+            if (layoutBean.resPaddingBottom != null && !layoutBean.resPaddingBottom.isEmpty() && !toNotAdd.contains("android:paddingBottom") && !injectHandler.contains("paddingBottom")) {
+                nx.addAttribute("android", "paddingBottom", layoutBean.resPaddingBottom);
+            } else if (paddingBottom > 0 && !toNotAdd.contains("android:paddingBottom") && !injectHandler.contains("paddingBottom")) {
+                nx.addAttribute("android", "paddingBottom", paddingBottom + "dp");
+            }
+            return;
+        }
+
         if (paddingLeft == paddingRight && paddingTop == paddingBottom
                 && paddingLeft == paddingTop && paddingLeft > 0) {
             if (!toNotAdd.contains("android:padding") && !injectHandler.contains("padding")) {
@@ -766,9 +832,13 @@ public class Ox {
             }
         }
 
-        int textSize = viewBean.text.textSize;
-        if (textSize > 0 && !toNotAdd.contains("android:textSize") && !injectHandler.contains("textSize")) {
-            nx.addAttribute("android", "textSize", textSize + "sp");
+        if (viewBean.text.resTextSize != null && !viewBean.text.resTextSize.isEmpty() && !toNotAdd.contains("android:textSize") && !injectHandler.contains("textSize")) {
+            nx.addAttribute("android", "textSize", viewBean.text.resTextSize);
+        } else {
+            int textSize = viewBean.text.textSize;
+            if (textSize > 0 && !toNotAdd.contains("android:textSize") && !injectHandler.contains("textSize")) {
+                nx.addAttribute("android", "textSize", textSize + "sp");
+            }
         }
         if (!toNotAdd.contains("android:textStyle") && !injectHandler.contains("textStyle")) {
             int textType = viewBean.text.textType;
@@ -822,9 +892,13 @@ public class Ox {
                     nx.addAttribute("android", "singleLine", "true");
                 }
 
-                int line = viewBean.text.line;
-                if (line > 0 && !toNotAdd.contains("android:lines") && !injectHandler.contains("lines")) {
-                    nx.addAttribute("android", "lines", String.valueOf(line));
+                if (viewBean.text.resLine != null && !viewBean.text.resLine.isEmpty() && !toNotAdd.contains("android:lines") && !injectHandler.contains("lines")) {
+                    nx.addAttribute("android", "lines", viewBean.text.resLine);
+                } else {
+                    int line = viewBean.text.line;
+                    if (line > 0 && !toNotAdd.contains("android:lines") && !injectHandler.contains("lines")) {
+                        nx.addAttribute("android", "lines", String.valueOf(line));
+                    }
                 }
 
                 int inputType = viewBean.text.inputType;
@@ -854,9 +928,13 @@ public class Ox {
                 if (viewBean.text.singleLine != 0 && !toNotAdd.contains("android:singleLine") && !injectHandler.contains("singleLine")) {
                     nx.addAttribute("android", "singleLine", "true");
                 }
-                line = viewBean.text.line;
-                if (line > 0 && !toNotAdd.contains("android:lines") && !injectHandler.contains("lines")) {
-                    nx.addAttribute("android", "lines", String.valueOf(line));
+                if (viewBean.text.resLine != null && !viewBean.text.resLine.isEmpty() && !toNotAdd.contains("android:lines") && !injectHandler.contains("lines")) {
+                    nx.addAttribute("android", "lines", viewBean.text.resLine);
+                } else {
+                    int line = viewBean.text.line;
+                    if (line > 0 && !toNotAdd.contains("android:lines") && !injectHandler.contains("lines")) {
+                        nx.addAttribute("android", "lines", String.valueOf(line));
+                    }
                 }
                 break;
         }
@@ -871,27 +949,47 @@ public class Ox {
         if (viewBean.clickable == 0 && !toNotAdd.contains("android:clickable") && !injectHandler.contains("clickable")) {
             nx.addAttribute("android", "clickable", "false");
         }
-        int rotate = viewBean.image.rotate;
-        if (rotate != 0 && !toNotAdd.contains("android:rotation") && !injectHandler.contains("rotation")) {
-            nx.addAttribute("android", "rotation", String.valueOf(rotate));
+        if (viewBean.image.resRotate != null && !viewBean.image.resRotate.isEmpty() && !toNotAdd.contains("android:rotation") && !injectHandler.contains("rotation")) {
+            nx.addAttribute("android", "rotation", viewBean.image.resRotate);
+        } else {
+            int rotate = viewBean.image.rotate;
+            if (rotate != 0 && !toNotAdd.contains("android:rotation") && !injectHandler.contains("rotation")) {
+                nx.addAttribute("android", "rotation", String.valueOf(rotate));
+            }
         }
-        float alpha = viewBean.alpha;
-        if (1.0f != alpha && !toNotAdd.contains("android:alpha") && !injectHandler.contains("alpha")) {
-            nx.addAttribute("android", "alpha", String.valueOf(alpha));
+        if (viewBean.resAlpha != null && !viewBean.resAlpha.isEmpty() && !toNotAdd.contains("android:alpha") && !injectHandler.contains("alpha")) {
+            nx.addAttribute("android", "alpha", viewBean.resAlpha);
+        } else {
+            float alpha = viewBean.alpha;
+            if (1.0f != alpha && !toNotAdd.contains("android:alpha") && !injectHandler.contains("alpha")) {
+                nx.addAttribute("android", "alpha", String.valueOf(alpha));
+            }
         }
-        if (0.0f != viewBean.translationX && !toNotAdd.contains("android:translationX") && !injectHandler.contains("translationX")) {
+        if (viewBean.resTranslationX != null && !viewBean.resTranslationX.isEmpty() && !toNotAdd.contains("android:translationX") && !injectHandler.contains("translationX")) {
+            nx.addAttribute("android", "translationX", viewBean.resTranslationX);
+        } else if (0.0f != viewBean.translationX && !toNotAdd.contains("android:translationX") && !injectHandler.contains("translationX")) {
             nx.addAttribute("android", "translationX", viewBean.translationX + "dp");
         }
-        if (0.0f != viewBean.translationY && !toNotAdd.contains("android:translationY") && !injectHandler.contains("translationY")) {
+        if (viewBean.resTranslationY != null && !viewBean.resTranslationY.isEmpty() && !toNotAdd.contains("android:translationY") && !injectHandler.contains("translationY")) {
+            nx.addAttribute("android", "translationY", viewBean.resTranslationY);
+        } else if (0.0f != viewBean.translationY && !toNotAdd.contains("android:translationY") && !injectHandler.contains("translationY")) {
             nx.addAttribute("android", "translationY", viewBean.translationY + "dp");
         }
-        float scaleX = viewBean.scaleX;
-        if (1.0f != scaleX && !toNotAdd.contains("android:scaleX") && !injectHandler.contains("scaleX")) {
-            nx.addAttribute("android", "scaleX", String.valueOf(scaleX));
+        if (viewBean.resScaleX != null && !viewBean.resScaleX.isEmpty() && !toNotAdd.contains("android:scaleX") && !injectHandler.contains("scaleX")) {
+            nx.addAttribute("android", "scaleX", viewBean.resScaleX);
+        } else {
+            float scaleX = viewBean.scaleX;
+            if (1.0f != scaleX && !toNotAdd.contains("android:scaleX") && !injectHandler.contains("scaleX")) {
+                nx.addAttribute("android", "scaleX", String.valueOf(scaleX));
+            }
         }
-        float scaleY = viewBean.scaleY;
-        if (1.0f != scaleY && !toNotAdd.contains("android:scaleY") && !injectHandler.contains("scaleY")) {
-            nx.addAttribute("android", "scaleY", String.valueOf(scaleY));
+        if (viewBean.resScaleY != null && !viewBean.resScaleY.isEmpty() && !toNotAdd.contains("android:scaleY") && !injectHandler.contains("scaleY")) {
+            nx.addAttribute("android", "scaleY", viewBean.resScaleY);
+        } else {
+            float scaleY = viewBean.scaleY;
+            if (1.0f != scaleY && !toNotAdd.contains("android:scaleY") && !injectHandler.contains("scaleY")) {
+                nx.addAttribute("android", "scaleY", String.valueOf(scaleY));
+            }
         }
 
         switch (viewBean.type) {

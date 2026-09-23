@@ -1,6 +1,7 @@
 package a.a.a;
 
 import android.text.TextUtils;
+import android.util.Log;
 
 import com.besome.sketch.beans.ComponentBean;
 import com.besome.sketch.beans.ViewBean;
@@ -183,16 +184,20 @@ public class Lx {
         String fileContent = FileUtil.readFile(local_lib_file);
 
         if (!fileContent.isEmpty()) {
-            Gson gson = new Gson();
-            ArrayList<HashMap<String, Object>> localLibraries = gson.fromJson(fileContent, Helper.TYPE_MAP_LIST);
-            if (localLibraries != null) {
-                for (HashMap<String, Object> library : localLibraries) {
-                    String dependency = (String) library.get("dependency");
-                    if (dependency != null && !dependency.isEmpty()) {
-                        dependency = "implementation '" + dependency + "'";
-                        content.append(dependency).append("\r\n");
+            try {
+                Gson gson = new Gson();
+                ArrayList<HashMap<String, Object>> localLibraries = gson.fromJson(fileContent, Helper.TYPE_MAP_LIST);
+                if (localLibraries != null) {
+                    for (HashMap<String, Object> library : localLibraries) {
+                        String dependency = (String) library.get("dependency");
+                        if (dependency != null && !dependency.isEmpty()) {
+                            dependency = "implementation '" + dependency + "'";
+                            content.append(dependency).append("\r\n");
+                        }
                     }
                 }
+            } catch (Exception e) {
+                Log.e("Lx", "Failed to parse local_library JSON for project " + sc_id, e);
             }
         }
 

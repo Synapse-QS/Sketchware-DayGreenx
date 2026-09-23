@@ -289,6 +289,12 @@ public class Fx {
             case "getResStr":
                 opcode = "getString(R.string." + bean.spec + ")";
                 break;
+            case "getResDim":
+                opcode = "(int) getResources().getDimension(R.dimen." + bean.spec + ")";
+                break;
+            case "getResDimen":
+                opcode = "(int) getResources().getDimension(" + params.get(0) + ")";
+                break;
             case "setVarBoolean", "setVarInt", "setVarString":
                 opcode = String.format("%s = %s;", params.get(0), params.get(1));
                 break;
