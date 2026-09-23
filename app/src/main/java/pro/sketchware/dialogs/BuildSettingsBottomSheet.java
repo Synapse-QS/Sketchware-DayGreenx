@@ -43,6 +43,7 @@ import java.util.List;
 import extensions.anbui.daydream.configs.Configs;
 import extensions.anbui.daydream.library.DRFeatureManager;
 import mod.hey.studios.build.BuildSettings;
+import pro.sketchware.utility.ProjectSettings;
 import pro.sketchware.databinding.ProjectConfigLayoutBinding;
 import pro.sketchware.utility.SketchwareUtil;
 
@@ -118,7 +119,7 @@ public class BuildSettingsBottomSheet extends BottomSheetDialogFragment {
         setRadioGroupOptions(binding.rgJavaVersion, getAvailableJavaVersions(), SETTING_JAVA_VERSION, "1.7");
         
         boolean nativeEnable = new ProjectSettings(getArguments().getString("sc_id")).getValue(ProjectSettings.SETTINGS_ENABLE_NATIVE, "false").equals("true");
-        binding.cmakeSection.setVisibility(nativeEnable ? View.VISIBEL : View.GONE);
+        binding.cmakeSection.setVisibility(nativeEnable ? View.VISIBLE : View.GONE);
 
         String configuredAbis = projectSettings.getValue(SETTING_CMAKE_ABIS, "");
         if (!configuredAbis.isEmpty()) {
