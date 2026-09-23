@@ -118,7 +118,7 @@ public class BuildSettingsBottomSheet extends BottomSheetDialogFragment {
         setRadioGroupOptions(binding.rgDexer, new String[]{"Dx", "D8"}, SETTING_DEXER, "Dx");
         setRadioGroupOptions(binding.rgJavaVersion, getAvailableJavaVersions(), SETTING_JAVA_VERSION, "1.7");
         
-        boolean nativeEnable = new ProjectSettings(getArguments().getString("sc_id")).getValue(ProjectSettings.SETTINGS_ENABLE_NATIVE, "false").equals("true");
+        boolean nativeEnable = new ProjectSettings(getArguments().getString("sc_id")).getValue(ProjectSettings.SETTING_ENABLE_NATIVE, "false").equals("true");
         binding.cmakeSection.setVisibility(nativeEnable ? View.VISIBLE : View.GONE);
 
         String configuredAbis = projectSettings.getValue(SETTING_CMAKE_ABIS, "");
