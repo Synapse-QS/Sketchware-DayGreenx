@@ -1100,7 +1100,7 @@ public final class DexMerger {
             classData = (int) Math.ceil(dexMerger.classDataOut.used() * 1.67);
             code = (int) Math.ceil(dexMerger.codeOut.used() * 1.25);
             stringData = dexMerger.stringDataOut.used();
-            debugInfo = dexMerger.debugInfoOut.used() * 16 + 4096;
+            debugInfo = dexMerger.debugInfoOut.used() * 32 + 8192;
             encodedArray = dexMerger.encodedArrayOut.used() * 2;
             annotationsDirectory = dexMerger.annotationsDirectoryOut.used();
             annotationsSet = dexMerger.annotationSetOut.used();
@@ -1147,7 +1147,7 @@ public final class DexMerger {
                 // all of the bytes in a debug info section may be uleb/sleb. The additive constant
                 // is a fudge factor observed to be required when merging small
                 // DEX files (b/68483205).
-                debugInfo += contents.debugInfos.byteCount * 16 + 4096;
+                debugInfo += contents.debugInfos.byteCount * 32 + 8192;
             }
         }
 
