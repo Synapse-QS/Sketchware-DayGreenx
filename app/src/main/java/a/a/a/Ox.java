@@ -850,18 +850,15 @@ public class Ox {
                 nx.addAttribute("android", "textStyle", "bold|italic");
             }
         }
-        if (viewBean.text.textColor != 0xffffff) {
-            if (!hasAttr("textColor", viewBean) && !toNotAdd.contains("android:textColor") && !injectHandler.contains("textColor") && viewBean.text.resTextColor != null) {
-                if (viewBean.text.resTextColor.startsWith("?") || viewBean.text.resTextColor.startsWith("@color/")) {
-                    nx.addAttribute("android", "textColor", viewBean.text.resTextColor);
-                } else {
-                    nx.addAttribute("android", "textColor", "@color/" + viewBean.text.resTextColor);
-                }
-            } else if (!hasAttr("textColor", viewBean) && !toNotAdd.contains("android:textColor") && !injectHandler.contains("textColor")) {
-                //-16777216 aka black
-                if (!DayDreamProjectSettings.isEnableAndroidTextColorRemoval(Configs.currentProjectID) || viewBean.text.textColor != -16777216)
-                    nx.addAttribute("android", "textColor", formatColor(viewBean.text.textColor & 0xffffff));
-            }
+        if (!hasAttr("textColor", viewBean) && !toNotAdd.contains("android:textColor") && !injectHandler.contains("textColor")) {
+           String resTextColor = viewBean.text.resTextColor;
+           int textColor = viewBean.text.textColor;
+           if (resTextColor != null && (resTextColor.startsWith("?") || resTextColor.startsWith("@color/"))) {
+               nx.addAttribute("android", "textColor", resTextColor);
+           } else if (textColor != 0xffffff) {
+               if (!DayDreamProjectSettings.isEnableAndroidTextColorRemoval(Configs.currentProjectID) || textColor != -16777216)
+                   nx.addAttribute("android", "textColor", formatColor(textColor & 0xffffff));
+           }
         }
         switch (viewBean.type) {
             case ViewBean.VIEW_TYPE_WIDGET_EDITTEXT:
@@ -883,7 +880,6 @@ public class Ox {
                             nx.addAttribute("android", "textColorHint", "@color/" + viewBean.text.resHintColor);
                         }
                     } else if (!hasAttr("textColorHint", viewBean) && !toNotAdd.contains("android:textColorHint")) {
-                        //-10453621 aka grey
                         if (!DayDreamProjectSettings.isEnableAndroidTextColorRemoval(Configs.currentProjectID) || viewBean.text.hintColor != -10453621)
                             nx.addAttribute("android", "textColorHint", formatColor(viewBean.text.hintColor & 0xffffff));
                     }
@@ -1120,8 +1116,7 @@ public class Ox {
             while (eventType != XmlPullParser.END_DOCUMENT) {
                 if (eventType == XmlPullParser.START_TAG) {
                     for (int i = 0; i < parser.getAttributeCount(); i++) {
-                        if ("http://schemas.android.com/tools".equals(parser.getAttributeNamespace(i)) &&
-                                "replace".equals(parser.getAttributeName(i))) {
+                        if ("http://schemas.android.com/tools".equals(parser.getAttributeNamespace(i)) && "replace".equals(parser.getAttributeName(i))) {
                             toReplace.addAll(Arrays.asList(parser.getAttributeValue(i).split("\\s*,\\s*")));
                         }
                     }
