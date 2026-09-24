@@ -147,8 +147,7 @@ public final class DexMerger {
         encodedArrayOut = dexOut.appendSection(writerSizes.encodedArray, "encoded array");
 
         contentsOut.annotationsDirectories.off = dexOut.getNextSectionStart();
-        annotationsDirectoryOut = dexOut.appendSection(
-                writerSizes.annotationsDirectory, "annotations directory");
+        annotationsDirectoryOut = dexOut.appendSection(writerSizes.annotationsDirectory, "annotations directory");
 
         contentsOut.dataSize = dexOut.getNextSectionStart() - contentsOut.dataOff;
     }
@@ -1148,7 +1147,7 @@ public final class DexMerger {
                 // all of the bytes in a debug info section may be uleb/sleb. The additive constant
                 // is a fudge factor observed to be required when merging small
                 // DEX files (b/68483205).
-                debugInfo += contents.debugInfos.byteCount * 8 + 512;
+                debugInfo += contents.debugInfos.byteCount * 16 + 4096;
             }
         }
 
