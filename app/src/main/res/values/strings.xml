@@ -8,6 +8,7 @@
     <string name="menu_manifest_manager_open_dec">Edit AndroidManifest.xml directly in the code editor</string>
     <string name="name_tag_discord_new">Discord</string>
     <string name="name_tag_github_new">Github</string>
+    <string name="name_tag_donation_new">Donation</string>
     <string name="name_tag_create_new">New Project</string>
     <string name="title_sketchware">Sketchware-DayGreen</string>
     <string name="program_information_title_open_source_license">Open Source Licenses</string>
@@ -16,7 +17,7 @@
     <string name="link_discord_invite">https://discord.gg/ukRxYdXVF</string>
     <string name="link_telegram_invite">https://t.me/sketchware_daygreen</string>
     <string name="link_github_url">https://github.com/fora2323/Sketchware-DayGreen.git</string>
-    
+    <string name="link_donation_url">https://tako.id/azura_xd23</string>
     <!--atribut lagecy-->
     <string name="appbar_scrolling_view_behavior">com.google.android.material.appbar.AppBarLayout$ScrollingViewBehavior</string>
     <string name="besome_blog_url">http://medium.com/sketchware</string>

@@ -162,6 +162,20 @@ public class ProjectFileBean extends SelectableBean implements Parcelable {
     }
 
     public static String getActivityName(String name) {
+        String suffix;
+        if (name.endsWith("_bottomdialog_fragment")) {
+            name = name.replace("_bottomdialog_fragment", "");
+            suffix = "BottomSheetDialogFragment";
+        } else if (name.endsWith("_dialog_fragment")) {
+            name = name.replace("_dialog_fragment", "");
+            suffix = "DialogFragment";
+        } else if (name.endsWith("_fragment")) {
+            name = name.replace("_fragment", "");
+            suffix = "Fragment";
+        } else {
+            suffix = "Activity";
+        }
+
         name = name.toLowerCase();
         while (name.contains("_")) {
             int index = name.indexOf('_');
@@ -174,7 +188,7 @@ public class ProjectFileBean extends SelectableBean implements Parcelable {
                 name = firstPart + camelCase + lastPart;
             }
         }
-        name += "Activity";
+        name += suffix;
         return Character.toUpperCase(name.charAt(0)) + name.substring(1);
     }
 
