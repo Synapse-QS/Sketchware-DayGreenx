@@ -1097,15 +1097,15 @@ public final class DexMerger {
             idsDefs = dexMerger.idsDefsOut.used();
             mapList = dexMerger.mapListOut.used();
             typeList = dexMerger.typeListOut.used();
-            classData = dexMerger.classDataOut.used();
-            code = dexMerger.codeOut.used();
+            classData = (int) Math.ceil(dexMerger.classDataOut.used() * 1.67);
+            code = (int) Math.ceil(dexMerger.codeOut.used() * 1.25);
             stringData = dexMerger.stringDataOut.used();
-            debugInfo = dexMerger.debugInfoOut.used();
-            encodedArray = dexMerger.encodedArrayOut.used();
+            debugInfo = dexMerger.debugInfoOut.used() * 16 + 4096;
+            encodedArray = dexMerger.encodedArrayOut.used() * 2;
             annotationsDirectory = dexMerger.annotationsDirectoryOut.used();
             annotationsSet = dexMerger.annotationSetOut.used();
             annotationsSetRefList = dexMerger.annotationSetRefListOut.used();
-            annotation = dexMerger.annotationOut.used();
+            annotation = (int) Math.ceil(dexMerger.annotationOut.used() * 2);
             fourByteAlign();
         }
 

@@ -990,20 +990,8 @@ public class ProjectBuilder {
     }
 
     private void mergeDexes(File target, List<Dex> dexes) throws IOException {
-        try {
-            DexMerger merger = new DexMerger(dexes.toArray(new Dex[0]), CollisionPolicy.KEEP_FIRST, new DxContext());
-            merger.setCompactWasteThreshold(0);
-            merger.merge().writeTo(target);
-        } catch (java.nio.BufferOverflowException e) {
-            LogUtil.w(TAG, "BufferOverflow saat merge DEX, mencoba merge bertahap...");
-            Dex result = new Dex(dexes.get(0).getBytes());
-        for (int i = 1; i < dexes.size(); i++) {
-            DexMerger merger = new DexMerger(new Dex[]{result, dexes.get(i)}, CollisionPolicy.KEEP_FIRST, new DxContext());
-            merger.setCompactWasteThreshold(0);
-            result = merger.merge();
-        }
-        result.writeTo(target);
-        }
+        DexMerger merger = new DexMerger(dexes.toArray(new Dex[0]), CollisionPolicy.KEEP_FIRST, new DxContext());
+        merger.merge().writeTo(target);
     }
 
     private void proguardAddLibConfigs(List<String> args) {
