@@ -18,18 +18,12 @@ jobs:
         with:
           fetch-depth: 0
 
-      - name: Read version from build.gradle (.kts)
+      - name: Read version from build.gradle
         id: version
         run: |
           FILE="app/build.gradle"
           [ -f "app/build.gradle.kts" ] && FILE="app/build.gradle.kts"
           VERSION=$(grep -m1 'versionCode' "$FILE" | grep -oE '[0-9]+')
-          
-          if [ -z "$VERSION" ]; then
-            echo "Error: versionCode tidak ditemukan!"
-            exit 1
-          fi
-          
           echo "version=$VERSION" >> "$GITHUB_OUTPUT"
 
       - name: Check if tag already exists
@@ -38,13 +32,13 @@ jobs:
           TAG="v${{ steps.version.outputs.version }}"
           if git rev-parse "$TAG" >/dev/null 2>&1; then
             echo "exists=true" >> "$GITHUB_OUTPUT"
-            echo "Tag $TAG sudah ada di repository."
           else
             echo "exists=false" >> "$GITHUB_OUTPUT"
           fi
 
       - name: Get commit message
         id: commit
+        if: steps.check_tag.outputs.exists == 'false'
         run: |
           echo "message<<EOF" >> $GITHUB_OUTPUT
           git log -1 --pretty=%B >> $GITHUB_OUTPUT
@@ -73,32 +67,23 @@ jobs:
         if: steps.check_tag.outputs.exists == 'false'
         run: chmod +x gradlew
 
-      # ✅ بناء APK (debug + release)
-      - name: Build Release APKs
+      # ✅ بناء كل الـ flavors
+      - name: Build Release APKs (all flavors)
         if: steps.check_tag.outputs.exists == 'false'
-        run: ./gradlew assembleRelease --stacktrace
+        run: ./gradlew assembleAndroid26Release assembleAndroid33Release --stacktrace
 
-      - name: Build Debug APK (fallback)
-        if: steps.check_tag.outputs.exists == 'false' && failure()
-        run: ./gradlew assembleDebug --stacktrace
-
-      # ✅✅✅ أهم خطوة: رفع الـ APK كـ Artifact ليظهر في الـ Actions
-      - name: Upload Release APK as Artifact
+      - name: List built APKs
         if: steps.check_tag.outputs.exists == 'false'
-        uses: actions/upload-artifact@v4
-        with:
-          name: release-apk-v${{ steps.version.outputs.version }}
-          path: app/build/outputs/apk/release/*.apk
-          if-no-files-found: warn
-          retention-days: 30
+        run: find app/build/outputs/apk -name "*.apk"
 
-      - name: Upload Debug APK as Artifact
+      # ✅ رفع الـ APKs كـ Artifact
+      - name: Upload APKs as Artifact
         if: steps.check_tag.outputs.exists == 'false'
         uses: actions/upload-artifact@v4
         with:
-          name: debug-apk-v${{ steps.version.outputs.version }}
-          path: app/build/outputs/apk/debug/*.apk
-          if-no-files-found: ignore
+          name: apk-v${{ steps.version.outputs.version }}
+          path: app/build/outputs/apk/**/release/*.apk
+          if-no-files-found: error
           retention-days: 30
 
       - name: Create GitHub Release
@@ -109,29 +94,3 @@ jobs:
           body: ${{ steps.commit.outputs.message }}
           files: |
             app/build/outputs/apk/**/release/*.apk
-
-      - name: Set up Python
-        if: steps.check_tag.outputs.exists == 'false'
-        uses: actions/setup-python@v5
-        with:
-          python-version: '3.10'
-
-      - name: Install Pyrogram & Dependencies
-        if: steps.check_tag.outputs.exists == 'false'
-        run: pip install pyrofork tgcrypto
-
-      - name: Send APKs to Telegram (Userbot)
-        if: steps.check_tag.outputs.exists == 'false'
-        continue-on-error: true
-        env:
-          API_ID: ${{ secrets.API_ID }}
-          API_HASH: ${{ secrets.API_HASH }}
-          SESSION_STRING: ${{ secrets.SESSION_STRING }}
-          TELEGRAM_CHAT_ID: ${{ secrets.TELEGRAM_CHAT_ID }}
-          TELEGRAM_THREAD_ID: ${{ secrets.TELEGRAM_THREAD_ID }}
-          VERSION: "v${{ steps.version.outputs.version }}"
-          REPO: "${{ github.repository }}"
-          COMMIT_AUTHOR: ${{ github.actor }}
-          COMMIT_MESSAGE: ${{ github.event.head_commit.message }}
-          COMMIT_SHA: ${{ github.sha }}
-        run: python send_telegram.py
