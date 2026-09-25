@@ -38,7 +38,7 @@ jobs:
           TAG="v${{ steps.version.outputs.version }}"
           if git rev-parse "$TAG" >/dev/null 2>&1; then
             echo "exists=true" >> "$GITHUB_OUTPUT"
-            echo "Tag $TAG sudah ada di repository. Menghentikan workflow agar tidak duplicate."
+            echo "Tag $TAG sudah ada di repository."
           else
             echo "exists=false" >> "$GITHUB_OUTPUT"
           fi
@@ -65,13 +65,41 @@ jobs:
           distribution: 'temurin'
           java-version: '17'
 
+      - name: Setup Gradle
+        if: steps.check_tag.outputs.exists == 'false'
+        uses: gradle/actions/setup-gradle@v3
+
       - name: Grant execute permission for gradlew
         if: steps.check_tag.outputs.exists == 'false'
         run: chmod +x gradlew
 
-      - name: Build release APKs
+      # ✅ بناء APK (debug + release)
+      - name: Build Release APKs
         if: steps.check_tag.outputs.exists == 'false'
         run: ./gradlew assembleRelease --stacktrace
+
+      - name: Build Debug APK (fallback)
+        if: steps.check_tag.outputs.exists == 'false' && failure()
+        run: ./gradlew assembleDebug --stacktrace
+
+      # ✅✅✅ أهم خطوة: رفع الـ APK كـ Artifact ليظهر في الـ Actions
+      - name: Upload Release APK as Artifact
+        if: steps.check_tag.outputs.exists == 'false'
+        uses: actions/upload-artifact@v4
+        with:
+          name: release-apk-v${{ steps.version.outputs.version }}
+          path: app/build/outputs/apk/release/*.apk
+          if-no-files-found: warn
+          retention-days: 30
+
+      - name: Upload Debug APK as Artifact
+        if: steps.check_tag.outputs.exists == 'false'
+        uses: actions/upload-artifact@v4
+        with:
+          name: debug-apk-v${{ steps.version.outputs.version }}
+          path: app/build/outputs/apk/debug/*.apk
+          if-no-files-found: ignore
+          retention-days: 30
 
       - name: Create GitHub Release
         if: steps.check_tag.outputs.exists == 'false'
