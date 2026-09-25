@@ -1,5 +1,7 @@
 package pro.sketchware.activities.main.fragments.projects;
 
+import pro.sketchware.activities.main.activities.MainActivity;
+
 import android.app.Activity;
 import android.content.Intent;
 import android.graphics.Color;
@@ -16,6 +18,7 @@ import androidx.activity.result.contract.ActivityResultContracts;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.recyclerview.widget.DiffUtil;
+import androidx.recyclerview.widget.RecyclerView;
 
 import com.besome.sketch.adapters.ProjectsAdapter;
 import com.besome.sketch.design.DesignActivity;
@@ -144,6 +147,19 @@ public class ProjectsFragment extends DA {
         binding.myprojects.setHasFixedSize(true);
 
         binding.myprojects.post(this::refreshProjectsList);
+        binding.myprojects.addOnScrollListener(new RecyclerView.OnScrollListener() {
+            @Override
+            public void onScrolled(@NonNull RecyclerView recyclerView, int dx, int dy) {
+                if (getActivity() instanceof MainActivity) {
+                    MainActivity activity = (MainActivity) getActivity();
+                    if (dy > 0) {
+                        activity.hideFab();
+                    } else if (dy < 0) {
+                        activity.showFab();
+                    }
+                }
+            }
+        });
         UI.addSystemWindowInsetToPadding(binding.loadingContainer, true, false, true, true);
         UI.addSystemWindowInsetToPadding(binding.titleContainer, true, false, true, false);
         UI.addSystemWindowInsetToPadding(binding.myprojects, true, false, true, true);
